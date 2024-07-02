@@ -235,11 +235,16 @@
                     placa: placa,
                     telefone: telefone,
                     endereco: endereco
+                }, function(error) {
+                    if (error) {
+                        alert('Erro ao adicionar cliente: ' + error.message);
+                    } else {
+                        alert('Cliente adicionado com sucesso!');
+                        document.getElementById('form-cliente').reset();
+                        fecharModalAdicionar();
+                        carregarClientes();
+                    }
                 });
-
-                document.getElementById('form-cliente').reset();
-                fecharModalAdicionar();
-                carregarClientes();
             } else {
                 alert("Por favor, preencha todos os campos.");
             }
@@ -294,8 +299,14 @@
         // Função para remover cliente
         function removerCliente(key, event) {
             event.stopPropagation();
-            database.ref('clientes/' + key).remove();
-            carregarClientes();
+            database.ref('clientes/' + key).remove(function(error) {
+                if (error) {
+                    alert('Erro ao remover cliente: ' + error.message);
+                } else {
+                    alert('Cliente removido com sucesso!');
+                    carregarClientes();
+                }
+            });
         }
 
         // Função para salvar alterações do cliente
@@ -312,10 +323,15 @@
                     placa: placa,
                     telefone: telefone,
                     endereco: endereco
+                }, function(error) {
+                    if (error) {
+                        alert('Erro ao atualizar cliente: ' + error.message);
+                    } else {
+                        alert('Cliente atualizado com sucesso!');
+                        fecharModalEditar();
+                        carregarClientes();
+                    }
                 });
-
-                fecharModalEditar();
-                carregarClientes();
             } else {
                 alert("Por favor, preencha todos os campos.");
             }
@@ -444,23 +460,5 @@
             </form>
         </div>
     </div>
-
-    <!-- Modal Remover Cliente -->
-    <div id="modalRemoverCliente" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Remover Cliente</h2>
-                <span class="close" onclick="fecharModalRemover()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja remover este cliente?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-modal" onclick="removerClienteConfirmado()">Sim</button>
-                <button type="button" class="btn-modal" onclick="fecharModalRemover()">Não</button>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
