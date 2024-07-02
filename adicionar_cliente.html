@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Cliente - Garagem 87</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .container h1 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #00796b;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #00796b;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #004d40;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        #buscar-cliente {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .lista-cabecalho {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #00796b;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .lista-cabecalho span {
+            flex: 1;
+            text-align: center;
+        }
+        #lista-clientes {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        #lista-clientes li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #ffffff;
+            border-radius: 5px;
+            border: 1px solid #b2dfdb;
+            transition: box-shadow 0.3s;
+            cursor: pointer;
+        }
+        #lista-clientes li:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #lista-clientes li span {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            color: #00796b;
+        }
+        /* Estilo do modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header, .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-footer {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 10px;
+            margin-top: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #00796b;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            color: #00796b;
+            font-weight: bold;
+        }
+        .form-group input {
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clientes</h1>
+        <button class="btn" onclick="abrirModalAdicionar()">Adicionar Cliente</button>
+        <div class="search-container">
+            <input type="text" id="buscar-cliente" onkeyup="filtrarClientes()" placeholder="Buscar cliente...">
+        </div>
+        <div class="lista-cabecalho">
+            <span>Nome</span>
+            <span>Carro</span>
+            <span>Placa</span>
+        </div>
+        <ul id="lista-clientes">
+            <!-- Lista de clientes adicionados -->
+        </ul>
+    </div>
+
+    <!-- Modal Adicionar Cliente -->
+    <div id="modalAdicionarCliente" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Cliente</h2>
+                <span class="close" onclick="fecharModalAdicionar()">&times;</span>
+            </div>
+            <form id="form-cliente">
+                <div class="form-group">
+                    <label for="nome">Nome:</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="carro">Carro:</label>
+                    <input type="text" id="carro" name="carro" required>
+                </div>
+                <div class="form-group">
+                    <label for="placa">Placa do Carro:</label>
+                    <input type="text" id="placa" name="placa" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone:</label>
+                    <input type="text" id="telefone" name="telefone" required>
+                </div>
+                <div class="form-group">
+                    <label for="endereco">Endereço:</label>
+                    <input type="text" id="endereco" name="endereco" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="adicionarCliente()">Salvar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Cliente -->
+    <div id="modalEditarCliente" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Cliente</h2>
+                <span class="close" onclick="fecharModalEditar()">&times;</span>
+            </div>
+            <form id="form-editar-cliente">
+                <input type="hidden" id="editar-index">
+                <div class="form-group">
+                    <label for="editar-nome">Nome:</label>
+                    <input type="text" id="editar-nome" name="editar-nome" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="editar-carro">Carro:</label>
+                    <input type="text" id="editar-carro" name="editar-carro" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-placa">Placa do Carro:</label>
+                    <input type="text" id="editar-placa" name="editar-placa" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-telefone">Telefone:</label>
+                    <input type="text" id="editar-telefone" name="editar-telefone" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-endereco">Endereço:</label>
+                    <input type="text" id="editar-endereco" name="editar-endereco" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="salvarCliente()">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+
+        function adicionarCliente() {
+            const nome = document.getElementById('nome').value;
+            const carro = document.getElementById('carro').value;
+            const placa = document.getElementById('placa').value;
+            const telefone = document.getElementById('telefone').value;
+            const endereco = document.getElementById('endereco').value;
+
+            if (nome && carro && placa && telefone && endereco) {
+                const cliente = { nome, carro, placa, telefone, endereco };
+                clientes.push(cliente);
+                atualizarListaClientes();
+                localStorage.setItem('clientes', JSON.stringify(clientes));
+                document.getElementById('form-cliente').reset();
+                fecharModalAdicionar();
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        function atualizarListaClientes() {
+            const listaClientes = document.getElementById('lista-clientes');
+            listaClientes.innerHTML = '';
+            clientes.forEach((cliente, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${cliente.nome}</span>
+                    <span>${cliente.carro}</span>
+                    <span>${cliente.placa}</span>
+                `;
+                li.onclick = () => abrirModalEditar(index);
+                listaClientes.appendChild(li);
+            });
+        }
+
+        function abrirModalAdicionar() {
+            document.getElementById('modalAdicionarCliente').style.display = 'block';
+        }
+
+        function fecharModalAdicionar() {
+            document.getElementById('modalAdicionarCliente').style.display = 'none';
+        }
+
+        function abrirModalEditar(index) {
+            const cliente = clientes[index];
+            document.getElementById('editar-index').value = index;
+            document.getElementById('editar-nome').value = cliente.nome;
+            document.getElementById('editar-carro').value = cliente.carro;
+            document.getElementById('editar-placa').value = cliente.placa;
+            document.getElementById('editar-telefone').value = cliente.telefone;
+            document.getElementById('editar-endereco').value = cliente.endereco;
+            document.getElementById('modalEditarCliente').style.display = 'block';
+        }
+
+        function fecharModalEditar() {
+            document.getElementById('modalEditarCliente').style.display = 'none';
+        }
+
+        function salvarCliente() {
+            const index = document.getElementById('editar-index').value;
+            const carro = document.getElementById('editar-carro').value;
+            const placa = document.getElementById('editar-placa').value;
+            const telefone = document.getElementById('editar-telefone').value;
+            const endereco = document.getElementById('editar-endereco').value;
+
+            if (carro && placa && telefone && endereco) {
+                clientes[index].carro = carro;
+                clientes[index].placa = placa;
+                clientes[index].telefone = telefone;
+                clientes[index].endereco = endereco;
+                atualizarListaClientes();
+                localStorage.setItem('clientes', JSON.stringify(clientes));
+                fecharModalEditar();
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        function filtrarClientes() {
+            const input = document.getElementById('buscar-cliente');
+            const filter = input.value.toUpperCase();
+            const ul = document.getElementById('lista-clientes');
+            const li = ul.getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const txtValue = li[i].textContent || li[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
+        window.onclick = function(event) {
+            const modalAdicionar = document.getElementById('modalAdicionarCliente');
+            const modalEditar = document.getElementById('modalEditarCliente');
+            if (event.target == modalAdicionar) {
+                modalAdicionar.style.display = "none";
+            }
+            if (event.target == modalEditar) {
+                modalEditar.style.display = "none";
+            }
+        }
+
+        window.onload = atualizarListaClientes;
+    </script>
+</body>
+</html>

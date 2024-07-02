@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garagem 87 - Página Inicial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .container h1 {
+            margin-bottom: 40px;
+            color: #00796b;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        .icon-row {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+        .icon-button {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #00796b;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+        }
+        .icon-button:hover {
+            background-color: #004d40;
+            transform: scale(1.1);
+        }
+        .icon-button span {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: #004d40;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .icon-button:hover span {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Garagem 87</h1>
+        <div class="icon-container">
+            <div class="icon-row">
+                <div class="icon-button" onclick="window.location.href='adicionar_cliente.html'">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Adicionar Cliente</span>
+                </div>
+                <div class="icon-button" onclick="window.location.href='adicionar_produto.html'">
+                    <i class="fas fa-box"></i>
+                    <span>Adicionar Produto</span>
+                </div>
+            </div>
+            <div class="icon-row">
+                <div class="icon-button" onclick="window.location.href='fazer_orcamento.html'">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Fazer Orçamento</span>
+                </div>
+                <div class="icon-button" onclick="window.location.href='confirmar_orcamento.html'">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Confirmar Orçamento</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

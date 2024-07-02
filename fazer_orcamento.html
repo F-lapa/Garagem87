@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazer Orçamento - Garagem 87</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .container h1 {
+            margin-bottom: 20px;
+            color: #00796b;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #00796b;
+        }
+        .form-group input,
+        .form-group select {
+            width: calc(100% - 50px);
+            padding: 10px;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .form-group .add-product,
+        .form-group .remove-product {
+            width: 30px;
+            padding: 10px;
+            margin-left: 10px;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #00796b;
+            color: white;
+            display: inline-block;
+        }
+        .form-group .remove-product {
+            background-color: #e57373;
+        }
+        .product-list .product-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .product-list .product-item select {
+            width: calc(100% - 100px);
+        }
+        .product-list .product-item input {
+            width: 60px;
+            margin-left: 10px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #00796b;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #004d40;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fazer Orçamento</h1>
+        <form id="orcamento-form" onsubmit="enviarOrcamento(event)">
+            <div class="form-group">
+                <label for="nome-cliente">Nome do Cliente:</label>
+                <select id="nome-cliente" name="nome-cliente">
+                    <option value="">Nenhum Cliente</option>
+                    <!-- Os clientes serão adicionados aqui -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Produtos:</label>
+                <div class="product-list" id="product-list">
+                    <div class="product-item">
+                        <select name="produtos">
+                            <option value="">Nenhum Produto</option>
+                            <!-- Os produtos serão adicionados aqui -->
+                        </select>
+                        <input type="number" name="quantidade" min="1">
+                        <div class="add-product" onclick="adicionarProduto()">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="servico">Valor da Mão de Obra:</label>
+                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn">Enviar Orçamento</button>
+        </form>
+    </div>
+    <script>
+        let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+        let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+
+        function carregarProdutos() {
+            const productSelects = document.querySelectorAll('select[name="produtos"]');
+            productSelects.forEach(select => {
+                select.innerHTML = '<option value="">Nenhum Produto</option>';
+                produtos.forEach(produto => {
+                    const option = document.createElement('option');
+                    option.value = produto.produto;
+                    option.textContent = produto.produto;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function carregarClientes() {
+            const clienteSelect = document.getElementById('nome-cliente');
+            clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.nome;
+                option.textContent = cliente.nome;
+                clienteSelect.appendChild(option);
+            });
+        }
+
+        function adicionarProduto() {
+            const productList = document.getElementById('product-list');
+            const productItem = document.createElement('div');
+            productItem.className = 'product-item';
+            productItem.innerHTML = `
+                <select name="produtos">
+                    <option value="">Nenhum Produto</option>
+                    <!-- Os produtos serão adicionados aqui -->
+                </select>
+                <input type="number" name="quantidade" min="1">
+                <div class="add-product" onclick="adicionarProduto()">+</div>
+                <div class="remove-product" onclick="removerProduto(this)">-</div>
+            `;
+            productList.appendChild(productItem);
+            carregarProdutos();
+        }
+
+        function removerProduto(element) {
+            element.parentNode.remove();
+        }
+
+        function enviarOrcamento(event) {
+            event.preventDefault();
+            const form = document.getElementById('orcamento-form');
+            const nomeCliente = form['nome-cliente'].value;
+            const servico = form.servico.value;
+            const produtos = Array.from(form.querySelectorAll('select[name="produtos"]'))
+                                .map((select, index) => ({
+                                    produto: select.value,
+                                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
+                                }))
+                                .filter(item => item.produto);  // Filtra produtos não preenchidos
+                                
+            const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
+
+            const orcamento = {
+                nomeCliente,
+                servico,
+                produtos,
+                clienteInfo
+            };
+
+            localStorage.setItem('orcamento', JSON.stringify(orcamento));
+            window.location.href = 'exibir_orcamento.html';
+        }
+
+        window.onload = function() {
+            carregarProdutos();
+            carregarClientes();
+        }
+    </script>
+</body>
+</html>
