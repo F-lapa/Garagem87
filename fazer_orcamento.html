@@ -98,6 +98,108 @@
             background-color: #004d40;
         }
     </style>
+    <!-- Adicionando os scripts do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script>
+        // Configurações do Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
+            authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
+            databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
+            projectId: "sistema-de-receitas-e-despesas",
+            storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
+            messagingSenderId: "252102478972",
+            appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
+            measurementId: "G-K2HCS7WNZV"
+        };
+        // Inicializando o Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        // Referência ao banco de dados
+        const database = firebase.database();
+
+        // Função para carregar produtos do Firebase
+        function carregarProdutos() {
+            const productSelects = document.querySelectorAll('select[name="produtos"]');
+            database.ref('produtos').once('value', function(snapshot) {
+                productSelects.forEach(select => {
+                    select.innerHTML = '<option value="">Nenhum Produto</option>';
+                    snapshot.forEach(function(childSnapshot) {
+                        const produto = childSnapshot.val();
+                        const option = document.createElement('option');
+                        option.value = produto.produto;
+                        option.textContent = produto.produto;
+                        select.appendChild(option);
+                    });
+                });
+            });
+        }
+
+        // Função para carregar clientes do Firebase
+        function carregarClientes() {
+            const clienteSelect = document.getElementById('nome-cliente');
+            database.ref('clientes').once('value', function(snapshot) {
+                clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
+                snapshot.forEach(function(childSnapshot) {
+                    const cliente = childSnapshot.val();
+                    const option = document.createElement('option');
+                    option.value = cliente.nome;
+                    option.textContent = cliente.nome;
+                    clienteSelect.appendChild(option);
+                });
+            });
+        }
+
+        function adicionarProduto() {
+            const productList = document.getElementById('product-list');
+            const productItem = document.createElement('div');
+            productItem.className = 'product-item';
+            productItem.innerHTML = `
+                <select name="produtos">
+                    <option value="">Nenhum Produto</option>
+                </select>
+                <input type="number" name="quantidade" min="1">
+                <div class="add-product" onclick="adicionarProduto()">+</div>
+                <div class="remove-product" onclick="removerProduto(this)">-</div>
+            `;
+            productList.appendChild(productItem);
+            carregarProdutos();
+        }
+
+        function removerProduto(element) {
+            element.parentNode.remove();
+        }
+
+        function enviarOrcamento(event) {
+            event.preventDefault();
+            const form = document.getElementById('orcamento-form');
+            const nomeCliente = form['nome-cliente'].value;
+            const servico = form.servico.value;
+            const produtos = Array.from(form.querySelectorAll('select[name="produtos"]'))
+                                .map((select, index) => ({
+                                    produto: select.value,
+                                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
+                                }))
+                                .filter(item => item.produto);  // Filtra produtos não preenchidos
+
+            const orcamento = {
+                nomeCliente,
+                servico,
+                produtos
+            };
+
+            database.ref('orcamentos').push(orcamento);
+            window.location.href = 'exibir_orcamento.html';
+        }
+
+        window.onload = function() {
+            carregarProdutos();
+            carregarClientes();
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -130,84 +232,5 @@
             <button type="submit" class="btn">Enviar Orçamento</button>
         </form>
     </div>
-    <script>
-        let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-        let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-
-        function carregarProdutos() {
-            const productSelects = document.querySelectorAll('select[name="produtos"]');
-            productSelects.forEach(select => {
-                select.innerHTML = '<option value="">Nenhum Produto</option>';
-                produtos.forEach(produto => {
-                    const option = document.createElement('option');
-                    option.value = produto.produto;
-                    option.textContent = produto.produto;
-                    select.appendChild(option);
-                });
-            });
-        }
-
-        function carregarClientes() {
-            const clienteSelect = document.getElementById('nome-cliente');
-            clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
-            clientes.forEach(cliente => {
-                const option = document.createElement('option');
-                option.value = cliente.nome;
-                option.textContent = cliente.nome;
-                clienteSelect.appendChild(option);
-            });
-        }
-
-        function adicionarProduto() {
-            const productList = document.getElementById('product-list');
-            const productItem = document.createElement('div');
-            productItem.className = 'product-item';
-            productItem.innerHTML = `
-                <select name="produtos">
-                    <option value="">Nenhum Produto</option>
-                    <!-- Os produtos serão adicionados aqui -->
-                </select>
-                <input type="number" name="quantidade" min="1">
-                <div class="add-product" onclick="adicionarProduto()">+</div>
-                <div class="remove-product" onclick="removerProduto(this)">-</div>
-            `;
-            productList.appendChild(productItem);
-            carregarProdutos();
-        }
-
-        function removerProduto(element) {
-            element.parentNode.remove();
-        }
-
-        function enviarOrcamento(event) {
-            event.preventDefault();
-            const form = document.getElementById('orcamento-form');
-            const nomeCliente = form['nome-cliente'].value;
-            const servico = form.servico.value;
-            const produtos = Array.from(form.querySelectorAll('select[name="produtos"]'))
-                                .map((select, index) => ({
-                                    produto: select.value,
-                                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
-                                }))
-                                .filter(item => item.produto);  // Filtra produtos não preenchidos
-                                
-            const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
-
-            const orcamento = {
-                nomeCliente,
-                servico,
-                produtos,
-                clienteInfo
-            };
-
-            localStorage.setItem('orcamento', JSON.stringify(orcamento));
-            window.location.href = 'exibir_orcamento.html';
-        }
-
-        window.onload = function() {
-            carregarProdutos();
-            carregarClientes();
-        }
-    </script>
 </body>
 </html>
