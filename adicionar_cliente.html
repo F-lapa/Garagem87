@@ -99,6 +99,16 @@
             font-weight: bold;
             color: #00796b;
         }
+        .icon-remove {
+            color: #e57373;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.3s;
+        }
+        .icon-remove:hover {
+            color: #d32f2f;
+        }
         /* Estilo do modal */
         .modal {
             display: none;
@@ -171,6 +181,20 @@
             font-size: 14px;
             margin-bottom: 10px;
         }
+        .btn-modal {
+            background-color: #00796b;
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-modal:hover {
+            background-color: #004d40;
+        }
     </style>
 </head>
 <body>
@@ -184,6 +208,7 @@
             <span>Nome</span>
             <span>Carro</span>
             <span>Placa</span>
+            <span>Remover</span>
         </div>
         <ul id="lista-clientes">
             <!-- Lista de clientes adicionados -->
@@ -219,7 +244,7 @@
                     <input type="text" id="endereco" name="endereco" required>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn" onclick="adicionarCliente()">Salvar Cliente</button>
+                    <button type="button" class="btn-modal" onclick="adicionarCliente()">Salvar Cliente</button>
                 </div>
             </form>
         </div>
@@ -255,14 +280,32 @@
                     <input type="text" id="editar-endereco" name="editar-endereco" required>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn" onclick="salvarCliente()">Salvar Alterações</button>
+                    <button type="button" class="btn-modal" onclick="salvarCliente()">Salvar Alterações</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Modal Remover Cliente -->
+    <div id="modalRemoverCliente" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Remover Cliente</h2>
+                <span class="close" onclick="fecharModalRemover()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja remover este cliente?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal" onclick="removerClienteConfirmado()">Sim</button>
+                <button type="button" class="btn-modal" onclick="fecharModalRemover()">Não</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+        let clienteParaRemover;
 
         function adicionarCliente() {
             const nome = document.getElementById('nome').value;
@@ -292,6 +335,7 @@
                     <span>${cliente.nome}</span>
                     <span>${cliente.carro}</span>
                     <span>${cliente.placa}</span>
+                    <i class="fas fa-trash icon-remove" onclick="abrirModalRemover(${index}, event)"></i>
                 `;
                 li.onclick = () => abrirModalEditar(index);
                 listaClientes.appendChild(li);
@@ -319,6 +363,23 @@
 
         function fecharModalEditar() {
             document.getElementById('modalEditarCliente').style.display = 'none';
+        }
+
+        function abrirModalRemover(index, event) {
+            event.stopPropagation();
+            clienteParaRemover = index;
+            document.getElementById('modalRemoverCliente').style.display = 'block';
+        }
+
+        function fecharModalRemover() {
+            document.getElementById('modalRemoverCliente').style.display = 'none';
+        }
+
+        function removerClienteConfirmado() {
+            clientes.splice(clienteParaRemover, 1);
+            atualizarListaClientes();
+            localStorage.setItem('clientes', JSON.stringify(clientes));
+            fecharModalRemover();
         }
 
         function salvarCliente() {
@@ -360,11 +421,15 @@
         window.onclick = function(event) {
             const modalAdicionar = document.getElementById('modalAdicionarCliente');
             const modalEditar = document.getElementById('modalEditarCliente');
+            const modalRemover = document.getElementById('modalRemoverCliente');
             if (event.target == modalAdicionar) {
                 modalAdicionar.style.display = "none";
             }
             if (event.target == modalEditar) {
                 modalEditar.style.display = "none";
+            }
+            if (event.target == modalRemover) {
+                modalRemover.style.display = "none";
             }
         }
 
