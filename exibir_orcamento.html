@@ -74,15 +74,27 @@
             background-color: #004d40;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Exibir Orçamento</h1>
-        <div class="info" id="orcamento-info"></div>
-        <div class="total" id="total"></div>
-        <button class="btn" onclick="salvarOrcamento()">Salvar Orçamento</button>
-    </div>
+    <!-- Adicionando os scripts do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
     <script>
+        // Configurações do Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
+            authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
+            databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
+            projectId: "sistema-de-receitas-e-despesas",
+            storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
+            messagingSenderId: "252102478972",
+            appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
+            measurementId: "G-K2HCS7WNZV"
+        };
+        // Inicializando o Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        // Função para exibir o orçamento
         function exibirOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
             const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
@@ -137,18 +149,32 @@
             document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
         }
 
+        // Função para salvar o orçamento no Firebase
         function salvarOrcamento() {
-            const orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
 
-            orcamentos.push(orcamento);
-            localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-            alert('Orçamento salvo com sucesso!');
+            // Salvando o orçamento no Firebase
+            firebase.database().ref('orcamentos').push(orcamento, function(error) {
+                if (error) {
+                    alert('Erro ao salvar orçamento: ' + error.message);
+                } else {
+                    alert('Orçamento salvo com sucesso!');
+                    localStorage.removeItem('orcamento');  // Remove o orçamento do localStorage após salvar
+                }
+            });
         }
 
         window.onload = function() {
             exibirOrcamento();
         }
     </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Exibir Orçamento</h1>
+        <div class="info" id="orcamento-info"></div>
+        <div class="total" id="total"></div>
+        <button class="btn" onclick="salvarOrcamento()">Salvar Orçamento</button>
+    </div>
 </body>
 </html>
