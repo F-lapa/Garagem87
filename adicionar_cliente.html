@@ -196,6 +196,165 @@
             background-color: #004d40;
         }
     </style>
+    <!-- Adicionando os scripts do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script>
+        // Configurações do Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
+            authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
+            databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
+            projectId: "sistema-de-receitas-e-despesas",
+            storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
+            messagingSenderId: "252102478972",
+            appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
+            measurementId: "G-K2HCS7WNZV"
+        };
+        // Inicializando o Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        // Referência ao banco de dados
+        const database = firebase.database();
+
+        // Função para adicionar cliente no Firebase
+        function adicionarCliente() {
+            const nome = document.getElementById('nome').value;
+            const carro = document.getElementById('carro').value;
+            const placa = document.getElementById('placa').value;
+            const telefone = document.getElementById('telefone').value;
+            const endereco = document.getElementById('endereco').value;
+
+            if (nome && carro && placa && telefone && endereco) {
+                const novoClienteRef = database.ref('clientes').push();
+                novoClienteRef.set({
+                    nome: nome,
+                    carro: carro,
+                    placa: placa,
+                    telefone: telefone,
+                    endereco: endereco
+                });
+
+                document.getElementById('form-cliente').reset();
+                fecharModalAdicionar();
+                carregarClientes();
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        // Função para carregar clientes do Firebase
+        function carregarClientes() {
+            const listaClientes = document.getElementById('lista-clientes');
+            listaClientes.innerHTML = '';
+            database.ref('clientes').once('value', function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                    const cliente = childSnapshot.val();
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${cliente.nome}</span>
+                        <span>${cliente.carro}</span>
+                        <span>${cliente.placa}</span>
+                        <i class="fas fa-trash icon-remove" onclick="removerCliente('${childSnapshot.key}', event)"></i>
+                    `;
+                    li.onclick = () => abrirModalEditar(cliente, childSnapshot.key);
+                    listaClientes.appendChild(li);
+                });
+            });
+        }
+
+        // Função para abrir modal de adicionar cliente
+        function abrirModalAdicionar() {
+            document.getElementById('modalAdicionarCliente').style.display = 'block';
+        }
+
+        // Função para fechar modal de adicionar cliente
+        function fecharModalAdicionar() {
+            document.getElementById('modalAdicionarCliente').style.display = 'none';
+        }
+
+        // Função para abrir modal de editar cliente
+        function abrirModalEditar(cliente, key) {
+            document.getElementById('editar-key').value = key;
+            document.getElementById('editar-nome').value = cliente.nome;
+            document.getElementById('editar-carro').value = cliente.carro;
+            document.getElementById('editar-placa').value = cliente.placa;
+            document.getElementById('editar-telefone').value = cliente.telefone;
+            document.getElementById('editar-endereco').value = cliente.endereco;
+            document.getElementById('modalEditarCliente').style.display = 'block';
+        }
+
+        // Função para fechar modal de editar cliente
+        function fecharModalEditar() {
+            document.getElementById('modalEditarCliente').style.display = 'none';
+        }
+
+        // Função para remover cliente
+        function removerCliente(key, event) {
+            event.stopPropagation();
+            database.ref('clientes/' + key).remove();
+            carregarClientes();
+        }
+
+        // Função para salvar alterações do cliente
+        function salvarCliente() {
+            const key = document.getElementById('editar-key').value;
+            const carro = document.getElementById('editar-carro').value;
+            const placa = document.getElementById('editar-placa').value;
+            const telefone = document.getElementById('editar-telefone').value;
+            const endereco = document.getElementById('editar-endereco').value;
+
+            if (carro && placa && telefone && endereco) {
+                database.ref('clientes/' + key).update({
+                    carro: carro,
+                    placa: placa,
+                    telefone: telefone,
+                    endereco: endereco
+                });
+
+                fecharModalEditar();
+                carregarClientes();
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        // Função para filtrar clientes
+        function filtrarClientes() {
+            const input = document.getElementById('buscar-cliente');
+            const filter = input.value.toUpperCase();
+            const ul = document.getElementById('lista-clientes');
+            const li = ul.getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const txtValue = li[i].textContent || li[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
+        window.onclick = function(event) {
+            const modalAdicionar = document.getElementById('modalAdicionarCliente');
+            const modalEditar = document.getElementById('modalEditarCliente');
+            const modalRemover = document.getElementById('modalRemoverCliente');
+            if (event.target == modalAdicionar) {
+                modalAdicionar.style.display = "none";
+            }
+            if (event.target == modalEditar) {
+                modalEditar.style.display = "none";
+            }
+            if (event.target == modalRemover) {
+                modalRemover.style.display = "none";
+            }
+        }
+
+        window.onload = carregarClientes;
+    </script>
 </head>
 <body>
     <div class="container">
@@ -258,7 +417,7 @@
                 <span class="close" onclick="fecharModalEditar()">&times;</span>
             </div>
             <form id="form-editar-cliente">
-                <input type="hidden" id="editar-index">
+                <input type="hidden" id="editar-key">
                 <div class="form-group">
                     <label for="editar-nome">Nome:</label>
                     <input type="text" id="editar-nome" name="editar-nome" disabled>
@@ -303,137 +462,5 @@
         </div>
     </div>
 
-    <script>
-        let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-        let clienteParaRemover;
-
-        function adicionarCliente() {
-            const nome = document.getElementById('nome').value;
-            const carro = document.getElementById('carro').value;
-            const placa = document.getElementById('placa').value;
-            const telefone = document.getElementById('telefone').value;
-            const endereco = document.getElementById('endereco').value;
-
-            if (nome && carro && placa && telefone && endereco) {
-                const cliente = { nome, carro, placa, telefone, endereco };
-                clientes.push(cliente);
-                atualizarListaClientes();
-                localStorage.setItem('clientes', JSON.stringify(clientes));
-                document.getElementById('form-cliente').reset();
-                fecharModalAdicionar();
-            } else {
-                alert("Por favor, preencha todos os campos.");
-            }
-        }
-
-        function atualizarListaClientes() {
-            const listaClientes = document.getElementById('lista-clientes');
-            listaClientes.innerHTML = '';
-            clientes.forEach((cliente, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>${cliente.nome}</span>
-                    <span>${cliente.carro}</span>
-                    <span>${cliente.placa}</span>
-                    <i class="fas fa-trash icon-remove" onclick="abrirModalRemover(${index}, event)"></i>
-                `;
-                li.onclick = () => abrirModalEditar(index);
-                listaClientes.appendChild(li);
-            });
-        }
-
-        function abrirModalAdicionar() {
-            document.getElementById('modalAdicionarCliente').style.display = 'block';
-        }
-
-        function fecharModalAdicionar() {
-            document.getElementById('modalAdicionarCliente').style.display = 'none';
-        }
-
-        function abrirModalEditar(index) {
-            const cliente = clientes[index];
-            document.getElementById('editar-index').value = index;
-            document.getElementById('editar-nome').value = cliente.nome;
-            document.getElementById('editar-carro').value = cliente.carro;
-            document.getElementById('editar-placa').value = cliente.placa;
-            document.getElementById('editar-telefone').value = cliente.telefone;
-            document.getElementById('editar-endereco').value = cliente.endereco;
-            document.getElementById('modalEditarCliente').style.display = 'block';
-        }
-
-        function fecharModalEditar() {
-            document.getElementById('modalEditarCliente').style.display = 'none';
-        }
-
-        function abrirModalRemover(index, event) {
-            event.stopPropagation();
-            clienteParaRemover = index;
-            document.getElementById('modalRemoverCliente').style.display = 'block';
-        }
-
-        function fecharModalRemover() {
-            document.getElementById('modalRemoverCliente').style.display = 'none';
-        }
-
-        function removerClienteConfirmado() {
-            clientes.splice(clienteParaRemover, 1);
-            atualizarListaClientes();
-            localStorage.setItem('clientes', JSON.stringify(clientes));
-            fecharModalRemover();
-        }
-
-        function salvarCliente() {
-            const index = document.getElementById('editar-index').value;
-            const carro = document.getElementById('editar-carro').value;
-            const placa = document.getElementById('editar-placa').value;
-            const telefone = document.getElementById('editar-telefone').value;
-            const endereco = document.getElementById('editar-endereco').value;
-
-            if (carro && placa && telefone && endereco) {
-                clientes[index].carro = carro;
-                clientes[index].placa = placa;
-                clientes[index].telefone = telefone;
-                clientes[index].endereco = endereco;
-                atualizarListaClientes();
-                localStorage.setItem('clientes', JSON.stringify(clientes));
-                fecharModalEditar();
-            } else {
-                alert("Por favor, preencha todos os campos.");
-            }
-        }
-
-        function filtrarClientes() {
-            const input = document.getElementById('buscar-cliente');
-            const filter = input.value.toUpperCase();
-            const ul = document.getElementById('lista-clientes');
-            const li = ul.getElementsByTagName('li');
-
-            for (let i = 0; i < li.length; i++) {
-                const txtValue = li[i].textContent || li[i].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    li[i].style.display = "";
-                } else {
-                    li[i].style.display = "none";
-                }
-            }
-        }
-
-        window.onclick = function(event) {
-            const modalAdicionar = document.getElementById('modalAdicionarCliente');
-            const modalEditar = document.getElementById('modalEditarCliente');
-            const modalRemover = document.getElementById('modalRemoverCliente');
-            if (event.target == modalAdicionar) {
-                modalAdicionar.style.display = "none";
-            }
-            if (event.target == modalEditar) {
-                modalEditar.style.display = "none";
-            }
-            if (event.target == modalRemover) {
-                modalRemover.style.display = "none";
-            }
-        }
-
-        window.onload = atualizarListaClientes;
-    </script>
 </body>
 </html>
