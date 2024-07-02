@@ -195,6 +195,155 @@
             background-color: #004d40;
         }
     </style>
+    <!-- Adicionando os scripts do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script>
+        // Configurações do Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
+            authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
+            databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
+            projectId: "sistema-de-receitas-e-despesas",
+            storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
+            messagingSenderId: "252102478972",
+            appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
+            measurementId: "G-K2HCS7WNZV"
+        };
+        // Inicializando o Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        // Referência ao banco de dados
+        const database = firebase.database();
+
+        // Função para adicionar produto no Firebase
+        function adicionarProduto() {
+            const produto = document.getElementById('produto').value;
+            const quantidade = document.getElementById('quantidade').value;
+            const valor = document.getElementById('valor').value;
+
+            if (produto && quantidade && valor) {
+                const novoProdutoRef = database.ref('produtos').push();
+                novoProdutoRef.set({
+                    produto: produto,
+                    quantidade: quantidade,
+                    valor: valor
+                });
+
+                document.getElementById('form-produto').reset();
+                fecharModalAdicionar();
+                carregarProdutos();
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        // Função para carregar produtos do Firebase
+        function carregarProdutos() {
+            const listaProdutos = document.getElementById('lista-produtos');
+            listaProdutos.innerHTML = '';
+            database.ref('produtos').once('value', function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                    const produto = childSnapshot.val();
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${produto.produto}</span>
+                        <span>${produto.quantidade}</span>
+                        <span>R$ ${parseFloat(produto.valor).toFixed(2)}</span>
+                        <i class="fas fa-trash icon-remove" onclick="removerProduto('${childSnapshot.key}', event)"></i>
+                    `;
+                    li.onclick = () => abrirModalEditar(produto, childSnapshot.key);
+                    listaProdutos.appendChild(li);
+                });
+            });
+        }
+
+        // Função para abrir modal de adicionar produto
+        function abrirModalAdicionar() {
+            document.getElementById('modalAdicionarProduto').style.display = 'block';
+        }
+
+        // Função para fechar modal de adicionar produto
+        function fecharModalAdicionar() {
+            document.getElementById('modalAdicionarProduto').style.display = 'none';
+        }
+
+        // Função para abrir modal de editar produto
+        function abrirModalEditar(produto, key) {
+            document.getElementById('editar-key').value = key;
+            document.getElementById('editar-produto').value = produto.produto;
+            document.getElementById('editar-quantidade').value = produto.quantidade;
+            document.getElementById('editar-valor').value = produto.valor;
+            document.getElementById('modalEditarProduto').style.display = 'block';
+        }
+
+        // Função para fechar modal de editar produto
+        function fecharModalEditar() {
+            document.getElementById('modalEditarProduto').style.display = 'none';
+        }
+
+        // Função para remover produto
+        function removerProduto(key, event) {
+            event.stopPropagation();
+            database.ref('produtos/' + key).remove();
+            carregarProdutos();
+        }
+
+        // Função para salvar alterações do produto
+        function salvarProduto() {
+            const key = document.getElementById('editar-key').value;
+            const quantidade = document.getElementById('editar-quantidade').value;
+            const valor = document.getElementById('editar-valor').value;
+
+            if (quantidade && valor) {
+                database.ref('produtos/' + key).update({
+                    quantidade: quantidade,
+                    valor: valor
+                });
+
+                fecharModalEditar();
+                carregarProdutos();
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        // Função para filtrar produtos
+        function filtrarProdutos() {
+            const input = document.getElementById('buscar-produto');
+            const filter = input.value.toUpperCase();
+            const ul = document.getElementById('lista-produtos');
+            const li = ul.getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const txtValue = li[i].textContent || li[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
+        window.onclick = function(event) {
+            const modalAdicionar = document.getElementById('modalAdicionarProduto');
+            const modalEditar = document.getElementById('modalEditarProduto');
+            const modalRemover = document.getElementById('modalRemoverProduto');
+            if (event.target == modalAdicionar) {
+                modalAdicionar.style.display = "none";
+            }
+            if (event.target == modalEditar) {
+                modalEditar.style.display = "none";
+            }
+            if (event.target == modalRemover) {
+                modalRemover.style.display = "none";
+            }
+        }
+
+        window.onload = carregarProdutos;
+    </script>
 </head>
 <body>
     <div class="container">
@@ -249,7 +398,7 @@
                 <span class="close" onclick="fecharModalEditar()">&times;</span>
             </div>
             <form id="form-editar-produto">
-                <input type="hidden" id="editar-index">
+                <input type="hidden" id="editar-key">
                 <div class="form-group">
                     <label for="editar-produto">Produto:</label>
                     <input type="text" id="editar-produto" name="editar-produto" disabled>
@@ -286,129 +435,5 @@
         </div>
     </div>
 
-    <script>
-        let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-        let produtoParaRemover;
-
-        function adicionarProduto() {
-            const produto = document.getElementById('produto').value;
-            const quantidade = document.getElementById('quantidade').value;
-            const valor = document.getElementById('valor').value;
-
-            if (produto && quantidade && valor) {
-                const item = { produto, quantidade, valor };
-                produtos.push(item);
-                atualizarListaProdutos();
-                localStorage.setItem('produtos', JSON.stringify(produtos));
-                document.getElementById('form-produto').reset();
-                fecharModalAdicionar();
-            } else {
-                alert("Por favor, preencha todos os campos.");
-            }
-        }
-
-        function atualizarListaProdutos() {
-            const listaProdutos = document.getElementById('lista-produtos');
-            listaProdutos.innerHTML = '';
-            produtos.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>${item.produto}</span>
-                    <span>${item.quantidade}</span>
-                    <span>R$ ${parseFloat(item.valor).toFixed(2)}</span>
-                    <i class="fas fa-trash icon-remove" onclick="abrirModalRemover(${index}, event)"></i>
-                `;
-                li.onclick = () => abrirModalEditar(index);
-                listaProdutos.appendChild(li);
-            });
-        }
-
-        function abrirModalAdicionar() {
-            document.getElementById('modalAdicionarProduto').style.display = 'block';
-        }
-
-        function fecharModalAdicionar() {
-            document.getElementById('modalAdicionarProduto').style.display = 'none';
-        }
-
-        function abrirModalEditar(index) {
-            const produto = produtos[index];
-            document.getElementById('editar-index').value = index;
-            document.getElementById('editar-produto').value = produto.produto;
-            document.getElementById('editar-quantidade').value = produto.quantidade;
-            document.getElementById('editar-valor').value = produto.valor;
-            document.getElementById('modalEditarProduto').style.display = 'block';
-        }
-
-        function fecharModalEditar() {
-            document.getElementById('modalEditarProduto').style.display = 'none';
-        }
-
-        function abrirModalRemover(index, event) {
-            event.stopPropagation();
-            produtoParaRemover = index;
-            document.getElementById('modalRemoverProduto').style.display = 'block';
-        }
-
-        function fecharModalRemover() {
-            document.getElementById('modalRemoverProduto').style.display = 'none';
-        }
-
-        function removerProdutoConfirmado() {
-            produtos.splice(produtoParaRemover, 1);
-            atualizarListaProdutos();
-            localStorage.setItem('produtos', JSON.stringify(produtos));
-            fecharModalRemover();
-        }
-
-        function salvarProduto() {
-            const index = document.getElementById('editar-index').value;
-            const quantidade = document.getElementById('editar-quantidade').value;
-            const valor = document.getElementById('editar-valor').value;
-
-            if (quantidade && valor) {
-                produtos[index].quantidade = quantidade;
-                produtos[index].valor = valor;
-                atualizarListaProdutos();
-                localStorage.setItem('produtos', JSON.stringify(produtos));
-                fecharModalEditar();
-            } else {
-                alert("Por favor, preencha todos os campos.");
-            }
-        }
-
-        function filtrarProdutos() {
-            const input = document.getElementById('buscar-produto');
-            const filter = input.value.toUpperCase();
-            const ul = document.getElementById('lista-produtos');
-            const li = ul.getElementsByTagName('li');
-
-            for (let i = 0; i < li.length; i++) {
-                const txtValue = li[i].textContent || li[i].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    li[i].style.display = "";
-                } else {
-                    li[i].style.display = "none";
-                }
-            }
-        }
-
-        window.onclick = function(event) {
-            const modalAdicionar = document.getElementById('modalAdicionarProduto');
-            const modalEditar = document.getElementById('modalEditarProduto');
-            const modalRemover = document.getElementById('modalRemoverProduto');
-            if (event.target == modalAdicionar) {
-                modalAdicionar.style.display = "none";
-            }
-            if (event.target == modalEditar) {
-                modalEditar.style.display = "none";
-            }
-            if (event.target == modalRemover) {
-                modalRemover.style.display = "none";
-            }
-        }
-
-        window.onload = atualizarListaProdutos;
-    </script>
 </body>
 </html>
