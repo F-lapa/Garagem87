@@ -88,7 +88,6 @@
             border-radius: 5px;
             border: 1px solid #b2dfdb;
             transition: box-shadow 0.3s;
-            cursor: pointer;
         }
         #lista-produtos li:hover {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -98,6 +97,16 @@
             text-align: center;
             font-weight: bold;
             color: #00796b;
+        }
+        .icon-remove {
+            color: #e57373;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.3s;
+        }
+        .icon-remove:hover {
+            color: #d32f2f;
         }
         /* Estilo do modal */
         .modal {
@@ -171,6 +180,20 @@
             font-size: 14px;
             margin-bottom: 10px;
         }
+        .btn-modal {
+            background-color: #00796b;
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-modal:hover {
+            background-color: #004d40;
+        }
     </style>
 </head>
 <body>
@@ -184,6 +207,7 @@
             <span>Produto</span>
             <span>Qtd.</span>
             <span>Valor</span>
+            <span>Remover</span>
         </div>
         <ul id="lista-produtos">
             <!-- Lista de produtos adicionados -->
@@ -200,18 +224,18 @@
             <form id="form-produto">
                 <div class="form-group">
                     <label for="produto">Produto:</label>
-                    <input type="text" id="produto" name="produto">
+                    <input type="text" id="produto" name="produto" required>
                 </div>
                 <div class="form-group">
                     <label for="quantidade">Quantidade:</label>
-                    <input type="number" id="quantidade" name="quantidade" min="1">
+                    <input type="number" id="quantidade" name="quantidade" min="1" required>
                 </div>
                 <div class="form-group">
                     <label for="valor">Valor:</label>
-                    <input type="number" id="valor" name="valor" min="0" step="0.01">
+                    <input type="number" id="valor" name="valor" min="0" step="0.01" required>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn" onclick="adicionarProduto()">Adicionar Produto</button>
+                    <button type="button" class="btn-modal" onclick="adicionarProduto()">Adicionar Produto</button>
                 </div>
             </form>
         </div>
@@ -232,21 +256,39 @@
                 </div>
                 <div class="form-group">
                     <label for="editar-quantidade">Quantidade:</label>
-                    <input type="number" id="editar-quantidade" name="editar-quantidade" min="1">
+                    <input type="number" id="editar-quantidade" name="editar-quantidade" min="1" required>
                 </div>
                 <div class="form-group">
                     <label for="editar-valor">Valor:</label>
-                    <input type="number" id="editar-valor" name="editar-valor" min="0" step="0.01">
+                    <input type="number" id="editar-valor" name="editar-valor" min="0" step="0.01" required>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn" onclick="salvarProduto()">Salvar Alterações</button>
+                    <button type="button" class="btn-modal" onclick="salvarProduto()">Salvar Alterações</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Modal Remover Produto -->
+    <div id="modalRemoverProduto" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Remover Produto</h2>
+                <span class="close" onclick="fecharModalRemover()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja remover este produto?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal" onclick="removerProdutoConfirmado()">Sim</button>
+                <button type="button" class="btn-modal" onclick="fecharModalRemover()">Não</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+        let produtoParaRemover;
 
         function adicionarProduto() {
             const produto = document.getElementById('produto').value;
@@ -272,8 +314,9 @@
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span>${item.produto}</span>
-                    <span>${item.quantidade} <i class="fas fa-check-circle"></i></span>
+                    <span>${item.quantidade}</span>
                     <span>R$ ${parseFloat(item.valor).toFixed(2)}</span>
+                    <i class="fas fa-trash icon-remove" onclick="abrirModalRemover(${index}, event)"></i>
                 `;
                 li.onclick = () => abrirModalEditar(index);
                 listaProdutos.appendChild(li);
@@ -299,6 +342,23 @@
 
         function fecharModalEditar() {
             document.getElementById('modalEditarProduto').style.display = 'none';
+        }
+
+        function abrirModalRemover(index, event) {
+            event.stopPropagation();
+            produtoParaRemover = index;
+            document.getElementById('modalRemoverProduto').style.display = 'block';
+        }
+
+        function fecharModalRemover() {
+            document.getElementById('modalRemoverProduto').style.display = 'none';
+        }
+
+        function removerProdutoConfirmado() {
+            produtos.splice(produtoParaRemover, 1);
+            atualizarListaProdutos();
+            localStorage.setItem('produtos', JSON.stringify(produtos));
+            fecharModalRemover();
         }
 
         function salvarProduto() {
@@ -336,11 +396,15 @@
         window.onclick = function(event) {
             const modalAdicionar = document.getElementById('modalAdicionarProduto');
             const modalEditar = document.getElementById('modalEditarProduto');
+            const modalRemover = document.getElementById('modalRemoverProduto');
             if (event.target == modalAdicionar) {
                 modalAdicionar.style.display = "none";
             }
             if (event.target == modalEditar) {
                 modalEditar.style.display = "none";
+            }
+            if (event.target == modalRemover) {
+                modalRemover.style.display = "none";
             }
         }
 
