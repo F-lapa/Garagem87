@@ -175,6 +175,166 @@
             }
         }
     </style>
+    <!-- Adicionando os scripts do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script>
+        // Configurações do Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
+            authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
+            databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
+            projectId: "sistema-de-receitas-e-despesas",
+            storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
+            messagingSenderId: "252102478972",
+            appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
+            measurementId: "G-K2HCS7WNZV"
+        };
+        // Inicializando o Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        let orcamentoIndex;
+
+        function carregarOrcamentos() {
+            firebase.database().ref('orcamentos').once('value', function(snapshot) {
+                const listaOrcamentos = document.getElementById('lista-orcamentos');
+                listaOrcamentos.innerHTML = '';
+                snapshot.forEach(function(childSnapshot) {
+                    const orcamento = childSnapshot.val();
+                    const key = childSnapshot.key;
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="orcamento-info" onclick="abrirDetalhesModal('${key}')">
+                            <strong>${orcamento.nomeCliente || 'Sem nome de cliente'}</strong> - ${orcamento.clienteInfo?.carro || ''} (${orcamento.clienteInfo?.placa || ''})
+                        </div>
+                        <div class="orcamento-actions">
+                            <button class="btn-icon" onclick="abrirConfirmarModal('${key}')">
+                                <i class="fas fa-check-circle"></i>
+                            </button>
+                            <button class="btn-icon" onclick="abrirExcluirModal('${key}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            ${orcamento.confirmado ? '<i class="fas fa-check confirmado"></i>' : ''}
+                        </div>
+                    `;
+                    listaOrcamentos.appendChild(li);
+                });
+            });
+        }
+
+        function abrirDetalhesModal(key) {
+            firebase.database().ref('orcamentos/' + key).once('value', function(snapshot) {
+                const orcamento = snapshot.val();
+                const detalhesInfo = document.getElementById('detalhes-info');
+                let detalhesHTML = `
+                    <p><strong>Cliente:</strong> ${orcamento.nomeCliente || 'Sem nome de cliente'}</p>
+                    ${orcamento.clienteInfo ? `
+                    <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
+                    <p><strong>Placa:</strong> ${orcamento.clienteInfo.placa}</p>
+                    <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
+                    ` : ''}
+                    <p><strong>Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
+                    <p><strong>Produtos:</strong></p>
+                    <table>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço Unitário (R$)</th>
+                            <th>Total (R$)</th>
+                        </tr>
+                `;
+                const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+                let total = parseFloat(orcamento.servico);
+                orcamento.produtos.forEach(item => {
+                    const produto = produtos.find(p => p.produto === item.produto);
+                    const preco = produto ? produto.valor : 0;
+                    const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
+                    total += totalProduto;
+                    detalhesHTML += `
+                        <tr>
+                            <td>${item.produto}</td>
+                            <td>${item.quantidade}</td>
+                            <td>${parseFloat(preco).toFixed(2)}</td>
+                            <td>${totalProduto.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+                detalhesHTML += `</table>`;
+                detalhesInfo.innerHTML = detalhesHTML;
+
+                const totalValor = document.getElementById('total-valor');
+                totalValor.innerText = `Valor Total: R$ ${total.toFixed(2)}`;
+
+                const modal = document.getElementById('detalhes-modal');
+                modal.style.display = 'flex';
+            });
+        }
+
+        function abrirConfirmarModal(key) {
+            orcamentoIndex = key;
+            const modal = document.getElementById('confirmar-modal');
+            modal.style.display = 'flex';
+        }
+
+        function abrirExcluirModal(key) {
+            orcamentoIndex = key;
+            const modal = document.getElementById('excluir-modal');
+            modal.style.display = 'flex';
+        }
+
+        function fecharModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+        }
+
+        function confirmarOrcamento() {
+            const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+
+            firebase.database().ref('orcamentos/' + orcamentoIndex).once('value', function(snapshot) {
+                const orcamento = snapshot.val();
+                orcamento.produtos.forEach(item => {
+                    const produtoIndex = produtos.findIndex(p => p.produto === item.produto);
+                    if (produtoIndex !== -1) {
+                        produtos[produtoIndex].quantidade -= parseInt(item.quantidade);
+                        if (produtos[produtoIndex].quantidade < 0) {
+                            produtos[produtoIndex].quantidade = 0;
+                        }
+                    }
+                });
+                orcamento.confirmado = true;
+
+                firebase.database().ref('orcamentos/' + orcamentoIndex).set(orcamento, function(error) {
+                    if (error) {
+                        alert('Erro ao confirmar orçamento: ' + error.message);
+                    } else {
+                        alert('Orçamento confirmado com sucesso!');
+                        localStorage.setItem('produtos', JSON.stringify(produtos));
+                        fecharModal('confirmar-modal');
+                        carregarOrcamentos();
+                    }
+                });
+            });
+        }
+
+        function excluirOrcamento() {
+            firebase.database().ref('orcamentos/' + orcamentoIndex).remove(function(error) {
+                if (error) {
+                    alert('Erro ao excluir orçamento: ' + error.message);
+                } else {
+                    alert('Orçamento excluído com sucesso!');
+                    fecharModal('excluir-modal');
+                    carregarOrcamentos();
+                }
+            });
+        }
+
+        document.getElementById('confirmar-sim').addEventListener('click', confirmarOrcamento);
+        document.getElementById('excluir-sim').addEventListener('click', excluirOrcamento);
+
+        window.onload = carregarOrcamentos;
+    </script>
 </head>
 <body>
     <div class="container">
@@ -217,135 +377,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        let orcamentoIndex;
-
-        function carregarOrcamentos() {
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
-            const listaOrcamentos = document.getElementById('lista-orcamentos');
-            listaOrcamentos.innerHTML = '';
-
-            orcamentos.forEach((orcamento, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <div class="orcamento-info" onclick="abrirDetalhesModal(${index})">
-                        <strong>${orcamento.nomeCliente || 'Sem nome de cliente'}</strong> - ${orcamento.clienteInfo?.carro || ''} (${orcamento.clienteInfo?.placa || ''})
-                    </div>
-                    <div class="orcamento-actions">
-                        <button class="btn-icon" onclick="abrirConfirmarModal(${index})">
-                            <i class="fas fa-check-circle"></i>
-                        </button>
-                        <button class="btn-icon" onclick="abrirExcluirModal(${index})">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                        ${orcamento.confirmado ? '<i class="fas fa-check confirmado"></i>' : ''}
-                    </div>
-                `;
-                listaOrcamentos.appendChild(li);
-            });
-        }
-
-        function abrirDetalhesModal(index) {
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
-            const orcamento = orcamentos[index];
-            const detalhesInfo = document.getElementById('detalhes-info');
-            let detalhesHTML = `
-                <p><strong>Cliente:</strong> ${orcamento.nomeCliente || 'Sem nome de cliente'}</p>
-                ${orcamento.clienteInfo ? `
-                <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
-                <p><strong>Placa:</strong> ${orcamento.clienteInfo.placa}</p>
-                <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
-                ` : ''}
-                <p><strong>Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                <p><strong>Produtos:</strong></p>
-                <table>
-                    <tr>
-                        <th>Produto</th>
-                        <th>Quantidade</th>
-                        <th>Preço Unitário (R$)</th>
-                        <th>Total (R$)</th>
-                    </tr>
-            `;
-            const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-            let total = parseFloat(orcamento.servico);
-            orcamento.produtos.forEach(item => {
-                const produto = produtos.find(p => p.produto === item.produto);
-                const preco = produto ? produto.valor : 0;
-                const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
-                total += totalProduto;
-                detalhesHTML += `
-                    <tr>
-                        <td>${item.produto}</td>
-                        <td>${item.quantidade}</td>
-                        <td>${parseFloat(preco).toFixed(2)}</td>
-                        <td>${totalProduto.toFixed(2)}</td>
-                    </tr>
-                `;
-            });
-            detalhesHTML += `</table>`;
-            detalhesInfo.innerHTML = detalhesHTML;
-
-            const totalValor = document.getElementById('total-valor');
-            totalValor.innerText = `Valor Total: R$ ${total.toFixed(2)}`;
-
-            const modal = document.getElementById('detalhes-modal');
-            modal.style.display = 'flex';
-        }
-
-        function abrirConfirmarModal(index) {
-            orcamentoIndex = index;
-            const modal = document.getElementById('confirmar-modal');
-            modal.style.display = 'flex';
-        }
-
-        function abrirExcluirModal(index) {
-            orcamentoIndex = index;
-            const modal = document.getElementById('excluir-modal');
-            modal.style.display = 'flex';
-        }
-
-        function fecharModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.style.display = 'none';
-        }
-
-        function confirmarOrcamento() {
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
-            let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-
-            const orcamento = orcamentos[orcamentoIndex];
-            orcamento.produtos.forEach(item => {
-                const produtoIndex = produtos.findIndex(p => p.produto === item.produto);
-                if (produtoIndex !== -1) {
-                    produtos[produtoIndex].quantidade -= parseInt(item.quantidade);
-                    if (produtos[produtoIndex].quantidade < 0) {
-                        produtos[produtoIndex].quantidade = 0;
-                    }
-                }
-            });
-
-            orcamento.confirmado = true;
-            localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-            localStorage.setItem('produtos', JSON.stringify(produtos));
-            alert(`Orçamento ${orcamentoIndex + 1} confirmado!`);
-            fecharModal('confirmar-modal');
-            carregarOrcamentos();
-        }
-
-        function excluirOrcamento() {
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
-            orcamentos.splice(orcamentoIndex, 1);
-            localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-            alert('Orçamento excluído com sucesso!');
-            fecharModal('excluir-modal');
-            carregarOrcamentos();
-        }
-
-        document.getElementById('confirmar-sim').addEventListener('click', confirmarOrcamento);
-        document.getElementById('excluir-sim').addEventListener('click', excluirOrcamento);
-
-        window.onload = carregarOrcamentos;
-    </script>
 </body>
 </html>
