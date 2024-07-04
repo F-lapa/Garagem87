@@ -115,56 +115,63 @@
         // Função para exibir o orçamento
         function exibirOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
-            const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
             const infoDiv = document.getElementById('orcamento-info');
             let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
 
-            let clienteHTML = '';
-            if (orcamento.clienteInfo) {
-                clienteHTML = `
-                    <p><strong>Nome do Cliente:</strong> ${orcamento.clienteInfo.nome}</p>
-                    <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
-                    <p><strong>Placa do Carro:</strong> ${orcamento.clienteInfo.placa}</p>
-                    <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
-                `;
-            }
-
-            let produtosHTML = '';
-            if (orcamento.produtos && orcamento.produtos.length > 0) {
-                produtosHTML = `
-                    <p><strong>Produtos:</strong></p>
-                    <table>
-                        <tr>
-                            <th>Produto</th>
-                            <th>Quantidade</th>
-                            <th>Preço Unitário (R$)</th>
-                            <th>Total (R$)</th>
-                        </tr>
-                `;
-                orcamento.produtos.forEach(prod => {
-                    const produto = produtos.find(p => p.produto === prod.produto);
-                    const preco = produto ? produto.valor : 0;
-                    const totalProduto = parseFloat(preco) * parseInt(prod.quantidade);
-                    total += totalProduto;
-                    produtosHTML += `
-                        <tr>
-                            <td>${prod.produto}</td>
-                            <td>${prod.quantidade}</td>
-                            <td>${parseFloat(preco).toFixed(2)}</td>
-                            <td>${totalProduto.toFixed(2)}</td>
-                        </tr>
-                    `;
+            // Carregar produtos do Firebase
+            database.ref('produtos').once('value', function(snapshot) {
+                const produtos = [];
+                snapshot.forEach(function(childSnapshot) {
+                    produtos.push(childSnapshot.val());
                 });
-                produtosHTML += '</table>';
-            }
 
-            infoDiv.innerHTML = `
-                ${clienteHTML}
-                <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                ${produtosHTML}
-            `;
+                let clienteHTML = '';
+                if (orcamento.clienteInfo) {
+                    clienteHTML = `
+                        <p><strong>Nome do Cliente:</strong> ${orcamento.clienteInfo.nome}</p>
+                        <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
+                        <p><strong>Placa do Carro:</strong> ${orcamento.clienteInfo.placa}</p>
+                        <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
+                    `;
+                }
 
-            document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
+                let produtosHTML = '';
+                if (orcamento.produtos && orcamento.produtos.length > 0) {
+                    produtosHTML = `
+                        <p><strong>Produtos:</strong></p>
+                        <table>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Preço Unitário (R$)</th>
+                                <th>Total (R$)</th>
+                            </tr>
+                    `;
+                    orcamento.produtos.forEach(prod => {
+                        const produto = produtos.find(p => p.produto === prod.produto);
+                        const preco = produto ? produto.valor : 0;
+                        const totalProduto = parseFloat(preco) * parseInt(prod.quantidade);
+                        total += totalProduto;
+                        produtosHTML += `
+                            <tr>
+                                <td>${prod.produto}</td>
+                                <td>${prod.quantidade}</td>
+                                <td>${parseFloat(preco).toFixed(2)}</td>
+                                <td>${totalProduto.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                    produtosHTML += '</table>';
+                }
+
+                infoDiv.innerHTML = `
+                    ${clienteHTML}
+                    <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
+                    ${produtosHTML}
+                `;
+
+                document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
+            });
         }
 
         // Função para salvar o orçamento no Firebase
