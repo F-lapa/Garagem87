@@ -94,9 +94,9 @@
         firebase.initializeApp(firebaseConfig);
         firebase.analytics();
 
-        // Função para exibir o orçamento
         function exibirOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
+            const produtos = orcamento.produtos;
             const infoDiv = document.getElementById('orcamento-info');
             let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
 
@@ -111,7 +111,7 @@
             }
 
             let produtosHTML = '';
-            if (orcamento.produtos && orcamento.produtos.length > 0) {
+            if (produtos && produtos.length > 0) {
                 produtosHTML = `
                     <p><strong>Produtos:</strong></p>
                     <table>
@@ -122,14 +122,14 @@
                             <th>Total (R$)</th>
                         </tr>
                 `;
-                orcamento.produtos.forEach(prod => {
-                    // Vamos buscar os dados do produto no Firebase
-                    firebase.database().ref('produtos/' + prod.produtoKey).once('value').then(function(snapshot) {
+
+                let promises = produtos.map(prod => {
+                    return firebase.database().ref('produtos/' + prod.produtoKey).once('value').then(function(snapshot) {
                         const produto = snapshot.val();
                         const preco = produto ? parseFloat(produto.valor) : 0;
                         const totalProduto = preco * parseInt(prod.quantidade);
                         total += totalProduto;
-                        produtosHTML += `
+                        return `
                             <tr>
                                 <td>${produto ? produto.produto : 'Produto não encontrado'}</td>
                                 <td>${prod.quantidade}</td>
@@ -137,15 +137,18 @@
                                 <td>${totalProduto.toFixed(2)}</td>
                             </tr>
                         `;
-                        infoDiv.innerHTML = `
-                            ${clienteHTML}
-                            <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                            ${produtosHTML}
-                        `;
-                        document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
                     });
                 });
-                produtosHTML += '</table>';
+
+                Promise.all(promises).then(produtosHTMLArray => {
+                    produtosHTML += produtosHTMLArray.join('') + '</table>';
+                    infoDiv.innerHTML = `
+                        ${clienteHTML}
+                        <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
+                        ${produtosHTML}
+                    `;
+                    document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
+                });
             } else {
                 infoDiv.innerHTML = `
                     ${clienteHTML}
@@ -156,17 +159,14 @@
             }
         }
 
-        // Função para salvar o orçamento no Firebase
         function salvarOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
-
-            // Salvando o orçamento no Firebase
             firebase.database().ref('orcamentos').push(orcamento, function(error) {
                 if (error) {
                     alert('Erro ao salvar orçamento: ' + error.message);
                 } else {
                     alert('Orçamento salvo com sucesso!');
-                    localStorage.removeItem('orcamento');  // Remove o orçamento do localStorage após salvar
+                    localStorage.removeItem('orcamento');
                 }
             });
         }
