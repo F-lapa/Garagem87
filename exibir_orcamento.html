@@ -86,8 +86,8 @@
     <script>
         function exibirOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
-            const infoDiv = document.getElementById('orcamento-info');
             const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+            const infoDiv = document.getElementById('orcamento-info');
             let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
 
             let clienteHTML = '';
@@ -115,14 +115,14 @@
                 orcamento.produtos.forEach(item => {
                     const produto = produtos.find(p => p.produto === item.produto);
                     if (produto) {
-                        const preco = produto.valor;
-                        const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
+                        const preco = parseFloat(produto.valor);
+                        const totalProduto = preco * parseInt(item.quantidade);
                         total += totalProduto;
                         produtosHTML += `
                             <tr>
                                 <td>${item.produto}</td>
                                 <td>${item.quantidade}</td>
-                                <td>${parseFloat(preco).toFixed(2)}</td>
+                                <td>${preco.toFixed(2)}</td>
                                 <td>${totalProduto.toFixed(2)}</td>
                             </tr>
                         `;
