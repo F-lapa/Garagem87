@@ -146,7 +146,7 @@
                     snapshot.forEach(function(childSnapshot) {
                         const produto = childSnapshot.val();
                         const option = document.createElement('option');
-                        option.value = produto.produto;
+                        option.value = childSnapshot.key; // Usar a chave como valor do option
                         option.textContent = produto.produto;
                         select.appendChild(option);
                     });
@@ -194,12 +194,11 @@
             const form = document.getElementById('orcamento-form');
             const nomeCliente = form['nome-cliente'].value;
             const servico = form.servico.value;
-            const produtos = Array.from(form.querySelectorAll('select[name="produtos"]'))
-                                .map((select, index) => ({
-                                    produto: select.value,
-                                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
-                                }))
-                                .filter(item => item.produto);  // Filtra produtos não preenchidos
+            const produtos = Array.from(form.querySelectorAll('.product-item')).map(item => {
+                const produtoKey = item.querySelector('select[name="produtos"]').value;
+                const quantidade = item.querySelector('input[name="quantidade"]').value;
+                return { produtoKey, quantidade };
+            });
 
             const orcamento = {
                 nomeCliente,
@@ -212,25 +211,14 @@
                     alert('Erro ao enviar orçamento: ' + error.message);
                 } else {
                     alert('Orçamento enviado com sucesso!');
+                    localStorage.setItem('orcamento', JSON.stringify(orcamento));
                     window.location.href = 'exibir_orcamento.html';
                 }
             });
         }
 
-        // Autenticar usuário ao carregar a página
         window.onload = function() {
             autenticarUsuario();
-        }
-
-        window.onclick = function(event) {
-            const modalAdicionar = document.getElementById('modalAdicionarProduto');
-            const modalEditar = document.getElementById('modalEditarProduto');
-            if (event.target == modalAdicionar) {
-                modalAdicionar.style.display = "none";
-            }
-            if (event.target == modalEditar) {
-                modalEditar.style.display = "none";
-            }
         }
     </script>
 </head>
