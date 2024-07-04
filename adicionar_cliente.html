@@ -200,6 +200,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script>
         // Configurações do Firebase
         var firebaseConfig = {
@@ -218,6 +219,7 @@
 
         // Referência ao banco de dados
         const database = firebase.database();
+        const auth = firebase.auth();
 
         // Função para adicionar cliente no Firebase
         function adicionarCliente() {
@@ -354,22 +356,34 @@
             }
         }
 
+        // Função para autenticar usuário
+        function autenticarUsuario() {
+            const email = "fernandolapa1987@gmail.com";
+            const senha = "nando1234";
+
+            auth.signInWithEmailAndPassword(email, senha).catch(function(error) {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.error('Erro ao autenticar usuário:', errorCode, errorMessage);
+            });
+        }
+
+        // Autenticar usuário ao carregar a página
+        window.onload = function() {
+            autenticarUsuario();
+            carregarClientes();
+        };
+
         window.onclick = function(event) {
             const modalAdicionar = document.getElementById('modalAdicionarCliente');
             const modalEditar = document.getElementById('modalEditarCliente');
-            const modalRemover = document.getElementById('modalRemoverCliente');
             if (event.target == modalAdicionar) {
                 modalAdicionar.style.display = "none";
             }
             if (event.target == modalEditar) {
                 modalEditar.style.display = "none";
             }
-            if (event.target == modalRemover) {
-                modalRemover.style.display = "none";
-            }
         }
-
-        window.onload = carregarClientes;
     </script>
 </head>
 <body>
