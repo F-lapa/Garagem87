@@ -74,13 +74,20 @@
             background-color: #004d40;
         }
     </style>
-    <!-- Adicionando os scripts do Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Exibir Orçamento</h1>
+        <div class="info" id="orcamento-info"></div>
+        <div class="total" id="total"></div>
+        <button class="btn" onclick="salvarOrcamento()">Salvar Orçamento</button>
+    </div>
+    <!-- Adicione os SDKs do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
     <script>
-        // Configurações do Firebase
-        var firebaseConfig = {
+        // Configuração do Firebase
+        const firebaseConfig = {
             apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
             authDomain: "garagem87-c652e.firebaseapp.com",
             databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
@@ -90,84 +97,84 @@
             appId: "1:325224720529:web:bfed4699261241f7ddf730",
             measurementId: "G-83FY7T6X2D"
         };
-        // Inicializando o Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
+
+        // Inicialize o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
         function exibirOrcamento() {
-            const orcamento = JSON.parse(localStorage.getItem('orcamento'));
-            const produtos = orcamento.produtos;
-            const infoDiv = document.getElementById('orcamento-info');
-            let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
+            const orcamentoId = localStorage.getItem('orcamentoId');
+            const orcamentoRef = database.ref('orcamentos/' + orcamentoId);
+            
+            orcamentoRef.once('value').then(snapshot => {
+                const orcamento = snapshot.val();
+                const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+                const infoDiv = document.getElementById('orcamento-info');
+                let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
 
-            let clienteHTML = '';
-            if (orcamento.clienteInfo) {
-                clienteHTML = `
-                    <p><strong>Nome do Cliente:</strong> ${orcamento.clienteInfo.nome}</p>
-                    <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
-                    <p><strong>Placa do Carro:</strong> ${orcamento.clienteInfo.placa}</p>
-                    <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
-                `;
-            }
+                let clienteHTML = '';
+                if (orcamento.clienteInfo) {
+                    clienteHTML = `
+                        <p><strong>Nome do Cliente:</strong> ${orcamento.clienteInfo.nome}</p>
+                        <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
+                        <p><strong>Placa do Carro:</strong> ${orcamento.clienteInfo.placa}</p>
+                        <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
+                    `;
+                }
 
-            let produtosHTML = '';
-            if (produtos && produtos.length > 0) {
-                produtosHTML = `
-                    <p><strong>Produtos:</strong></p>
-                    <table>
-                        <tr>
-                            <th>Produto</th>
-                            <th>Quantidade</th>
-                            <th>Preço Unitário (R$)</th>
-                            <th>Total (R$)</th>
-                        </tr>
-                `;
-
-                let promises = produtos.map(prod => {
-                    return firebase.database().ref('produtos/' + prod.produtoKey).once('value').then(function(snapshot) {
-                        const produto = snapshot.val();
-                        const preco = produto ? parseFloat(produto.valor) : 0;
-                        const totalProduto = preco * parseInt(prod.quantidade);
-                        total += totalProduto;
-                        return `
+                let produtosHTML = '';
+                if (orcamento.produtos && orcamento.produtos.length > 0) {
+                    produtosHTML = `
+                        <p><strong>Produtos:</strong></p>
+                        <table>
                             <tr>
-                                <td>${produto ? produto.produto : 'Produto não encontrado'}</td>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Preço Unitário (R$)</th>
+                                <th>Total (R$)</th>
+                            </tr>
+                    `;
+                    orcamento.produtos.forEach(prod => {
+                        const produto = produtos.find(p => p.produto === prod.produto);
+                        const preco = produto ? produto.valor : 0;
+                        const totalProduto = parseFloat(preco) * parseInt(prod.quantidade);
+                        total += totalProduto;
+                        produtosHTML += `
+                            <tr>
+                                <td>${prod.produto}</td>
                                 <td>${prod.quantidade}</td>
-                                <td>${preco.toFixed(2)}</td>
+                                <td>${parseFloat(preco).toFixed(2)}</td>
                                 <td>${totalProduto.toFixed(2)}</td>
                             </tr>
                         `;
                     });
-                });
+                    produtosHTML += '</table>';
+                }
 
-                Promise.all(promises).then(produtosHTMLArray => {
-                    produtosHTML += produtosHTMLArray.join('') + '</table>';
-                    infoDiv.innerHTML = `
-                        ${clienteHTML}
-                        <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                        ${produtosHTML}
-                    `;
-                    document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
-                });
-            } else {
                 infoDiv.innerHTML = `
                     ${clienteHTML}
                     <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                    <p><strong>Produtos:</strong> Nenhum produto selecionado</p>
+                    ${produtosHTML}
                 `;
+
                 document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
-            }
+            });
         }
 
         function salvarOrcamento() {
-            const orcamento = JSON.parse(localStorage.getItem('orcamento'));
-            firebase.database().ref('orcamentos').push(orcamento, function(error) {
-                if (error) {
-                    alert('Erro ao salvar orçamento: ' + error.message);
-                } else {
-                    alert('Orçamento salvo com sucesso!');
-                    localStorage.removeItem('orcamento');
-                }
+            const orcamentosRef = database.ref('orcamentos');
+            const orcamentoId = localStorage.getItem('orcamentoId');
+
+            orcamentosRef.child(orcamentoId).once('value').then(snapshot => {
+                const orcamento = snapshot.val();
+                const orcamentosSalvosRef = database.ref('orcamentosSalvos');
+                orcamentosSalvosRef.push(orcamento, error => {
+                    if (error) {
+                        alert('Erro ao salvar orçamento: ' + error.message);
+                    } else {
+                        alert('Orçamento salvo com sucesso!');
+                    }
+                });
             });
         }
 
@@ -175,13 +182,5 @@
             exibirOrcamento();
         }
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Exibir Orçamento</h1>
-        <div class="info" id="orcamento-info"></div>
-        <div class="total" id="total"></div>
-        <button class="btn" onclick="salvarOrcamento()">Salvar Orçamento</button>
-    </div>
 </body>
 </html>
