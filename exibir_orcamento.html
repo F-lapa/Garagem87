@@ -88,7 +88,7 @@
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
             const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
             const infoDiv = document.getElementById('orcamento-info');
-            let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
+            let total = parseFloat(orcamento.servico);
 
             let clienteHTML = '';
             if (orcamento.clienteInfo) {
