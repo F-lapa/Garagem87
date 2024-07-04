@@ -147,7 +147,7 @@
         };
 
         // Inicialize o Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         let produtos = [];
@@ -218,8 +218,8 @@
                                     produto: select.value,
                                     quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
                                 }))
-                                .filter(item => item.produto);
-
+                                .filter(item => item.produto);  // Filtra produtos não preenchidos
+                                
             const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
 
             const orcamento = {
@@ -233,8 +233,8 @@
             const newOrcamentoKey = database.ref().child('orcamentos').push().key;
             database.ref('orcamentos/' + newOrcamentoKey).set(orcamento);
 
-            alert('Orçamento enviado com sucesso!');
-            form.reset();
+            localStorage.setItem('orcamentoId', newOrcamentoKey);
+            window.location.href = 'exibir_orcamento.html';
         }
 
         window.onload = function() {
