@@ -78,7 +78,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script>
         // Configurações do Firebase
         var firebaseConfig = {
@@ -95,83 +94,66 @@
         firebase.initializeApp(firebaseConfig);
         firebase.analytics();
 
-        const database = firebase.database();
-        const auth = firebase.auth();
-
-        // Função para autenticar usuário
-        function autenticarUsuario() {
-            const email = "fernandolapa1987@gmail.com";
-            const senha = "nando1234";
-
-            auth.signInWithEmailAndPassword(email, senha).then(function(userCredential) {
-                exibirOrcamento();
-            }).catch(function(error) {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error('Erro ao autenticar usuário:', errorCode, errorMessage);
-            });
-        }
-
         // Função para exibir o orçamento
         function exibirOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
             const infoDiv = document.getElementById('orcamento-info');
             let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
 
-            // Carregar produtos do Firebase
-            database.ref('produtos').once('value', function(snapshot) {
-                const produtos = [];
-                snapshot.forEach(function(childSnapshot) {
-                    produtos.push(childSnapshot.val());
-                });
+            let clienteHTML = '';
+            if (orcamento.clienteInfo) {
+                clienteHTML = `
+                    <p><strong>Nome do Cliente:</strong> ${orcamento.clienteInfo.nome}</p>
+                    <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
+                    <p><strong>Placa do Carro:</strong> ${orcamento.clienteInfo.placa}</p>
+                    <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
+                `;
+            }
 
-                let clienteHTML = '';
-                if (orcamento.clienteInfo) {
-                    clienteHTML = `
-                        <p><strong>Nome do Cliente:</strong> ${orcamento.clienteInfo.nome}</p>
-                        <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
-                        <p><strong>Placa do Carro:</strong> ${orcamento.clienteInfo.placa}</p>
-                        <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
-                    `;
-                }
-
-                let produtosHTML = '';
-                if (orcamento.produtos && orcamento.produtos.length > 0) {
-                    produtosHTML = `
-                        <p><strong>Produtos:</strong></p>
-                        <table>
-                            <tr>
-                                <th>Produto</th>
-                                <th>Quantidade</th>
-                                <th>Preço Unitário (R$)</th>
-                                <th>Total (R$)</th>
-                            </tr>
-                    `;
-                    orcamento.produtos.forEach(prod => {
-                        const produto = produtos.find(p => p.produto === prod.produto);
-                        const preco = produto ? produto.valor : 0;
-                        const totalProduto = parseFloat(preco) * parseInt(prod.quantidade);
+            let produtosHTML = '';
+            if (orcamento.produtos && orcamento.produtos.length > 0) {
+                produtosHTML = `
+                    <p><strong>Produtos:</strong></p>
+                    <table>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço Unitário (R$)</th>
+                            <th>Total (R$)</th>
+                        </tr>
+                `;
+                orcamento.produtos.forEach(prod => {
+                    // Vamos buscar os dados do produto no Firebase
+                    firebase.database().ref('produtos/' + prod.produtoKey).once('value').then(function(snapshot) {
+                        const produto = snapshot.val();
+                        const preco = produto ? parseFloat(produto.valor) : 0;
+                        const totalProduto = preco * parseInt(prod.quantidade);
                         total += totalProduto;
                         produtosHTML += `
                             <tr>
-                                <td>${prod.produto}</td>
+                                <td>${produto ? produto.produto : 'Produto não encontrado'}</td>
                                 <td>${prod.quantidade}</td>
-                                <td>${parseFloat(preco).toFixed(2)}</td>
+                                <td>${preco.toFixed(2)}</td>
                                 <td>${totalProduto.toFixed(2)}</td>
                             </tr>
                         `;
+                        infoDiv.innerHTML = `
+                            ${clienteHTML}
+                            <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
+                            ${produtosHTML}
+                        `;
+                        document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
                     });
-                    produtosHTML += '</table>';
-                }
-
+                });
+                produtosHTML += '</table>';
+            } else {
                 infoDiv.innerHTML = `
                     ${clienteHTML}
                     <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                    ${produtosHTML}
+                    <p><strong>Produtos:</strong> Nenhum produto selecionado</p>
                 `;
-
                 document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
-            });
+            }
         }
 
         // Função para salvar o orçamento no Firebase
@@ -189,9 +171,8 @@
             });
         }
 
-        // Autenticar usuário ao carregar a página
         window.onload = function() {
-            autenticarUsuario();
+            exibirOrcamento();
         }
     </script>
 </head>
