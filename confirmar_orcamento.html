@@ -175,166 +175,6 @@
             }
         }
     </style>
-    <!-- Adicionando os scripts do Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-    <script>
-        // Configurações do Firebase
-        var firebaseConfig = {
-            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
-            authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
-            databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
-            projectId: "sistema-de-receitas-e-despesas",
-            storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
-            messagingSenderId: "252102478972",
-            appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
-            measurementId: "G-K2HCS7WNZV"
-        };
-        // Inicializando o Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
-
-        let orcamentoIndex;
-
-        function carregarOrcamentos() {
-            firebase.database().ref('orcamentos').once('value', function(snapshot) {
-                const listaOrcamentos = document.getElementById('lista-orcamentos');
-                listaOrcamentos.innerHTML = '';
-                snapshot.forEach(function(childSnapshot) {
-                    const orcamento = childSnapshot.val();
-                    const key = childSnapshot.key;
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <div class="orcamento-info" onclick="abrirDetalhesModal('${key}')">
-                            <strong>${orcamento.nomeCliente || 'Sem nome de cliente'}</strong> - ${orcamento.clienteInfo?.carro || ''} (${orcamento.clienteInfo?.placa || ''})
-                        </div>
-                        <div class="orcamento-actions">
-                            <button class="btn-icon" onclick="abrirConfirmarModal('${key}')">
-                                <i class="fas fa-check-circle"></i>
-                            </button>
-                            <button class="btn-icon" onclick="abrirExcluirModal('${key}')">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                            ${orcamento.confirmado ? '<i class="fas fa-check confirmado"></i>' : ''}
-                        </div>
-                    `;
-                    listaOrcamentos.appendChild(li);
-                });
-            });
-        }
-
-        function abrirDetalhesModal(key) {
-            firebase.database().ref('orcamentos/' + key).once('value', function(snapshot) {
-                const orcamento = snapshot.val();
-                const detalhesInfo = document.getElementById('detalhes-info');
-                let detalhesHTML = `
-                    <p><strong>Cliente:</strong> ${orcamento.nomeCliente || 'Sem nome de cliente'}</p>
-                    ${orcamento.clienteInfo ? `
-                    <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
-                    <p><strong>Placa:</strong> ${orcamento.clienteInfo.placa}</p>
-                    <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
-                    ` : ''}
-                    <p><strong>Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                    <p><strong>Produtos:</strong></p>
-                    <table>
-                        <tr>
-                            <th>Produto</th>
-                            <th>Quantidade</th>
-                            <th>Preço Unitário (R$)</th>
-                            <th>Total (R$)</th>
-                        </tr>
-                `;
-                const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-                let total = parseFloat(orcamento.servico);
-                orcamento.produtos.forEach(item => {
-                    const produto = produtos.find(p => p.produto === item.produto);
-                    const preco = produto ? produto.valor : 0;
-                    const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
-                    total += totalProduto;
-                    detalhesHTML += `
-                        <tr>
-                            <td>${item.produto}</td>
-                            <td>${item.quantidade}</td>
-                            <td>${parseFloat(preco).toFixed(2)}</td>
-                            <td>${totalProduto.toFixed(2)}</td>
-                        </tr>
-                    `;
-                });
-                detalhesHTML += `</table>`;
-                detalhesInfo.innerHTML = detalhesHTML;
-
-                const totalValor = document.getElementById('total-valor');
-                totalValor.innerText = `Valor Total: R$ ${total.toFixed(2)}`;
-
-                const modal = document.getElementById('detalhes-modal');
-                modal.style.display = 'flex';
-            });
-        }
-
-        function abrirConfirmarModal(key) {
-            orcamentoIndex = key;
-            const modal = document.getElementById('confirmar-modal');
-            modal.style.display = 'flex';
-        }
-
-        function abrirExcluirModal(key) {
-            orcamentoIndex = key;
-            const modal = document.getElementById('excluir-modal');
-            modal.style.display = 'flex';
-        }
-
-        function fecharModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.style.display = 'none';
-        }
-
-        function confirmarOrcamento() {
-            const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-
-            firebase.database().ref('orcamentos/' + orcamentoIndex).once('value', function(snapshot) {
-                const orcamento = snapshot.val();
-                orcamento.produtos.forEach(item => {
-                    const produtoIndex = produtos.findIndex(p => p.produto === item.produto);
-                    if (produtoIndex !== -1) {
-                        produtos[produtoIndex].quantidade -= parseInt(item.quantidade);
-                        if (produtos[produtoIndex].quantidade < 0) {
-                            produtos[produtoIndex].quantidade = 0;
-                        }
-                    }
-                });
-                orcamento.confirmado = true;
-
-                firebase.database().ref('orcamentos/' + orcamentoIndex).set(orcamento, function(error) {
-                    if (error) {
-                        alert('Erro ao confirmar orçamento: ' + error.message);
-                    } else {
-                        alert('Orçamento confirmado com sucesso!');
-                        localStorage.setItem('produtos', JSON.stringify(produtos));
-                        fecharModal('confirmar-modal');
-                        carregarOrcamentos();
-                    }
-                });
-            });
-        }
-
-        function excluirOrcamento() {
-            firebase.database().ref('orcamentos/' + orcamentoIndex).remove(function(error) {
-                if (error) {
-                    alert('Erro ao excluir orçamento: ' + error.message);
-                } else {
-                    alert('Orçamento excluído com sucesso!');
-                    fecharModal('excluir-modal');
-                    carregarOrcamentos();
-                }
-            });
-        }
-
-        document.getElementById('confirmar-sim').addEventListener('click', confirmarOrcamento);
-        document.getElementById('excluir-sim').addEventListener('click', excluirOrcamento);
-
-        window.onload = carregarOrcamentos;
-    </script>
 </head>
 <body>
     <div class="container">
@@ -377,5 +217,180 @@
             </div>
         </div>
     </div>
+
+    <!-- Firebase Configuration -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
+  authDomain: "garagem87-c652e.firebaseapp.com",
+  databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+  projectId: "garagem87-c652e",
+  storageBucket: "garagem87-c652e.appspot.com",
+  messagingSenderId: "325224720529",
+  appId: "1:325224720529:web:bfed4699261241f7ddf730",
+  measurementId: "G-83FY7T6X2D"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let orcamentoIndex;
+
+        function carregarOrcamentos() {
+            db.collection("orcamentos").get().then((querySnapshot) => {
+                const listaOrcamentos = document.getElementById('lista-orcamentos');
+                listaOrcamentos.innerHTML = '';
+
+                querySnapshot.forEach((doc) => {
+                    const orcamento = doc.data();
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="orcamento-info" onclick="abrirDetalhesModal('${doc.id}')">
+                            <strong>${orcamento.nomeCliente || 'Sem nome de cliente'}</strong> - ${orcamento.clienteInfo?.carro || ''} (${orcamento.clienteInfo?.placa || ''})
+                        </div>
+                        <div class="orcamento-actions">
+                            <button class="btn-icon" onclick="abrirConfirmarModal('${doc.id}')">
+                                <i class="fas fa-check-circle"></i>
+                            </button>
+                            <button class="btn-icon" onclick="abrirExcluirModal('${doc.id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            ${orcamento.confirmado ? '<i class="fas fa-check confirmado"></i>' : ''}
+                        </div>
+                    `;
+                    listaOrcamentos.appendChild(li);
+                });
+            });
+        }
+
+        function abrirDetalhesModal(id) {
+            const docRef = db.collection("orcamentos").doc(id);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const orcamento = doc.data();
+                    const detalhesInfo = document.getElementById('detalhes-info');
+                    let detalhesHTML = `
+                        <p><strong>Cliente:</strong> ${orcamento.nomeCliente || 'Sem nome de cliente'}</p>
+                        ${orcamento.clienteInfo ? `
+                        <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
+                        <p><strong>Placa:</strong> ${orcamento.clienteInfo.placa}</p>
+                        <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
+                        ` : ''}
+                        <p><strong>Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
+                        <p><strong>Produtos:</strong></p>
+                        <table>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Preço Unitário (R$)</th>
+                                <th>Total (R$)</th>
+                            </tr>
+                    `;
+                    const produtos = db.collection("produtos");
+                    let total = parseFloat(orcamento.servico);
+                    orcamento.produtos.forEach((item) => {
+                        produtos.where("produto", "==", item.produto).get().then((querySnapshot) => {
+                            querySnapshot.forEach((doc) => {
+                                const produto = doc.data();
+                                const preco = produto.valor;
+                                const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
+                                total += totalProduto;
+                                detalhesHTML += `
+                                    <tr>
+                                        <td>${item.produto}</td>
+                                        <td>${item.quantidade}</td>
+                                        <td>${parseFloat(preco).toFixed(2)}</td>
+                                        <td>${totalProduto.toFixed(2)}</td>
+                                    </tr>
+                                `;
+                            });
+                        });
+                    });
+                    detalhesHTML += `</table>`;
+                    detalhesInfo.innerHTML = detalhesHTML;
+
+                    const totalValor = document.getElementById('total-valor');
+                    totalValor.innerText = `Valor Total: R$ ${total.toFixed(2)}`;
+
+                    const modal = document.getElementById('detalhes-modal');
+                    modal.style.display = 'flex';
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting document:", error);
+            });
+        }
+
+        function abrirConfirmarModal(id) {
+            orcamentoIndex = id;
+            const modal = document.getElementById('confirmar-modal');
+            modal.style.display = 'flex';
+        }
+
+        function abrirExcluirModal(id) {
+            orcamentoIndex = id;
+            const modal = document.getElementById('excluir-modal');
+            modal.style.display = 'flex';
+        }
+
+        function fecharModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+        }
+
+        function confirmarOrcamento() {
+            const docRef = db.collection("orcamentos").doc(orcamentoIndex);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const orcamento = doc.data();
+                    const produtosRef = db.collection("produtos");
+                    orcamento.produtos.forEach((item) => {
+                        produtosRef.where("produto", "==", item.produto).get().then((querySnapshot) => {
+                            querySnapshot.forEach((doc) => {
+                                const produto = doc.data();
+                                const quantidadeAtualizada = produto.quantidade - parseInt(item.quantidade);
+                                produtosRef.doc(doc.id).update({
+                                    quantidade: quantidadeAtualizada < 0 ? 0 : quantidadeAtualizada
+                                });
+                            });
+                        });
+                    });
+
+                    docRef.update({ confirmado: true }).then(() => {
+                        alert(`Orçamento confirmado!`);
+                        fecharModal('confirmar-modal');
+                        carregarOrcamentos();
+                    }).catch((error) => {
+                        console.error("Error updating document: ", error);
+                    });
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting document:", error);
+            });
+        }
+
+        function excluirOrcamento() {
+            const docRef = db.collection("orcamentos").doc(orcamentoIndex);
+            docRef.delete().then(() => {
+                alert('Orçamento excluído com sucesso!');
+                fecharModal('excluir-modal');
+                carregarOrcamentos();
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+            });
+        }
+
+        document.getElementById('confirmar-sim').addEventListener('click', confirmarOrcamento);
+        document.getElementById('excluir-sim').addEventListener('click', excluirOrcamento);
+
+        window.onload = carregarOrcamentos;
+    </script>
 </body>
 </html>
