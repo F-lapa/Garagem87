@@ -246,10 +246,12 @@
             });
         }
 
-        async function abrirDetalhesModal(index) {
+        function abrirDetalhesModal(index) {
             let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
             const orcamento = orcamentos[index];
             const detalhesInfo = document.getElementById('detalhes-info');
+            const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+            let total = parseFloat(orcamento.servico);
             let detalhesHTML = `
                 <p><strong>Cliente:</strong> ${orcamento.nomeCliente || 'Sem nome de cliente'}</p>
                 ${orcamento.clienteInfo ? `
@@ -267,22 +269,22 @@
                         <th>Total (R$)</th>
                     </tr>
             `;
-            const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-            let total = parseFloat(orcamento.servico);
-            for (const item of orcamento.produtos) {
+            orcamento.produtos.forEach(item => {
                 const produto = produtos.find(p => p.produto === item.produto);
-                const preco = produto ? produto.valor : 0;
-                const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
-                total += totalProduto;
-                detalhesHTML += `
-                    <tr>
-                        <td>${item.produto}</td>
-                        <td>${item.quantidade}</td>
-                        <td>${parseFloat(preco).toFixed(2)}</td>
-                        <td>${totalProduto.toFixed(2)}</td>
-                    </tr>
-                `;
-            }
+                if (produto) {
+                    const preco = produto.valor;
+                    const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
+                    total += totalProduto;
+                    detalhesHTML += `
+                        <tr>
+                            <td>${item.produto}</td>
+                            <td>${item.quantidade}</td>
+                            <td>${parseFloat(preco).toFixed(2)}</td>
+                            <td>${totalProduto.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+            });
             detalhesHTML += `</table>`;
             detalhesInfo.innerHTML = detalhesHTML;
 
