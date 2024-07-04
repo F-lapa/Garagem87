@@ -198,7 +198,7 @@
                 const produtoKey = item.querySelector('select[name="produtos"]').value;
                 const quantidade = item.querySelector('input[name="quantidade"]').value;
                 return { produtoKey, quantidade };
-            });
+            }).filter(prod => prod.produtoKey !== ""); // Filtrar produtos vazios
 
             const orcamento = {
                 nomeCliente,
