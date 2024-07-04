@@ -272,14 +272,14 @@
             orcamento.produtos.forEach(item => {
                 const produto = produtos.find(p => p.produto === item.produto);
                 if (produto) {
-                    const preco = produto.valor;
-                    const totalProduto = parseFloat(preco) * parseInt(item.quantidade);
+                    const preco = parseFloat(produto.valor);
+                    const totalProduto = preco * parseInt(item.quantidade);
                     total += totalProduto;
                     detalhesHTML += `
                         <tr>
                             <td>${item.produto}</td>
                             <td>${item.quantidade}</td>
-                            <td>${parseFloat(preco).toFixed(2)}</td>
+                            <td>${preco.toFixed(2)}</td>
                             <td>${totalProduto.toFixed(2)}</td>
                         </tr>
                     `;
