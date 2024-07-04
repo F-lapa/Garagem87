@@ -89,7 +89,7 @@
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
+           apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
   authDomain: "garagem87-c652e.firebaseapp.com",
   databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
   projectId: "garagem87-c652e",
@@ -130,9 +130,10 @@
                             <th>Total (R$)</th>
                         </tr>
                 `;
-                orcamento.produtos.forEach(prod => {
-                    const produtoRef = db.collection("produtos").where("produto", "==", prod.produto);
-                    produtoRef.get().then((querySnapshot) => {
+                orcamento.produtos.forEach(async (prod) => {
+                    if (prod.produto) {
+                        const produtoRef = db.collection("produtos").where("produto", "==", prod.produto);
+                        const querySnapshot = await produtoRef.get();
                         querySnapshot.forEach((doc) => {
                             const produto = doc.data();
                             const preco = produto ? produto.valor : 0;
@@ -153,7 +154,7 @@
                             `;
                             document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
                         });
-                    });
+                    }
                 });
             } else {
                 infoDiv.innerHTML = `
@@ -174,9 +175,7 @@
             });
         }
 
-        window.onload = function() {
-            exibirOrcamento();
-        }
+        window.onload = exibirOrcamento;
     </script>
 </body>
 </html>
