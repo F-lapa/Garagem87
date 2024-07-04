@@ -89,7 +89,7 @@
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
-           apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
+            apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
   authDomain: "garagem87-c652e.firebaseapp.com",
   databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
   projectId: "garagem87-c652e",
@@ -103,7 +103,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        function exibirOrcamento() {
+        async function exibirOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
             const infoDiv = document.getElementById('orcamento-info');
             let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
@@ -130,7 +130,7 @@
                             <th>Total (R$)</th>
                         </tr>
                 `;
-                orcamento.produtos.forEach(async (prod) => {
+                for (const prod of orcamento.produtos) {
                     if (prod.produto) {
                         const produtoRef = db.collection("produtos").where("produto", "==", prod.produto);
                         const querySnapshot = await produtoRef.get();
@@ -147,22 +147,19 @@
                                     <td>${totalProduto.toFixed(2)}</td>
                                 </tr>
                             `;
-                            infoDiv.innerHTML = `
-                                ${clienteHTML}
-                                <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                                ${produtosHTML}
-                            `;
-                            document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
                         });
                     }
-                });
-            } else {
-                infoDiv.innerHTML = `
-                    ${clienteHTML}
-                    <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                `;
-                document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
+                }
+                produtosHTML += '</table>';
             }
+
+            infoDiv.innerHTML = `
+                ${clienteHTML}
+                <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
+                ${produtosHTML}
+            `;
+
+            document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
         }
 
         function salvarOrcamento() {
