@@ -98,14 +98,44 @@
             background-color: #004d40;
         }
     </style>
-    <!-- Adicionando os scripts do Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Fazer Orçamento</h1>
+        <form id="orcamento-form" onsubmit="enviarOrcamento(event)">
+            <div class="form-group">
+                <label for="nome-cliente">Nome do Cliente:</label>
+                <select id="nome-cliente" name="nome-cliente" required>
+                    <option value="">Nenhum Cliente</option>
+                    <!-- Os clientes serão adicionados aqui -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Produtos:</label>
+                <div class="product-list" id="product-list">
+                    <div class="product-item">
+                        <select name="produtos" required>
+                            <option value="">Nenhum Produto</option>
+                            <!-- Os produtos serão adicionados aqui -->
+                        </select>
+                        <input type="number" name="quantidade" min="1" required>
+                        <div class="add-product" onclick="adicionarProduto()">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="servico">Valor da Mão de Obra:</label>
+                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn">Enviar Orçamento</button>
+        </form>
+    </div>
+    <!-- Adicione os SDKs do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
     <script>
-        // Configurações do Firebase
-        var firebaseConfig = {
+        // Configuração do Firebase
+        const firebaseConfig = {
             apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
             authDomain: "garagem87-c652e.firebaseapp.com",
             databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
@@ -115,57 +145,46 @@
             appId: "1:325224720529:web:bfed4699261241f7ddf730",
             measurementId: "G-83FY7T6X2D"
         };
-        // Inicializando o Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
 
+        // Inicialize o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
 
-        // Função para autenticar usuário
-        function autenticarUsuario() {
-            const email = "fernandolapa1987@gmail.com";
-            const senha = "nando1234";
+        let produtos = [];
+        let clientes = [];
 
-            auth.signInWithEmailAndPassword(email, senha).then(function(userCredential) {
-                carregarProdutos();
-                carregarClientes();
-            }).catch(function(error) {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error('Erro ao autenticar usuário:', errorCode, errorMessage);
-            });
-        }
+        // Carregar produtos e clientes do Firebase
+        database.ref('produtos').once('value').then(snapshot => {
+            produtos = snapshot.val() || [];
+            carregarProdutos();
+        });
 
-        // Função para carregar produtos do Firebase
+        database.ref('clientes').once('value').then(snapshot => {
+            clientes = snapshot.val() || [];
+            carregarClientes();
+        });
+
         function carregarProdutos() {
             const productSelects = document.querySelectorAll('select[name="produtos"]');
-            database.ref('produtos').once('value', function(snapshot) {
-                productSelects.forEach(select => {
-                    select.innerHTML = '<option value="">Nenhum Produto</option>';
-                    snapshot.forEach(function(childSnapshot) {
-                        const produto = childSnapshot.val();
-                        const option = document.createElement('option');
-                        option.value = childSnapshot.key; // Usar a chave como valor do option
-                        option.textContent = produto.produto;
-                        select.appendChild(option);
-                    });
+            productSelects.forEach(select => {
+                select.innerHTML = '<option value="">Nenhum Produto</option>';
+                produtos.forEach(produto => {
+                    const option = document.createElement('option');
+                    option.value = produto.produto;
+                    option.textContent = produto.produto;
+                    select.appendChild(option);
                 });
             });
         }
 
-        // Função para carregar clientes do Firebase
         function carregarClientes() {
             const clienteSelect = document.getElementById('nome-cliente');
-            database.ref('clientes').once('value', function(snapshot) {
-                clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
-                snapshot.forEach(function(childSnapshot) {
-                    const cliente = childSnapshot.val();
-                    const option = document.createElement('option');
-                    option.value = cliente.nome;
-                    option.textContent = cliente.nome;
-                    clienteSelect.appendChild(option);
-                });
+            clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.nome;
+                option.textContent = cliente.nome;
+                clienteSelect.appendChild(option);
             });
         }
 
@@ -174,10 +193,10 @@
             const productItem = document.createElement('div');
             productItem.className = 'product-item';
             productItem.innerHTML = `
-                <select name="produtos">
+                <select name="produtos" required>
                     <option value="">Nenhum Produto</option>
                 </select>
-                <input type="number" name="quantidade" min="1">
+                <input type="number" name="quantidade" min="1" required>
                 <div class="add-product" onclick="adicionarProduto()">+</div>
                 <div class="remove-product" onclick="removerProduto(this)">-</div>
             `;
@@ -194,64 +213,34 @@
             const form = document.getElementById('orcamento-form');
             const nomeCliente = form['nome-cliente'].value;
             const servico = form.servico.value;
-            const produtos = Array.from(form.querySelectorAll('.product-item')).map(item => {
-                const produtoKey = item.querySelector('select[name="produtos"]').value;
-                const quantidade = item.querySelector('input[name="quantidade"]').value;
-                return { produtoKey, quantidade };
-            }).filter(prod => prod.produtoKey !== ""); // Filtrar produtos vazios
+            const produtos = Array.from(form.querySelectorAll('select[name="produtos"]'))
+                                .map((select, index) => ({
+                                    produto: select.value,
+                                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
+                                }))
+                                .filter(item => item.produto);
+
+            const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
 
             const orcamento = {
                 nomeCliente,
                 servico,
-                produtos
+                produtos,
+                clienteInfo
             };
 
-            database.ref('orcamentos').push(orcamento, function(error) {
-                if (error) {
-                    alert('Erro ao enviar orçamento: ' + error.message);
-                } else {
-                    alert('Orçamento enviado com sucesso!');
-                    localStorage.setItem('orcamento', JSON.stringify(orcamento));
-                    window.location.href = 'exibir_orcamento.html';
-                }
-            });
+            // Salvar orçamento no Firebase
+            const newOrcamentoKey = database.ref().child('orcamentos').push().key;
+            database.ref('orcamentos/' + newOrcamentoKey).set(orcamento);
+
+            alert('Orçamento enviado com sucesso!');
+            form.reset();
         }
 
         window.onload = function() {
-            autenticarUsuario();
+            carregarProdutos();
+            carregarClientes();
         }
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Fazer Orçamento</h1>
-        <form id="orcamento-form" onsubmit="enviarOrcamento(event)">
-            <div class="form-group">
-                <label for="nome-cliente">Nome do Cliente:</label>
-                <select id="nome-cliente" name="nome-cliente">
-                    <option value="">Nenhum Cliente</option>
-                    <!-- Os clientes serão adicionados aqui -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Produtos:</label>
-                <div class="product-list" id="product-list">
-                    <div class="product-item">
-                        <select name="produtos">
-                            <option value="">Nenhum Produto</option>
-                            <!-- Os produtos serão adicionados aqui -->
-                        </select>
-                        <input type="number" name="quantidade" min="1">
-                        <div class="add-product" onclick="adicionarProduto()">+</div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="servico">Valor da Mão de Obra:</label>
-                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
-            </div>
-            <button type="submit" class="btn">Enviar Orçamento</button>
-        </form>
-    </div>
 </body>
 </html>
