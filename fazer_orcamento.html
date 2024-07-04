@@ -151,13 +151,16 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        let produtos = [];
+        let clientes = [];
+
         function carregarProdutos() {
             db.collection("produtos").get().then((querySnapshot) => {
+                produtos = querySnapshot.docs.map(doc => doc.data());
                 const productSelects = document.querySelectorAll('select[name="produtos"]');
                 productSelects.forEach(select => {
                     select.innerHTML = '<option value="">Nenhum Produto</option>';
-                    querySnapshot.forEach((doc) => {
-                        const produto = doc.data();
+                    produtos.forEach(produto => {
                         const option = document.createElement('option');
                         option.value = produto.produto;
                         option.textContent = produto.produto;
@@ -169,10 +172,10 @@
 
         function carregarClientes() {
             db.collection("clientes").get().then((querySnapshot) => {
+                clientes = querySnapshot.docs.map(doc => doc.data());
                 const clienteSelect = document.getElementById('nome-cliente');
                 clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
-                querySnapshot.forEach((doc) => {
-                    const cliente = doc.data();
+                clientes.forEach(cliente => {
                     const option = document.createElement('option');
                     option.value = cliente.nome;
                     option.textContent = cliente.nome;
@@ -207,24 +210,24 @@
             const form = document.getElementById('orcamento-form');
             const nomeCliente = form['nome-cliente'].value;
             const servico = form.servico.value;
-            const produtos = Array.from(form.querySelectorAll('select[name="produtos"]'))
-                                .map((select, index) => ({
-                                    produto: select.value,
-                                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
-                                }))
-                                .filter(item => item.produto);  // Filtra produtos não preenchidos
-                                
+            const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
+                .map((select, index) => ({
+                    produto: select.value,
+                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
+                }))
+                .filter(item => item.produto);  // Filtra produtos não preenchidos
+
             const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
 
             const orcamento = {
                 nomeCliente,
                 servico,
-                produtos,
+                produtos: produtosSelecionados,
                 clienteInfo
             };
 
             db.collection("orcamentos").add(orcamento).then(() => {
-                localStorage.setItem('orcamento', JSON.stringify(orcamento));
+                alert('Orçamento enviado com sucesso!');
                 window.location.href = 'exibir_orcamento.html';
             }).catch((error) => {
                 console.error("Error adding document: ", error);
