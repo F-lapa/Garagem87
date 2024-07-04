@@ -127,7 +127,7 @@
             const email = "fernandolapa1987@gmail.com";
             const senha = "nando1234";
 
-            auth.signInWithEmailAndPassword(email, senha).then(function(userCredential) {
+           auth.signInWithEmailAndPassword(email, senha).then(function(userCredential) {
                 carregarProdutos();
                 carregarClientes();
             }).catch(function(error) {
@@ -220,6 +220,17 @@
         // Autenticar usuário ao carregar a página
         window.onload = function() {
             autenticarUsuario();
+        }
+
+        window.onclick = function(event) {
+            const modalAdicionar = document.getElementById('modalAdicionarProduto');
+            const modalEditar = document.getElementById('modalEditarProduto');
+            if (event.target == modalAdicionar) {
+                modalAdicionar.style.display = "none";
+            }
+            if (event.target == modalEditar) {
+                modalEditar.style.display = "none";
+            }
         }
     </script>
 </head>
