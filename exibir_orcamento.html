@@ -84,7 +84,7 @@
     </div>
 
     <script>
-        async function exibirOrcamento() {
+        function exibirOrcamento() {
             const orcamento = JSON.parse(localStorage.getItem('orcamento'));
             const infoDiv = document.getElementById('orcamento-info');
             const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
