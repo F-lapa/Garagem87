@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exibir Orçamento - Garagem 87</title>
+    <title>Fazer Orçamento - Garagem 87</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -12,50 +12,74 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f5f5f5;
+            background-color: #e0f7fa;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
         }
         .container {
             background: #ffffff;
-            padding: 30px;
+            padding: 20px 30px;
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
+            text-align: center;
         }
         .container h1 {
             margin-bottom: 20px;
             color: #00796b;
-            font-size: 28px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .info {
-            text-align: left;
-            font-size: 18px;
-        }
-        .info p {
-            margin: 10px 0;
-        }
-        .info table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .info th, .info td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        .info th {
-            background-color: #e0f7fa;
-        }
-        .total {
             font-size: 24px;
-            color: #d32f2f;
             font-weight: bold;
-            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #00796b;
+        }
+        .form-group input,
+        .form-group select {
+            width: calc(100% - 50px);
+            padding: 10px;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .form-group .add-product,
+        .form-group .remove-product {
+            width: 30px;
+            padding: 10px;
+            margin-left: 10px;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            font-size: 16px;
             text-align: center;
+            cursor: pointer;
+            background-color: #00796b;
+            color: white;
+            display: inline-block;
+        }
+        .form-group .remove-product {
+            background-color: #e57373;
+        }
+        .product-list .product-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .product-list .product-item select {
+            width: calc(100% - 100px);
+        }
+        .product-list .product-item input {
+            width: 60px;
+            margin-left: 10px;
         }
         .btn {
             width: 100%;
@@ -65,7 +89,7 @@
             background-color: #00796b;
             color: white;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             margin-top: 20px;
             transition: background-color 0.3s;
@@ -77,16 +101,38 @@
 </head>
 <body>
     <div class="container">
-        <h1>Exibir Orçamento</h1>
-        <div class="info" id="orcamento-info"></div>
-        <div class="total" id="total"></div>
-        <button class="btn" onclick="salvarOrcamento()">Salvar Orçamento</button>
+        <h1>Fazer Orçamento</h1>
+        <form id="orcamento-form" onsubmit="enviarOrcamento(event)">
+            <div class="form-group">
+                <label for="nome-cliente">Nome do Cliente:</label>
+                <select id="nome-cliente" name="nome-cliente">
+                    <option value="">Nenhum Cliente</option>
+                    <!-- Os clientes serão adicionados aqui -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Produtos:</label>
+                <div class="product-list" id="product-list">
+                    <div class="product-item">
+                        <select name="produtos">
+                            <option value="">Nenhum Produto</option>
+                            <!-- Os produtos serão adicionados aqui -->
+                        </select>
+                        <input type="number" name="quantidade" min="1">
+                        <div class="add-product" onclick="adicionarProduto()">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="servico">Valor da Mão de Obra:</label>
+                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn">Enviar Orçamento</button>
+        </form>
     </div>
-    <!-- Adicione os SDKs do Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
     <script>
-        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
             authDomain: "garagem87-c652e.firebaseapp.com",
@@ -98,88 +144,91 @@
             measurementId: "G-83FY7T6X2D"
         };
 
-        // Inicialize o Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        function exibirOrcamento() {
-            const orcamentoId = localStorage.getItem('orcamentoId');
-            const orcamentoRef = database.ref('orcamentos/' + orcamentoId);
-            
-            orcamentoRef.once('value').then(snapshot => {
-                const orcamento = snapshot.val();
-                const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-                const infoDiv = document.getElementById('orcamento-info');
-                let total = orcamento.servico ? parseFloat(orcamento.servico) : 0;
+        let produtos = [];
+        let clientes = [];
 
-                let clienteHTML = '';
-                if (orcamento.clienteInfo) {
-                    clienteHTML = `
-                        <p><strong>Nome do Cliente:</strong> ${orcamento.clienteInfo.nome}</p>
-                        <p><strong>Carro:</strong> ${orcamento.clienteInfo.carro}</p>
-                        <p><strong>Placa do Carro:</strong> ${orcamento.clienteInfo.placa}</p>
-                        <p><strong>Telefone:</strong> ${orcamento.clienteInfo.telefone}</p>
-                    `;
-                }
-
-                let produtosHTML = '';
-                if (orcamento.produtos && orcamento.produtos.length > 0) {
-                    produtosHTML = `
-                        <p><strong>Produtos:</strong></p>
-                        <table>
-                            <tr>
-                                <th>Produto</th>
-                                <th>Quantidade</th>
-                                <th>Preço Unitário (R$)</th>
-                                <th>Total (R$)</th>
-                            </tr>
-                    `;
-                    orcamento.produtos.forEach(prod => {
-                        const produto = produtos.find(p => p.produto === prod.produto);
-                        const preco = produto ? produto.valor : 0;
-                        const totalProduto = parseFloat(preco) * parseInt(prod.quantidade);
-                        total += totalProduto;
-                        produtosHTML += `
-                            <tr>
-                                <td>${prod.produto}</td>
-                                <td>${prod.quantidade}</td>
-                                <td>${parseFloat(preco).toFixed(2)}</td>
-                                <td>${totalProduto.toFixed(2)}</td>
-                            </tr>
-                        `;
+        function carregarProdutos() {
+            db.ref('produtos').once('value').then(snapshot => {
+                produtos = snapshot.val() || [];
+                const productSelects = document.querySelectorAll('select[name="produtos"]');
+                productSelects.forEach(select => {
+                    select.innerHTML = '<option value="">Nenhum Produto</option>';
+                    produtos.forEach(produto => {
+                        const option = document.createElement('option');
+                        option.value = produto.produto;
+                        option.textContent = produto.produto;
+                        select.appendChild(option);
                     });
-                    produtosHTML += '</table>';
-                }
-
-                infoDiv.innerHTML = `
-                    ${clienteHTML}
-                    <p><strong>Valor da Mão de Obra:</strong> R$ ${parseFloat(orcamento.servico).toFixed(2)}</p>
-                    ${produtosHTML}
-                `;
-
-                document.getElementById('total').innerText = `Valor Total: R$ ${total.toFixed(2)}`;
-            });
-        }
-
-        function salvarOrcamento() {
-            const orcamentosRef = database.ref('orcamentos');
-            const orcamentoId = localStorage.getItem('orcamentoId');
-
-            orcamentosRef.child(orcamentoId).once('value').then(snapshot => {
-                const orcamento = snapshot.val();
-                const orcamentosSalvosRef = database.ref('orcamentosSalvos');
-                orcamentosSalvosRef.push(orcamento, error => {
-                    if (error) {
-                        alert('Erro ao salvar orçamento: ' + error.message);
-                    } else {
-                        alert('Orçamento salvo com sucesso!');
-                    }
                 });
             });
         }
 
+        function carregarClientes() {
+            db.ref('clientes').once('value').then(snapshot => {
+                clientes = snapshot.val() || [];
+                const clienteSelect = document.getElementById('nome-cliente');
+                clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.nome;
+                    option.textContent = cliente.nome;
+                    clienteSelect.appendChild(option);
+                });
+            });
+        }
+
+        function adicionarProduto() {
+            const productList = document.getElementById('product-list');
+            const productItem = document.createElement('div');
+            productItem.className = 'product-item';
+            productItem.innerHTML = `
+                <select name="produtos">
+                    <option value="">Nenhum Produto</option>
+                </select>
+                <input type="number" name="quantidade" min="1">
+                <div class="add-product" onclick="adicionarProduto()">+</div>
+                <div class="remove-product" onclick="removerProduto(this)">-</div>
+            `;
+            productList.appendChild(productItem);
+            carregarProdutos();
+        }
+
+        function removerProduto(element) {
+            element.parentNode.remove();
+        }
+
+        function enviarOrcamento(event) {
+            event.preventDefault();
+            const form = document.getElementById('orcamento-form');
+            const nomeCliente = form['nome-cliente'].value;
+            const servico = form.servico.value;
+            const produtos = Array.from(form.querySelectorAll('select[name="produtos"]'))
+                                .map((select, index) => ({
+                                    produto: select.value,
+                                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
+                                }))
+                                .filter(item => item.produto);  // Filtra produtos não preenchidos
+
+            const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
+
+            const orcamento = {
+                nomeCliente,
+                servico,
+                produtos,
+                clienteInfo
+            };
+
+            db.ref('orcamentos').push(orcamento).then(() => {
+                window.location.href = 'exibir_orcamento.html';
+            });
+        }
+
         window.onload = function() {
-            exibirOrcamento();
+            carregarProdutos();
+            carregarClientes();
         }
     </script>
 </body>
