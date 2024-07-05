@@ -246,11 +246,11 @@
             event.preventDefault();
             const form = document.getElementById('orcamento-form');
             const nomeCliente = form['nome-cliente'].value;
-            const servico = form.servico.value;
+            const servico = parseFloat(form.servico.value);
             const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
                 .map((select, index) => ({
                     produto: select.value,
-                    quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
+                    quantidade: parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value)
                 }))
                 .filter(item => item.produto);  // Filtra produtos não preenchidos
 
@@ -321,7 +321,7 @@
                 <p><strong>Carro:</strong> ${cliente ? cliente.carro : 'N/A'}</p>
                 <p><strong>Placa:</strong> ${cliente ? cliente.placa : 'N/A'}</p>
                 <p><strong>Telefone:</strong> ${cliente ? cliente.telefone : 'N/A'}</p>
-                <p><strong>Serviço:</strong> R$ ${orcamento.servico}</p>
+                <p><strong>Serviço:</strong> R$ ${orcamento.servico.toFixed(2)}</p>
                 <p><strong>Produtos:</strong></p>
                 <ul>
                     ${produtosDetalhados.map(produto => `
