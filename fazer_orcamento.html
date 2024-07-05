@@ -265,8 +265,8 @@
                 id: Date.now(), // Usando timestamp como ID
                 nomeCliente,
                 servico,
-                valorTotalProdutos,
-                valorTotal,
+                valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
+                valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
                 produtos: produtosSelecionados
             };
 
@@ -349,10 +349,11 @@
             const orcamentoList = document.getElementById('orcamento-list');
             orcamentoList.innerHTML = '';
             orcamentos.forEach(orcamento => {
+                const valorTotal = orcamento.valorTotal || 0;
                 const orcamentoItem = document.createElement('div');
                 orcamentoItem.className = 'orcamento-item';
                 orcamentoItem.innerHTML = `
-                    <span>${orcamento.nomeCliente} - R$ ${orcamento.valorTotal.toFixed(2)}</span>
+                    <span>${orcamento.nomeCliente} - R$ ${valorTotal.toFixed(2)}</span>
                     <div>
                         <button onclick="verDetalhes(${orcamento.id})"><i class="fas fa-eye"></i></button>
                         <button onclick="confirmarOrcamento(${orcamento.id})"><i class="fas fa-check"></i></button>
