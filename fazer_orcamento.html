@@ -204,6 +204,8 @@
                         select.appendChild(option);
                     });
                 });
+            }).catch(error => {
+                console.error("Erro ao carregar produtos:", error);
             });
         }
 
@@ -218,6 +220,8 @@
                     option.textContent = cliente.nome;
                     clienteSelect.appendChild(option);
                 });
+            }).catch(error => {
+                console.error("Erro ao carregar clientes:", error);
             });
         }
 
@@ -269,7 +273,13 @@
                 return;
             }
 
-            const valorTotalProdutos = produtosSelecionados.reduce((total, item) => total + item.preco * item.quantidade, 0);
+            const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
+                if (isNaN(item.preco) || isNaN(item.quantidade)) {
+                    console.error(`Dados inválidos para o produto: ${item.produto}`);
+                    return total;
+                }
+                return total + item.preco * item.quantidade;
+            }, 0);
 
             const valorTotal = parseFloat(servico) + valorTotalProdutos;
 
