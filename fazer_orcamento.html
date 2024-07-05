@@ -139,7 +139,7 @@
         <form id="orcamento-form" onsubmit="enviarOrcamento(event)">
             <div class="form-group">
                 <label for="nome-cliente">Nome do Cliente:</label>
-                <select id="nome-cliente" name="nome-cliente">
+                <select id="nome-cliente" name="nome-cliente" required>
                     <option value="">Nenhum Cliente</option>
                     <!-- Os clientes serão adicionados aqui -->
                 </select>
@@ -148,11 +148,11 @@
                 <label>Produtos:</label>
                 <div class="product-list" id="product-list">
                     <div class="product-item">
-                        <select name="produtos">
+                        <select name="produtos" required>
                             <option value="">Nenhum Produto</option>
                             <!-- Os produtos serão adicionados aqui -->
                         </select>
-                        <input type="number" name="quantidade" min="1">
+                        <input type="number" name="quantidade" min="1" required>
                         <div class="add-product" onclick="adicionarProduto()">+</div>
                     </div>
                 </div>
@@ -226,11 +226,11 @@
             const productItem = document.createElement('div');
             productItem.className = 'product-item';
             productItem.innerHTML = `
-                <select name="produtos">
+                <select name="produtos" required>
                     <option value="">Nenhum Produto</option>
                     <!-- Os produtos serão adicionados aqui -->
                 </select>
-                <input type="number" name="quantidade" min="1">
+                <input type="number" name="quantidade" min="1" required>
                 <div class="add-product" onclick="adicionarProduto()">+</div>
                 <div class="remove-product" onclick="removerProduto(this)">-</div>
             `;
