@@ -200,7 +200,7 @@
                     produtos.forEach(produto => {
                         const option = document.createElement('option');
                         option.value = produto.produto;
-                        option.textContent = produto.produto;
+                        option.textContent = `${produto.produto} - R$ ${produto.preco.toFixed(2)}`;
                         select.appendChild(option);
                     });
                 });
@@ -248,16 +248,18 @@
             const nomeCliente = form['nome-cliente'].value;
             const servico = parseFloat(form.servico.value);
             const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
-                .map((select, index) => ({
-                    produto: select.value,
-                    quantidade: parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value)
-                }))
+                .map((select, index) => {
+                    const produto = produtos.find(prod => prod.produto === select.value.split(' - ')[0]);
+                    const quantidade = parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value);
+                    return {
+                        produto: produto.produto,
+                        quantidade,
+                        preco: produto.preco
+                    };
+                })
                 .filter(item => item.produto);  // Filtra produtos não preenchidos
 
-            const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
-                const produto = produtos.find(prod => prod.produto === item.produto);
-                return total + (produto ? produto.preco * item.quantidade : 0);
-            }, 0);
+            const valorTotalProdutos = produtosSelecionados.reduce((total, item) => total + item.preco * item.quantidade, 0);
 
             const valorTotal = parseFloat(servico) + valorTotalProdutos;
 
