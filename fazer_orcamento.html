@@ -9,7 +9,7 @@
         body {
             font-family: 'Arial', sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             height: 100vh;
             background-color: #e0f7fa;
@@ -25,6 +25,7 @@
             width: 100%;
             max-width: 600px;
             text-align: center;
+            margin-bottom: 20px;
         }
         .container h1 {
             margin-bottom: 20px;
@@ -97,6 +98,39 @@
         .btn:hover {
             background-color: #004d40;
         }
+        .orcamento-list {
+            width: 100%;
+            max-width: 600px;
+        }
+        .orcamento-item {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .orcamento-item button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #00796b;
+            margin-left: 10px;
+        }
+        .orcamento-item button:hover {
+            color: #004d40;
+        }
+        .orcamento-details {
+            display: none;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .orcamento-details.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -130,6 +164,9 @@
             <button type="submit" class="btn">Enviar Orçamento</button>
         </form>
     </div>
+    <div class="orcamento-list" id="orcamento-list">
+        <!-- Os orçamentos serão listados aqui -->
+    </div>
 
     <!-- Firebase Configuration -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
@@ -152,6 +189,7 @@
 
         let produtos = [];
         let clientes = [];
+        let orcamentos = [];
 
         function carregarProdutos() {
             db.collection("produtos").get().then((querySnapshot) => {
@@ -219,19 +257,77 @@
             const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
 
             const orcamento = {
+                id: Date.now(), // Usando timestamp como ID
                 nomeCliente,
                 servico,
                 produtos: produtosSelecionados,
                 clienteInfo
             };
 
-            localStorage.setItem('orcamento', JSON.stringify(orcamento));
-            window.location.href = 'exibir_orcamento.html';
+            orcamentos.push(orcamento);
+            salvarOrcamentos();
+            exibirOrcamentos();
+            form.reset();
+        }
+
+        function salvarOrcamentos() {
+            localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+        }
+
+        function carregarOrcamentos() {
+            const orcamentosSalvos = localStorage.getItem('orcamentos');
+            if (orcamentosSalvos) {
+                orcamentos = JSON.parse(orcamentosSalvos);
+                exibirOrcamentos();
+            }
+        }
+
+        function exibirOrcamentos() {
+            const orcamentoList = document.getElementById('orcamento-list');
+            orcamentoList.innerHTML = '';
+            orcamentos.forEach(orcamento => {
+                const orcamentoItem = document.createElement('div');
+                orcamentoItem.className = 'orcamento-item';
+                orcamentoItem.innerHTML = `
+                    <span>${orcamento.nomeCliente} - ${orcamento.servico}</span>
+                    <div>
+                        <button onclick="verDetalhes(${orcamento.id})"><i class="fas fa-eye"></i></button>
+                        <button onclick="confirmarOrcamento(${orcamento.id})"><i class="fas fa-check"></i></button>
+                        <button onclick="excluirOrcamento(${orcamento.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="orcamento-details" id="detalhes-${orcamento.id}">
+                        <p><strong>Cliente:</strong> ${orcamento.nomeCliente}</p>
+                        <p><strong>Serviço:</strong> R$ ${orcamento.servico}</p>
+                        <p><strong>Produtos:</strong></p>
+                        <ul>
+                            ${orcamento.produtos.map(produto => `<li>${produto.produto} - Quantidade: ${produto.quantidade}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                orcamentoList.appendChild(orcamentoItem);
+            });
+        }
+
+        function verDetalhes(id) {
+            const detalhes = document.getElementById(`detalhes-${id}`);
+            detalhes.classList.toggle('active');
+        }
+
+        function confirmarOrcamento(id) {
+            alert(`Orçamento ${id} confirmado!`);
+            // Aqui você pode adicionar lógica adicional para a confirmação do orçamento
+        }
+
+        function excluirOrcamento(id) {
+            orcamentos = orcamentos.filter(orcamento => orcamento.id !== id);
+            salvarOrcamentos();
+            exibirOrcamentos();
         }
 
         window.onload = function() {
             carregarProdutos();
             carregarClientes();
+            carregarOrcamentos();
         }
     </script>
 </body>
