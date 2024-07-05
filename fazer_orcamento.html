@@ -249,7 +249,12 @@
             const servico = parseFloat(form.servico.value);
             const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
                 .map((select, index) => {
-                    const produto = produtos.find(prod => prod.produto === select.value.split(' - ')[0]);
+                    const produtoNome = select.value.split(' - ')[0];
+                    const produto = produtos.find(prod => prod.produto === produtoNome);
+                    if (!produto) {
+                        console.error(`Produto não encontrado: ${produtoNome}`);
+                        return null;
+                    }
                     const quantidade = parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value);
                     return {
                         produto: produto.produto,
@@ -257,7 +262,12 @@
                         preco: produto.preco
                     };
                 })
-                .filter(item => item.produto);  // Filtra produtos não preenchidos
+                .filter(item => item);  // Filtra produtos não preenchidos
+
+            if (produtosSelecionados.length === 0) {
+                alert("Nenhum produto selecionado.");
+                return;
+            }
 
             const valorTotalProdutos = produtosSelecionados.reduce((total, item) => total + item.preco * item.quantidade, 0);
 
