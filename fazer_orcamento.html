@@ -145,18 +145,6 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="carro-cliente">Carro:</label>
-                <input type="text" id="carro-cliente" name="carro-cliente" required>
-            </div>
-            <div class="form-group">
-                <label for="placa-cliente">Placa:</label>
-                <input type="text" id="placa-cliente" name="placa-cliente" required>
-            </div>
-            <div class="form-group">
-                <label for="telefone-cliente">Telefone:</label>
-                <input type="text" id="telefone-cliente" name="telefone-cliente" required>
-            </div>
-            <div class="form-group">
                 <label>Produtos:</label>
                 <div class="product-list" id="product-list">
                     <div class="product-item">
@@ -258,9 +246,6 @@
             event.preventDefault();
             const form = document.getElementById('orcamento-form');
             const nomeCliente = form['nome-cliente'].value;
-            const carroCliente = form['carro-cliente'].value;
-            const placaCliente = form['placa-cliente'].value;
-            const telefoneCliente = form['telefone-cliente'].value;
             const servico = form.servico.value;
             const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
                 .map((select, index) => ({
@@ -268,8 +253,6 @@
                     quantidade: form.querySelectorAll('input[name="quantidade"]')[index].value
                 }))
                 .filter(item => item.produto);  // Filtra produtos não preenchidos
-
-            const clienteInfo = clientes.find(cliente => cliente.nome === nomeCliente);
 
             const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
                 const produto = produtos.find(prod => prod.produto === item.produto);
@@ -281,14 +264,10 @@
             const orcamento = {
                 id: Date.now(), // Usando timestamp como ID
                 nomeCliente,
-                carroCliente,
-                placaCliente,
-                telefoneCliente,
                 servico,
                 valorTotalProdutos,
                 valorTotal,
-                produtos: produtosSelecionados,
-                clienteInfo
+                produtos: produtosSelecionados
             };
 
             orcamentos.push(orcamento);
@@ -309,6 +288,63 @@
             }
         }
 
+        async function obterCliente(nomeCliente) {
+            const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
+            if (!clienteSnapshot.empty) {
+                return clienteSnapshot.docs[0].data();
+            }
+            return null;
+        }
+
+        async function obterProduto(produtoNome) {
+            const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
+            if (!produtoSnapshot.empty) {
+                return produtoSnapshot.docs[0].data();
+            }
+            return null;
+        }
+
+        async function verDetalhes(id) {
+            const orcamento = orcamentos.find(orc => orc.id === id);
+            const cliente = await obterCliente(orcamento.nomeCliente);
+            const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
+                const produto = await obterProduto(item.produto);
+                return {
+                    ...item,
+                    preco: produto ? produto.preco : 0
+                };
+            }));
+
+            const detalhes = document.getElementById(`detalhes-${id}`);
+            detalhes.innerHTML = `
+                <p><strong>Cliente:</strong> ${orcamento.nomeCliente}</p>
+                <p><strong>Carro:</strong> ${cliente ? cliente.carro : 'N/A'}</p>
+                <p><strong>Placa:</strong> ${cliente ? cliente.placa : 'N/A'}</p>
+                <p><strong>Telefone:</strong> ${cliente ? cliente.telefone : 'N/A'}</p>
+                <p><strong>Serviço:</strong> R$ ${orcamento.servico}</p>
+                <p><strong>Produtos:</strong></p>
+                <ul>
+                    ${produtosDetalhados.map(produto => `
+                        <li>${produto.produto} - Quantidade: ${produto.quantidade} - Preço: R$ ${(produto.preco * produto.quantidade).toFixed(2)}</li>
+                    `).join('')}
+                </ul>
+                <p><strong>Valor Total dos Produtos:</strong> R$ ${orcamento.valorTotalProdutos.toFixed(2)}</p>
+                <p><strong>Valor Total:</strong> R$ ${orcamento.valorTotal.toFixed(2)}</p>
+            `;
+            detalhes.classList.toggle('active');
+        }
+
+        function confirmarOrcamento(id) {
+            alert(`Orçamento ${id} confirmado!`);
+            // Aqui você pode adicionar lógica adicional para a confirmação do orçamento
+        }
+
+        function excluirOrcamento(id) {
+            orcamentos = orcamentos.filter(orcamento => orcamento.id !== id);
+            salvarOrcamentos();
+            exibirOrcamentos();
+        }
+
         function exibirOrcamentos() {
             const orcamentoList = document.getElementById('orcamento-list');
             orcamentoList.innerHTML = '';
@@ -323,37 +359,11 @@
                         <button onclick="excluirOrcamento(${orcamento.id})"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="orcamento-details" id="detalhes-${orcamento.id}">
-                        <p><strong>Cliente:</strong> ${orcamento.nomeCliente}</p>
-                        <p><strong>Carro:</strong> ${orcamento.carroCliente}</p>
-                        <p><strong>Placa:</strong> ${orcamento.placaCliente}</p>
-                        <p><strong>Telefone:</strong> ${orcamento.telefoneCliente}</p>
-                        <p><strong>Serviço:</strong> R$ ${orcamento.servico}</p>
-                        <p><strong>Produtos:</strong></p>
-                        <ul>
-                            ${orcamento.produtos.map(produto => `<li>${produto.produto} - Quantidade: ${produto.quantidade}</li>`).join('')}
-                        </ul>
-                        <p><strong>Valor Total dos Produtos:</strong> R$ ${orcamento.valorTotalProdutos.toFixed(2)}</p>
-                        <p><strong>Valor Total:</strong> R$ ${orcamento.valorTotal.toFixed(2)}</p>
+                        <!-- Detalhes serão preenchidos dinamicamente -->
                     </div>
                 `;
                 orcamentoList.appendChild(orcamentoItem);
             });
-        }
-
-        function verDetalhes(id) {
-            const detalhes = document.getElementById(`detalhes-${id}`);
-            detalhes.classList.toggle('active');
-        }
-
-        function confirmarOrcamento(id) {
-            alert(`Orçamento ${id} confirmado!`);
-            // Aqui você pode adicionar lógica adicional para a confirmação do orçamento
-        }
-
-        function excluirOrcamento(id) {
-            orcamentos = orcamentos.filter(orcamento => orcamento.id !== id);
-            salvarOrcamentos();
-            exibirOrcamentos();
         }
 
         window.onload = function() {
