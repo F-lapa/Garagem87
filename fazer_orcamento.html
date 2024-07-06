@@ -265,6 +265,10 @@
                         console.error(`Quantidade inválida para o produto: ${produto.produto}`);
                         return null;
                     }
+                    if (isNaN(produto.preco)) {
+                        console.error(`Preço inválido para o produto: ${produto.produto}`);
+                        return null;
+                    }
                     return {
                         produto: produto.produto,
                         quantidade,
