@@ -199,8 +199,9 @@
                     select.innerHTML = '<option value="">Nenhum Produto</option>';
                     produtos.forEach(produto => {
                         const option = document.createElement('option');
+                        const preco = produto.preco !== undefined ? parseFloat(produto.preco).toFixed(2) : "0.00";
                         option.value = produto.produto;
-                        option.textContent = `${produto.produto} - R$ ${produto.preco.toFixed(2)}`;
+                        option.textContent = `${produto.produto} - R$ ${preco}`;
                         select.appendChild(option);
                     });
                 });
