@@ -193,13 +193,19 @@
 
         function carregarProdutos() {
             db.collection("produtos").get().then((querySnapshot) => {
-                produtos = querySnapshot.docs.map(doc => doc.data());
+                produtos = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        produto: data.produto,
+                        preco: parseFloat(data.preco)
+                    };
+                });
                 const productSelects = document.querySelectorAll('select[name="produtos"]');
                 productSelects.forEach(select => {
                     select.innerHTML = '<option value="">Nenhum Produto</option>';
                     produtos.forEach(produto => {
                         const option = document.createElement('option');
-                        const preco = produto.preco !== undefined ? parseFloat(produto.preco).toFixed(2) : "0.00";
+                        const preco = produto.preco !== undefined ? produto.preco.toFixed(2) : "0.00";
                         option.value = produto.produto;
                         option.textContent = `${produto.produto} - R$ ${preco}`;
                         select.appendChild(option);
