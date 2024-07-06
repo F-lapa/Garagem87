@@ -261,13 +261,17 @@
                         return null;
                     }
                     const quantidade = parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value);
+                    if (isNaN(quantidade) || quantidade <= 0) {
+                        console.error(`Quantidade inválida para o produto: ${produto.produto}`);
+                        return null;
+                    }
                     return {
                         produto: produto.produto,
                         quantidade,
                         preco: produto.preco
                     };
                 })
-                .filter(item => item);  // Filtra produtos não preenchidos
+                .filter(item => item !== null);  // Filtra produtos não preenchidos ou inválidos
 
             if (produtosSelecionados.length === 0) {
                 alert("Nenhum produto selecionado.");
