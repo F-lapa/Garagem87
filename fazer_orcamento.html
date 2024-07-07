@@ -280,6 +280,10 @@
         .orcamento-item span {
             cursor: pointer;
         }
+        .orcamento-confirmado {
+            color: green;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -343,7 +347,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Detalhes do Orçamento</h2>
-                <span class="close" onclick="fecharModal('modalDetalhes')">&times;</span>
             </div>
             <div class="modal-body" id="detalhes-modal-body">
                 <!-- Detalhes do orçamento serão preenchidos aqui -->
@@ -493,7 +496,8 @@
                 descricaoServico,
                 valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
                 valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
-                produtos: produtosSelecionados
+                produtos: produtosSelecionados,
+                confirmado: false
             };
 
             orcamentos.push(orcamento);
@@ -610,8 +614,10 @@
         }
 
         function confirmarOrcamento(id) {
-            alert(`Orçamento ${id} confirmado!`);
-            // Aqui você pode adicionar lógica adicional para a confirmação do orçamento
+            const orcamento = orcamentos.find(orc => orc.id === id);
+            orcamento.confirmado = true;
+            salvarOrcamentos();
+            exibirOrcamentos();
         }
 
         function excluirOrcamento(id) {
@@ -638,8 +644,10 @@
                 orcamentoItem.innerHTML = `
                     <span onclick="verDetalhes(${orcamento.id})">${orcamento.nomeCliente} - R$ ${valorTotal.toFixed(2)}</span>
                     <div>
+                        ${orcamento.confirmado ? '<i class="fas fa-check orcamento-confirmado"></i>' : `
                         <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
                         <button onclick="abrirModalConfirmacao('excluir', ${orcamento.id})"><i class="fas fa-trash"></i></button>
+                        `}
                     </div>
                 `;
                 orcamentoList.appendChild(orcamentoItem);
