@@ -224,6 +224,32 @@
         .btn-modal:hover {
             background-color: #004d40;
         }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #f9f9f9;
+            border: 1px solid #b2dfdb;
+        }
+        .details-table th,
+        .details-table td {
+            border: 1px solid #b2dfdb;
+            padding: 8px;
+            text-align: left;
+        }
+        .details-table th {
+            background-color: #00796b;
+            color: white;
+        }
+        .details-table td {
+            background-color: #e0f2f1;
+        }
+        .details-table .header {
+            background-color: #004d40;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -238,6 +264,14 @@
                 </select>
             </div>
             <div class="form-group">
+                <label for="descricao-servico">Serviços:</label>
+                <textarea id="descricao-servico" name="descricao-servico" placeholder="Descreva o que foi feito"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="servico">Valor da Mão de Obra:</label>
+                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
                 <label>Produtos:</label>
                 <div class="product-list" id="product-list">
                     <div class="product-item">
@@ -249,14 +283,6 @@
                         <div class="add-product" onclick="adicionarProduto()">+</div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label for="servico">Valor da Mão de Obra:</label>
-                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="descricao-servico">Serviços:</label>
-                <textarea id="descricao-servico" name="descricao-servico" placeholder="Descreva o que foi feito"></textarea>
             </div>
             <button type="submit" class="btn">Enviar Orçamento</button>
         </form>
@@ -488,9 +514,26 @@
                 </div>
                 <div class="details-section">
                     <h2>Produtos</h2>
-                    ${produtosDetalhados.map(produto => `
-                        <p><span>${produto.produto}:</span> Quantidade: ${produto.quantidade} - Preço: R$ ${(produto.preco * produto.quantidade).toFixed(2)}</p>
-                    `).join('')}
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th>Quantidade</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${produtosDetalhados.map(produto => `
+                            <tr>
+                                <td>${produto.quantidade}</td>
+                                <td>${produto.produto}</td>
+                                <td>R$ ${produto.preco.toFixed(2)}</td>
+                                <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
+                            </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
                 </div>
                 <div class="details-section">
                     <h2>Totais</h2>
