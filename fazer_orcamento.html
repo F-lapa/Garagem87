@@ -44,7 +44,8 @@
             color: #00796b;
         }
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: calc(100% - 50px);
             padding: 10px;
             border: 1px solid #b2dfdb;
@@ -52,6 +53,10 @@
             font-size: 16px;
             box-sizing: border-box;
             display: inline-block;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
         }
         .form-group .add-product,
         .form-group .remove-product {
@@ -152,6 +157,73 @@
         .details-section p span {
             font-weight: bold;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header, .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-footer {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 10px;
+            margin-top: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #00796b;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+        .btn-modal {
+            background-color: #00796b;
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-modal:hover {
+            background-color: #004d40;
+        }
     </style>
 </head>
 <body>
@@ -182,11 +254,32 @@
                 <label for="servico">Valor da Mão de Obra:</label>
                 <input type="number" id="servico" name="servico" min="0" step="0.01" required>
             </div>
+            <div class="form-group">
+                <label for="descricao-servico">Serviços:</label>
+                <textarea id="descricao-servico" name="descricao-servico" placeholder="Descreva o que foi feito"></textarea>
+            </div>
             <button type="submit" class="btn">Enviar Orçamento</button>
         </form>
     </div>
     <div class="orcamento-list" id="orcamento-list">
         <!-- Os orçamentos serão listados aqui -->
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="modalConfirmacao" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirmação</h2>
+                <span class="close" onclick="fecharModal('modalConfirmacao')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalConfirmacaoTexto"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmarAcao" class="btn-modal">Confirmar</button>
+                <button class="btn-modal" onclick="fecharModal('modalConfirmacao')">Cancelar</button>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase Configuration -->
@@ -209,6 +302,7 @@
         let produtos = [];
         let clientes = [];
         let orcamentos = [];
+        let acaoConfirmada = null;
 
         function carregarProdutos() {
             db.collection("produtos").get().then((querySnapshot) => {
@@ -282,6 +376,7 @@
             const form = document.getElementById('orcamento-form');
             const nomeCliente = form['nome-cliente'].value;
             const servico = parseFloat(form.servico.value);
+            const descricaoServico = form['descricao-servico'].value || '';
             const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
                 .map((select, index) => {
                     const produtoNome = select.value.split(' - ')[0];
@@ -326,6 +421,7 @@
                 id: Date.now(), // Usando timestamp como ID
                 nomeCliente,
                 servico,
+                descricaoServico,
                 valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
                 valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
                 produtos: produtosSelecionados
@@ -388,6 +484,7 @@
                 <div class="details-section">
                     <h2>Serviço</h2>
                     <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
                 </div>
                 <div class="details-section">
                     <h2>Produtos</h2>
@@ -404,6 +501,23 @@
             detalhes.classList.toggle('active');
         }
 
+        function abrirModalConfirmacao(acao, id) {
+            const modalTexto = {
+                excluir: "Tem certeza que deseja excluir este orçamento?",
+                confirmar: "Tem certeza que deseja confirmar este orçamento?"
+            };
+            document.getElementById('modalConfirmacaoTexto').innerText = modalTexto[acao];
+            document.getElementById('confirmarAcao').onclick = () => {
+                if (acao === 'excluir') {
+                    excluirOrcamento(id);
+                } else if (acao === 'confirmar') {
+                    confirmarOrcamento(id);
+                }
+                fecharModal('modalConfirmacao');
+            };
+            abrirModal('modalConfirmacao');
+        }
+
         function confirmarOrcamento(id) {
             alert(`Orçamento ${id} confirmado!`);
             // Aqui você pode adicionar lógica adicional para a confirmação do orçamento
@@ -413,6 +527,14 @@
             orcamentos = orcamentos.filter(orcamento => orcamento.id !== id);
             salvarOrcamentos();
             exibirOrcamentos();
+        }
+
+        function abrirModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function fecharModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         function exibirOrcamentos() {
@@ -426,8 +548,8 @@
                     <span>${orcamento.nomeCliente} - R$ ${valorTotal.toFixed(2)}</span>
                     <div>
                         <button onclick="verDetalhes(${orcamento.id})"><i class="fas fa-eye"></i></button>
-                        <button onclick="confirmarOrcamento(${orcamento.id})"><i class="fas fa-check"></i></button>
-                        <button onclick="excluirOrcamento(${orcamento.id})"><i class="fas fa-trash"></i></button>
+                        <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
+                        <button onclick="abrirModalConfirmacao('excluir', ${orcamento.id})"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="orcamento-details" id="detalhes-${orcamento.id}">
                         <!-- Detalhes serão preenchidos dinamicamente -->
