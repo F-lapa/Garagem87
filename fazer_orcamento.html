@@ -643,21 +643,28 @@
 
             const doc = new jsPDF();
             doc.setFontSize(16);
-            doc.text('Orçamento de Produtos e Serviços', 20, 20);
+            doc.text('Detalhes do Orçamento', 20, 20);
 
             doc.setFontSize(12);
-            doc.text(`Cliente: ${orcamento.nomeCliente}`, 20, 30);
-            doc.text(`Serviço: R$ ${orcamento.servico.toFixed(2)}`, 20, 40);
-            doc.text(`Descrição: ${orcamento.descricaoServico}`, 20, 50);
+            doc.text('Cliente', 20, 30);
+            doc.text(`Nome: ${orcamento.nomeCliente}`, 20, 36);
+            doc.text(`Carro: ${orcamento.carro || 'N/A'}`, 20, 42);
+            doc.text(`Placa: ${orcamento.placa || 'N/A'}`, 20, 48);
+            doc.text(`Telefone: ${orcamento.telefone || 'N/A'}`, 20, 54);
 
-            let startY = 60;
+            doc.text('Produtos', 20, 64);
+            let startY = 70;
             orcamento.produtos.forEach((produto, index) => {
                 doc.text(`${index + 1}. ${produto.produto} - Quantidade: ${produto.quantidade} - Valor: R$ ${produto.preco.toFixed(2)} - Total: R$ ${(produto.preco * produto.quantidade).toFixed(2)}`, 20, startY);
                 startY += 10;
             });
 
-            doc.text(`Valor Total dos Produtos: R$ ${orcamento.valorTotalProdutos.toFixed(2)}`, 20, startY + 10);
-            doc.text(`Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}`, 20, startY + 20);
+            doc.text('Mão de obra', 20, startY + 10);
+            doc.text(`Valor: R$ ${orcamento.servico.toFixed(2)}`, 20, startY + 16);
+            doc.text(`Descrição: ${orcamento.descricaoServico}`, 20, startY + 22);
+
+            doc.text('Totais', 20, startY + 32);
+            doc.text(`Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}`, 20, startY + 38);
 
             doc.save(`Orcamento-${orcamento.nomeCliente}.pdf`);
         }
