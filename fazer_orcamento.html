@@ -351,7 +351,7 @@
                 const produto = await obterProduto(item.produto);
                 return {
                     ...item,
-                    preco: produto ? produto.preco : 0
+                    preco: produto ? parseFloat(produto.valor) : 0
                 };
             }));
 
