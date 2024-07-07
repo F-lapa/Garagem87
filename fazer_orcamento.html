@@ -117,6 +117,17 @@
             justify-content: space-between;
             align-items: center;
         }
+        .orcamento-item button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #00796b;
+            margin-left: 10px;
+        }
+        .orcamento-item button:hover {
+            color: #004d40;
+        }
         .orcamento-details {
             display: none;
             margin-top: 10px;
@@ -266,6 +277,9 @@
         .btn-enviar:hover {
             background-color: #004d40;
         }
+        .orcamento-item span {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -280,14 +294,6 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="descricao-servico">Serviços:</label>
-                <textarea id="descricao-servico" name="descricao-servico" placeholder="Descreva o que foi feito"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="servico">Valor da Mão de Obra:</label>
-                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
-            </div>
-            <div class="form-group">
                 <label>Produtos:</label>
                 <div class="product-list" id="product-list">
                     <div class="product-item">
@@ -300,7 +306,15 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="btn">Salvar Orçamento</button>
+            <div class="form-group">
+                <label for="descricao-servico">Serviços:</label>
+                <textarea id="descricao-servico" name="descricao-servico" placeholder="Descreva o que foi feito"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="servico">Valor da Mão de Obra:</label>
+                <input type="number" id="servico" name="servico" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn">Enviar Orçamento</button>
         </form>
     </div>
     <div class="orcamento-list" id="orcamento-list">
@@ -548,14 +562,13 @@
                     </table>
                 </div>
                 <div class="details-section">
-                    <h2>Serviço</h2>
+                    <h2>Mão de obra</h2>
                     <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
                     <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
                 </div>
                 <div class="details-section">
                     <h2>Totais</h2>
-                    <p><span>Valor Total dos Produtos:</span> R$ ${orcamento.valorTotalProdutos.toFixed(2)}</p>
-                    <p><span>Valor Total:</span> R$ ${orcamento.valorTotal.toFixed(2)}</p>
+                    <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
                 </div>
                 <button class="btn-enviar" onclick="gerarPDF(${id})">Enviar Orçamento</button>
             `;
@@ -611,9 +624,10 @@
                 const orcamentoItem = document.createElement('div');
                 orcamentoItem.className = 'orcamento-item';
                 orcamentoItem.innerHTML = `
-                    <span>${orcamento.nomeCliente} - R$ ${valorTotal.toFixed(2)}</span>
+                    <span onclick="verDetalhes(${orcamento.id})">${orcamento.nomeCliente} - R$ ${valorTotal.toFixed(2)}</span>
                     <div>
-                        <button onclick="verDetalhes(${orcamento.id})"><i class="fas fa-eye"></i></button>
+                        <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
+                        <button onclick="abrirModalConfirmacao('excluir', ${orcamento.id})"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="orcamento-details" id="detalhes-${orcamento.id}">
                         <!-- Detalhes serão preenchidos dinamicamente -->
