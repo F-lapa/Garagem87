@@ -195,17 +195,22 @@
             db.collection("produtos").get().then((querySnapshot) => {
                 produtos = querySnapshot.docs.map(doc => {
                     const data = doc.data();
+                    console.log("Dados do produto:", data); // Log dos dados recuperados
+                    const preco = parseFloat(data.preco);
+                    if (isNaN(preco)) {
+                        console.error(`Preço inválido para o produto: ${data.produto}`);
+                    }
                     return {
                         produto: data.produto,
-                        preco: parseFloat(data.preco)
+                        preco: isNaN(preco) ? 0 : preco // Verificação de NaN
                     };
                 });
                 const productSelects = document.querySelectorAll('select[name="produtos"]');
                 productSelects.forEach(select => {
                     select.innerHTML = '<option value="">Nenhum Produto</option>';
                     produtos.forEach(produto => {
+                        const preco = produto.preco.toFixed(2);
                         const option = document.createElement('option');
-                        const preco = produto.preco !== undefined ? produto.preco.toFixed(2) : "0.00";
                         option.value = produto.produto;
                         option.textContent = `${produto.produto} - R$ ${preco}`;
                         select.appendChild(option);
