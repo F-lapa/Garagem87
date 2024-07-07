@@ -103,6 +103,20 @@
         .btn:hover {
             background-color: #005e56;
         }
+        .search-bar {
+            margin-bottom: 20px;
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
         .orcamento-list {
             width: 100%;
             max-width: 600px;
@@ -321,6 +335,11 @@
             <button type="submit" class="btn">Enviar Orçamento</button>
         </form>
     </div>
+
+    <div class="search-bar">
+        <input type="text" id="search-bar" placeholder="Buscar orçamento pelo nome do cliente" oninput="buscarOrcamentos(event)">
+    </div>
+
     <div class="orcamento-list" id="orcamento-list">
         <!-- Os orçamentos serão listados aqui -->
     </div>
@@ -634,10 +653,11 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        function exibirOrcamentos() {
+        function exibirOrcamentos(filtro = "") {
             const orcamentoList = document.getElementById('orcamento-list');
             orcamentoList.innerHTML = '';
-            orcamentos.forEach(orcamento => {
+            orcamentos.filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
+                      .forEach(orcamento => {
                 const valorTotal = orcamento.valorTotal || 0;
                 const orcamentoItem = document.createElement('div');
                 orcamentoItem.className = 'orcamento-item';
@@ -652,6 +672,11 @@
                 `;
                 orcamentoList.appendChild(orcamentoItem);
             });
+        }
+
+        function buscarOrcamentos(event) {
+            const filtro = event.target.value;
+            exibirOrcamentos(filtro);
         }
 
         function gerarPDF(id) {
