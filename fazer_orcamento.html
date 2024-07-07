@@ -131,6 +131,30 @@
         .orcamento-details.active {
             display: block;
         }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .details-table th,
+        .details-table td {
+            border: 1px solid #b2dfdb;
+            padding: 8px;
+            text-align: left;
+        }
+        .details-table th {
+            background-color: #00796b;
+            color: white;
+        }
+        .details-table td {
+            background-color: #e0f2f1;
+        }
+        .details-table .header {
+            background-color: #004d40;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -357,19 +381,54 @@
 
             const detalhes = document.getElementById(`detalhes-${id}`);
             detalhes.innerHTML = `
-                <p><strong>Cliente:</strong> ${orcamento.nomeCliente}</p>
-                <p><strong>Carro:</strong> ${cliente ? cliente.carro : 'N/A'}</p>
-                <p><strong>Placa:</strong> ${cliente ? cliente.placa : 'N/A'}</p>
-                <p><strong>Telefone:</strong> ${cliente ? cliente.telefone : 'N/A'}</p>
-                <p><strong>Serviço:</strong> R$ ${orcamento.servico.toFixed(2)}</p>
-                <p><strong>Produtos:</strong></p>
-                <ul>
+                <table class="details-table">
+                    <tr class="header">
+                        <td colspan="2">Cliente</td>
+                    </tr>
+                    <tr>
+                        <th>Nome:</th>
+                        <td>${orcamento.nomeCliente}</td>
+                    </tr>
+                    <tr>
+                        <th>Carro:</th>
+                        <td>${cliente ? cliente.carro : 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <th>Placa:</th>
+                        <td>${cliente ? cliente.placa : 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <th>Telefone:</th>
+                        <td>${cliente ? cliente.telefone : 'N/A'}</td>
+                    </tr>
+                    <tr class="header">
+                        <td colspan="2">Serviço</td>
+                    </tr>
+                    <tr>
+                        <th>Valor:</th>
+                        <td>R$ ${orcamento.servico.toFixed(2)}</td>
+                    </tr>
+                    <tr class="header">
+                        <td colspan="2">Produtos</td>
+                    </tr>
                     ${produtosDetalhados.map(produto => `
-                        <li>${produto.produto} - Quantidade: ${produto.quantidade} - Preço: R$ ${(produto.preco * produto.quantidade).toFixed(2)}</li>
+                    <tr>
+                        <th>${produto.produto}</th>
+                        <td>Quantidade: ${produto.quantidade} - Preço: R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
+                    </tr>
                     `).join('')}
-                </ul>
-                <p><strong>Valor Total dos Produtos:</strong> R$ ${orcamento.valorTotalProdutos.toFixed(2)}</p>
-                <p><strong>Valor Total:</strong> R$ ${orcamento.valorTotal.toFixed(2)}</p>
+                    <tr class="header">
+                        <td colspan="2">Totais</td>
+                    </tr>
+                    <tr>
+                        <th>Valor Total dos Produtos:</th>
+                        <td>R$ ${orcamento.valorTotalProdutos.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <th>Valor Total:</th>
+                        <td>R$ ${orcamento.valorTotal.toFixed(2)}</td>
+                    </tr>
+                </table>
             `;
             detalhes.classList.toggle('active');
         }
