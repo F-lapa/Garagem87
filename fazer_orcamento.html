@@ -117,17 +117,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        .orcamento-item button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            color: #00796b;
-            margin-left: 10px;
-        }
-        .orcamento-item button:hover {
-            color: #004d40;
-        }
         .orcamento-details {
             display: none;
             margin-top: 10px;
@@ -136,6 +125,7 @@
             background: #ffffff;
             border-radius: 5px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         .orcamento-details.active {
             display: block;
@@ -250,6 +240,32 @@
             text-align: center;
             font-weight: bold;
         }
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .details-header .close {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .btn-enviar {
+            background-color: #00796b;
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+            display: block;
+            width: 100%;
+        }
+        .btn-enviar:hover {
+            background-color: #004d40;
+        }
     </style>
 </head>
 <body>
@@ -284,7 +300,7 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="btn">Enviar Orçamento</button>
+            <button type="submit" class="btn">Salvar Orçamento</button>
         </form>
     </div>
     <div class="orcamento-list" id="orcamento-list">
@@ -311,6 +327,7 @@
     <!-- Firebase Configuration -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
@@ -334,14 +351,10 @@
             db.collection("produtos").get().then((querySnapshot) => {
                 produtos = querySnapshot.docs.map(doc => {
                     const data = doc.data();
-                    console.log("Dados do produto:", data); // Log dos dados recuperados
                     const preco = parseFloat(data.valor);
-                    if (isNaN(preco)) {
-                        console.error(`Preço inválido para o produto: ${data.produto}`);
-                    }
                     return {
                         produto: data.produto,
-                        preco: isNaN(preco) ? 0 : preco // Verificação de NaN
+                        preco: isNaN(preco) ? 0 : preco
                     };
                 });
                 const productSelects = document.querySelectorAll('select[name="produtos"]');
@@ -500,17 +513,16 @@
 
             const detalhes = document.getElementById(`detalhes-${id}`);
             detalhes.innerHTML = `
+                <div class="details-header">
+                    <h2>Detalhes do Orçamento</h2>
+                    <span class="close" onclick="fecharDetalhes(${id})">&times;</span>
+                </div>
                 <div class="details-section">
                     <h2>Cliente</h2>
                     <p><span>Nome:</span> ${orcamento.nomeCliente}</p>
                     <p><span>Carro:</span> ${cliente ? cliente.carro : 'N/A'}</p>
                     <p><span>Placa:</span> ${cliente ? cliente.placa : 'N/A'}</p>
                     <p><span>Telefone:</span> ${cliente ? cliente.telefone : 'N/A'}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Serviço</h2>
-                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
-                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
                 </div>
                 <div class="details-section">
                     <h2>Produtos</h2>
@@ -536,12 +548,23 @@
                     </table>
                 </div>
                 <div class="details-section">
+                    <h2>Serviço</h2>
+                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
+                </div>
+                <div class="details-section">
                     <h2>Totais</h2>
                     <p><span>Valor Total dos Produtos:</span> R$ ${orcamento.valorTotalProdutos.toFixed(2)}</p>
                     <p><span>Valor Total:</span> R$ ${orcamento.valorTotal.toFixed(2)}</p>
                 </div>
+                <button class="btn-enviar" onclick="gerarPDF(${id})">Enviar Orçamento</button>
             `;
-            detalhes.classList.toggle('active');
+            detalhes.classList.add('active');
+        }
+
+        function fecharDetalhes(id) {
+            const detalhes = document.getElementById(`detalhes-${id}`);
+            detalhes.classList.remove('active');
         }
 
         function abrirModalConfirmacao(acao, id) {
@@ -591,8 +614,6 @@
                     <span>${orcamento.nomeCliente} - R$ ${valorTotal.toFixed(2)}</span>
                     <div>
                         <button onclick="verDetalhes(${orcamento.id})"><i class="fas fa-eye"></i></button>
-                        <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
-                        <button onclick="abrirModalConfirmacao('excluir', ${orcamento.id})"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="orcamento-details" id="detalhes-${orcamento.id}">
                         <!-- Detalhes serão preenchidos dinamicamente -->
@@ -600,6 +621,31 @@
                 `;
                 orcamentoList.appendChild(orcamentoItem);
             });
+        }
+
+        function gerarPDF(id) {
+            const orcamento = orcamentos.find(orc => orc.id === id);
+            const { jsPDF } = window.jspdf;
+
+            const doc = new jsPDF();
+            doc.setFontSize(16);
+            doc.text('Orçamento de Produtos e Serviços', 20, 20);
+
+            doc.setFontSize(12);
+            doc.text(`Cliente: ${orcamento.nomeCliente}`, 20, 30);
+            doc.text(`Serviço: R$ ${orcamento.servico.toFixed(2)}`, 20, 40);
+            doc.text(`Descrição: ${orcamento.descricaoServico}`, 20, 50);
+
+            let startY = 60;
+            orcamento.produtos.forEach((produto, index) => {
+                doc.text(`${index + 1}. ${produto.produto} - Quantidade: ${produto.quantidade} - Valor: R$ ${produto.preco.toFixed(2)} - Total: R$ ${(produto.preco * produto.quantidade).toFixed(2)}`, 20, startY);
+                startY += 10;
+            });
+
+            doc.text(`Valor Total dos Produtos: R$ ${orcamento.valorTotalProdutos.toFixed(2)}`, 20, startY + 10);
+            doc.text(`Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}`, 20, startY + 20);
+
+            doc.save(`Orcamento-${orcamento.nomeCliente}.pdf`);
         }
 
         window.onload = function() {
