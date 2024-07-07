@@ -130,16 +130,18 @@
         }
         .orcamento-details {
             display: none;
-            margin-top: 10px;
-            text-align: left;
-            padding: 15px;
-            background: #ffffff;
-            border-radius: 5px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #ffffff;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-        .orcamento-details.active {
-            display: block;
+            border-radius: 10px;
+            text-align: left;
         }
         .details-section {
             margin-bottom: 15px;
@@ -157,73 +159,6 @@
         }
         .details-section p span {
             font-weight: bold;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 350px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .modal-header, .modal-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header {
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .modal-footer {
-            border-top: 1px solid #e0e0e0;
-            padding-top: 10px;
-            margin-top: 20px;
-        }
-        .modal-header h2 {
-            margin: 0;
-            color: #00796b;
-        }
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-        }
-        .btn-modal {
-            background-color: #00796b;
-            color: white;
-            cursor: pointer;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .btn-modal:hover {
-            background-color: #004d40;
         }
         .details-table {
             width: 100%;
@@ -335,6 +270,20 @@
                 <button id="confirmarAcao" class="btn-modal">Confirmar</button>
                 <button class="btn-modal" onclick="fecharModal('modalConfirmacao')">Cancelar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Orçamento -->
+    <div id="modalDetalhesOrcamento" class="modal">
+        <div class="modal-content">
+            <div class="details-header">
+                <h2>Detalhes do Orçamento</h2>
+                <span class="close" onclick="fecharModal('modalDetalhesOrcamento')">&times;</span>
+            </div>
+            <div id="detalhes-content">
+                <!-- Detalhes serão preenchidos dinamicamente -->
+            </div>
+            <button class="btn-enviar" id="enviarOrcamentoBtn">Enviar Orçamento</button>
         </div>
     </div>
 
@@ -525,12 +474,8 @@
                 };
             }));
 
-            const detalhes = document.getElementById(`detalhes-${id}`);
-            detalhes.innerHTML = `
-                <div class="details-header">
-                    <h2>Detalhes do Orçamento</h2>
-                    <span class="close" onclick="fecharDetalhes(${id})">&times;</span>
-                </div>
+            const detalhesContent = document.getElementById('detalhes-content');
+            detalhesContent.innerHTML = `
                 <div class="details-section">
                     <h2>Cliente</h2>
                     <p><span>Nome:</span> ${orcamento.nomeCliente}</p>
@@ -570,14 +515,20 @@
                     <h2>Totais</h2>
                     <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
                 </div>
-                <button class="btn-enviar" onclick="gerarPDF(${id})">Enviar Orçamento</button>
             `;
-            detalhes.classList.add('active');
+
+            const enviarOrcamentoBtn = document.getElementById('enviarOrcamentoBtn');
+            enviarOrcamentoBtn.onclick = () => gerarPDF(id);
+
+            abrirModal('modalDetalhesOrcamento');
         }
 
-        function fecharDetalhes(id) {
-            const detalhes = document.getElementById(`detalhes-${id}`);
-            detalhes.classList.remove('active');
+        function abrirModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function fecharModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         function abrirModalConfirmacao(acao, id) {
@@ -608,14 +559,6 @@
             exibirOrcamentos();
         }
 
-        function abrirModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-        }
-
-        function fecharModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
         function exibirOrcamentos() {
             const orcamentoList = document.getElementById('orcamento-list');
             orcamentoList.innerHTML = '';
@@ -628,9 +571,6 @@
                     <div>
                         <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
                         <button onclick="abrirModalConfirmacao('excluir', ${orcamento.id})"><i class="fas fa-trash"></i></button>
-                    </div>
-                    <div class="orcamento-details" id="detalhes-${orcamento.id}">
-                        <!-- Detalhes serão preenchidos dinamicamente -->
                     </div>
                 `;
                 orcamentoList.appendChild(orcamentoItem);
