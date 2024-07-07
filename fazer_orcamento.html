@@ -172,7 +172,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
             authDomain: "garagem87-c652e.firebaseapp.com",
@@ -183,7 +182,6 @@
             measurementId: "G-83FY7T6X2D"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -196,7 +194,7 @@
                 produtos = querySnapshot.docs.map(doc => {
                     const data = doc.data();
                     console.log("Dados do produto:", data); // Log dos dados recuperados
-                    const preco = parseFloat(data.preco);
+                    const preco = parseFloat(data.valor);
                     if (isNaN(preco)) {
                         console.error(`Preço inválido para o produto: ${data.produto}`);
                     }
