@@ -135,7 +135,9 @@
         }
         .totals span, .filter span {
             font-weight: bold;
-            color: #ff0000;
+        }
+        .positive {
+            color: green;
         }
         .negative {
             color: red !important;
@@ -387,372 +389,380 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script>
         // Configuração do Firebase
-        var firebaseConfig = {
-            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
-            authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
-            databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
-            projectId: "sistema-de-receitas-e-despesas",
-            storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
-            messagingSenderId: "252102478972",
-            appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
-            measurementId: "G-K2HCS7WNZV"
-        };
-        
-        // Inicialize o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const auth = firebase.auth();
+var firebaseConfig = {
+    apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
+    authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
+    databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
+    projectId: "sistema-de-receitas-e-despesas",
+    storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
+    messagingSenderId: "252102478972",
+    appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
+    measurementId: "G-K2HCS7WNZV"
+};
 
-        // Função para monitorar mudanças na autenticação
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                const userId = user.uid;
-                database.ref('users/' + userId).once('value').then((snapshot) => {
-                    const userData = snapshot.val();
-                    const userName = userData ? userData.name : "Usuário";
-                    localStorage.setItem('username', userName);
-                    document.getElementById('userGreeting').innerHTML = '<img src="LogoGaragem87.png" alt="Logo Garagem 87" style="width: 150px; margin-bottom: 20px;">';
-                    loadTransactions();
-                    checkAdmin(user.email);
-                });
-            } else {
-                window.location.href = 'index.html';  // Redirecionar para a página de login se não estiver autenticado
-            }
+// Inicialize o Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const auth = firebase.auth();
+
+// Função para monitorar mudanças na autenticação
+auth.onAuthStateChanged(user => {
+    if (user) {
+        const userId = user.uid;
+        database.ref('users/' + userId).once('value').then((snapshot) => {
+            const userData = snapshot.val();
+            const userName = userData ? userData.name : "Usuário";
+            localStorage.setItem('username', userName);
+            document.getElementById('userGreeting').innerHTML = '<img src="LogoGaragem87.png" alt="Logo Garagem 87" style="width: 150px; margin-bottom: 20px;">';
+            loadTransactions();
+            checkAdmin(user.email);
         });
+    } else {
+        window.location.href = 'index.html';  // Redirecionar para a página de login se não estiver autenticado
+    }
+});
 
-        let transactions = [];
-        let lastTransactionId = localStorage.getItem('lastTransactionId');
-        let allUsers = [];
-        let monthlyLimit = parseCurrency(localStorage.getItem('monthlyLimit') || '0,00');
+let transactions = [];
+let lastTransactionId = localStorage.getItem('lastTransactionId');
+let allUsers = [];
+let monthlyLimit = parseCurrency(localStorage.getItem('monthlyLimit') || '0,00');
 
-        function saveTransactions() {
-            const userId = auth.currentUser.uid;
-            database.ref('transactions/' + userId).set(transactions);
+function saveTransactions() {
+    const userId = auth.currentUser.uid;
+    database.ref('transactions/' + userId).set(transactions);
+}
+
+function loadTransactions() {
+    const userId = auth.currentUser.uid;
+    database.ref('transactions/' + userId).once('value', function(snapshot) {
+        if (snapshot.val()) {
+            transactions = snapshot.val();
+            updateDescriptionList();
+            updateFilteredView();
+            calculateBalances();
+        }
+    });
+}
+
+function checkAdmin(email) {
+    if (email === 'fernandolapa1987@gmail.com') {
+        document.getElementById('adminIcon').style.display = 'block';
+        loadAllUsers();
+    }
+}
+
+function loadAllUsers() {
+    database.ref('users').once('value').then((snapshot) => {
+        const users = snapshot.val();
+        for (let uid in users) {
+            allUsers.push({ uid, name: users[uid].name });
+        }
+    });
+}
+
+function formatCurrency(value) {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function parseCurrency(value) {
+    return parseFloat(value.replace(/\./g, '').replace(',', '.').replace('R$', '')) || 0;
+}
+
+function addTransaction() {
+    const date = document.getElementById('date').value;
+    const description = document.getElementById('description').value;
+    const amountInput = document.getElementById('amount');
+    const amount = parseCurrency(amountInput.value);
+    const type = document.getElementById('type').value;
+
+    const transaction = { id: generateTransactionId(), date, description, amount, type };
+    transactions.push(transaction);
+    lastTransactionId = transaction.id;
+    localStorage.setItem('lastTransactionId', lastTransactionId);
+
+    saveTransactions();
+    updateDescriptionList();
+    updateFilteredView();
+    calculateBalances();
+
+    // Reset form fields
+    document.getElementById('date').value = getCurrentDate();
+    document.getElementById('description').value = '';
+    amountInput.value = '0,00';
+    document.getElementById('type').value = 'receita';
+}
+
+function generateTransactionId() {
+    return '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function updateDescriptionList() {
+    const filterDescription = document.getElementById('filterDescription');
+    filterDescription.innerHTML = '<option value="">Todos</option>';
+    const uniqueDescriptions = [...new Set(transactions.map(t => t.description))];
+    uniqueDescriptions.forEach(description => {
+        const option = document.createElement('option');
+        option.value = description;
+        option.text = description;
+        filterDescription.appendChild(option);
+    });
+}
+
+function updateFilteredView() {
+    const selectedDate = document.getElementById('date').value;
+    const tbody = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+
+    transactions.forEach(transaction => {
+        if (transaction.date === selectedDate) {
+            const row = tbody.insertRow();
+            
+            const cellDate = row.insertCell(0);
+            const cellDescription = row.insertCell(1);
+            const cellAmount = row.insertCell(2);
+            const cellType = row.insertCell(3);
+            const cellAction = row.insertCell(4); // Nova célula para o ícone de remoção
+
+            cellDate.innerText = transaction.date;
+            cellDescription.innerHTML = `<div class="transaction-description">
+                                            <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
+                                            ${transaction.description}
+                                         </div>`;
+            cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
+            cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
+            cellAction.innerHTML = `<i class="fas fa-trash-alt" onclick="confirmRemoveTransaction('${transaction.id}')" style="cursor:pointer; color:red;"></i>`;
+        }
+    });
+
+    calculateBalances();
+}
+
+function confirmRemoveTransaction(transactionId) {
+    if (confirm('Tem certeza que deseja remover esta transação?')) {
+        removeTransaction(transactionId);
+    }
+}
+
+function removeTransaction(transactionId) {
+    transactions = transactions.filter(transaction => transaction.id !== transactionId);
+    saveTransactions();
+    updateDescriptionList();
+    updateFilteredView();
+    calculateBalances();
+}
+
+function calculateBalances() {
+    const selectedDate = document.getElementById('date').value;
+    const currentMonth = selectedDate.slice(0, 7);
+    const currentYear = selectedDate.slice(0, 4);
+
+    let dailyBalance = 0;
+    let monthlyBalance = 0;
+    let annualBalance = 0;
+
+    transactions.forEach(transaction => {
+        if (transaction.date === selectedDate) {
+            dailyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
         }
 
-        function loadTransactions() {
-            const userId = auth.currentUser.uid;
-            database.ref('transactions/' + userId).once('value', function(snapshot) {
-                if (snapshot.val()) {
-                    transactions = snapshot.val();
-                    updateDescriptionList();
-                    updateFilteredView();
-                    calculateBalances();
-                }
-            });
+        if (transaction.date.startsWith(currentMonth)) {
+            monthlyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
         }
 
-        function checkAdmin(email) {
-            if (email === 'fernandolapa1987@gmail.com') {
-                document.getElementById('adminIcon').style.display = 'block';
+        if (transaction.date.startsWith(currentYear)) {
+            annualBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
+        }
+    });
+
+    const dailyBalanceSpan = document.getElementById('dailyBalance');
+    const monthlyBalanceSpan = document.getElementById('monthlyBalance');
+    const annualBalanceSpan = document.getElementById('annualBalance');
+
+    dailyBalanceSpan.innerText = formatCurrency(dailyBalance);
+    monthlyBalanceSpan.innerText = formatCurrency(monthlyBalance);
+    annualBalanceSpan.innerText = formatCurrency(annualBalance);
+
+    dailyBalanceSpan.classList.toggle('negative', dailyBalance < 0);
+    dailyBalanceSpan.classList.toggle('positive', dailyBalance >= 0);
+    monthlyBalanceSpan.classList.toggle('negative', monthlyBalance < 0);
+    monthlyBalanceSpan.classList.toggle('positive', monthlyBalance >= 0);
+    annualBalanceSpan.classList.toggle('negative', annualBalance < 0);
+    annualBalanceSpan.classList.toggle('positive', annualBalance >= 0);
+}
+
+function filterByPeriod() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const filterType = document.getElementById('filterType').value;
+    const filterDescription = document.getElementById('filterDescription').value.toLowerCase();
+
+    let totalReceitas = 0;
+    let totalDespesas = 0;
+
+    const filteredTransactions = transactions.filter(transaction => 
+        transaction.date >= startDate && transaction.date <= endDate &&
+        (filterType === '' || transaction.type === filterType) &&
+        (filterDescription === '' || transaction.description.toLowerCase().includes(filterDescription))
+    );
+
+    const filteredTbody = document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0];
+    filteredTbody.innerHTML = '';
+
+    filteredTransactions.forEach(transaction => {
+        if (transaction.type === 'receita') {
+            totalReceitas += transaction.amount;
+        } else if (transaction.type === 'despesa') {
+            totalDespesas += transaction.amount;
+        }
+
+        const row = filteredTbody.insertRow();
+        const cellDate = row.insertCell(0);
+        const cellDescription = row.insertCell(1);
+        const cellAmount = row.insertCell(2);
+        const cellType = row.insertCell(3);
+
+        cellDate.innerText = transaction.date;
+        cellDescription.innerHTML = `<div class="transaction-description">
+                                        <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
+                                        ${transaction.description}
+                                     </div>`;
+        cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
+        cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
+    });
+
+    const totalSaldo = totalReceitas - totalDespesas;
+
+    const totalReceitasSpan = document.getElementById('totalReceitas');
+    const totalDespesasSpan = document.getElementById('totalDespesas');
+    const totalSaldoSpan = document.getElementById('totalSaldo');
+
+    totalReceitasSpan.innerText = formatCurrency(totalReceitas);
+    totalDespesasSpan.innerText = formatCurrency(totalDespesas);
+    totalSaldoSpan.innerText = formatCurrency(totalSaldo);
+
+    totalReceitasSpan.classList.toggle('positive', true);
+    totalDespesasSpan.classList.add('negative');
+    totalSaldoSpan.classList.toggle('negative', totalSaldo < 0);
+    totalSaldoSpan.classList.toggle('positive', totalSaldo >= 0);
+}
+
+function clearFilter() {
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterDescription').value = '';
+    document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0].innerHTML = '';
+    document.getElementById('totalReceitas').innerText = 'R$ 0,00';
+    document.getElementById('totalDespesas').innerText = 'R$ 0,00';
+    document.getElementById('totalSaldo').innerText = 'R$ 0,00';
+    document.getElementById('totalReceitas').classList.remove('positive');
+    document.getElementById('totalDespesas').classList.remove('negative');
+    document.getElementById('totalSaldo').classList.remove('positive', 'negative');
+}
+
+const inputs = document.querySelectorAll('input, select');
+inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+        this.classList.remove('highlight');
+    });
+});
+
+function validateAmount() {
+    const amountInput = document.getElementById('amount');
+    amountInput.value = amountInput.value.replace(/[^\d,]/g, '');
+    amountInput.value = amountInput.value.replace(/(,.*?),(.*?)/g, '$1'); // Ensure only one comma
+}
+
+function getCurrentDate() {
+    const now = new Date();
+    const offset = -3; // Horário de Brasília (UTC-3)
+    const brasiliaTime = new Date(now.getTime() + offset * 3600 * 1000);
+    return brasiliaTime.toISOString().split('T')[0];
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('date');
+    dateInput.value = getCurrentDate();
+    updateFilteredView(); // Load transactions for the current date initially
+});
+
+function logout() {
+    auth.signOut().then(() => {
+        localStorage.removeItem('loggedIn');
+        localStorage.removeItem('username');
+        localStorage.removeItem('lastTransactionId');
+        window.location.href = 'index.html';
+    }).catch(error => {
+        console.error('Erro ao deslogar: ', error);
+    });
+}
+
+function toggleAdminSection() {
+    const adminSection = document.getElementById('adminSection');
+    adminSection.style.display = adminSection.style.display === 'block' ? 'none' : 'block';
+}
+
+function registerNewUser() {
+    const name = document.getElementById('newUserName').value;
+    const email = document.getElementById('newUserEmail').value;
+    const password = document.getElementById('newUserPassword').value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+            const user = userCredential.user;
+            database.ref('users/' + user.uid).set({
+                name: name,
+                email: email
+            }).then(() => {
+                alert('Novo usuário registrado com sucesso.');
+                document.getElementById('newUserName').value = '';
+                document.getElementById('newUserEmail').value = '';
+                document.getElementById('newUserPassword').value = '';
                 loadAllUsers();
-            }
-        }
-
-        function loadAllUsers() {
-            database.ref('users').once('value').then((snapshot) => {
-                const users = snapshot.val();
-                for (let uid in users) {
-                    allUsers.push({ uid, name: users[uid].name });
-                }
             });
-        }
-
-        function formatCurrency(value) {
-            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
-        function parseCurrency(value) {
-            return parseFloat(value.replace(/\./g, '').replace(',', '.').replace('R$', '')) || 0;
-        }
-
-        function addTransaction() {
-            const date = document.getElementById('date').value;
-            const description = document.getElementById('description').value;
-            const amountInput = document.getElementById('amount');
-            const amount = parseCurrency(amountInput.value);
-            const type = document.getElementById('type').value;
-
-            const transaction = { id: generateTransactionId(), date, description, amount, type };
-            transactions.push(transaction);
-            lastTransactionId = transaction.id;
-            localStorage.setItem('lastTransactionId', lastTransactionId);
-
-            saveTransactions();
-            updateDescriptionList();
-            updateFilteredView();
-            calculateBalances();
-
-            // Reset form fields
-            document.getElementById('date').value = getCurrentDate();
-            document.getElementById('description').value = '';
-            amountInput.value = '0,00';
-            document.getElementById('type').value = 'receita';
-        }
-
-        function generateTransactionId() {
-            return '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        function updateDescriptionList() {
-            const filterDescription = document.getElementById('filterDescription');
-            filterDescription.innerHTML = '<option value="">Todos</option>';
-            const uniqueDescriptions = [...new Set(transactions.map(t => t.description))];
-            uniqueDescriptions.forEach(description => {
-                const option = document.createElement('option');
-                option.value = description;
-                option.text = description;
-                filterDescription.appendChild(option);
-            });
-        }
-
-        function updateFilteredView() {
-            const selectedDate = document.getElementById('date').value;
-            const tbody = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
-            tbody.innerHTML = '';
-
-            transactions.forEach(transaction => {
-                if (transaction.date === selectedDate) {
-                    const row = tbody.insertRow();
-                    
-                    const cellDate = row.insertCell(0);
-                    const cellDescription = row.insertCell(1);
-                    const cellAmount = row.insertCell(2);
-                    const cellType = row.insertCell(3);
-                    const cellAction = row.insertCell(4); // Nova célula para o ícone de remoção
-
-                    cellDate.innerText = transaction.date;
-                    cellDescription.innerHTML = `<div class="transaction-description">
-                                                    <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
-                                                    ${transaction.description}
-                                                 </div>`;
-                    cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
-                    cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
-                    cellAction.innerHTML = `<i class="fas fa-trash-alt" onclick="confirmRemoveTransaction('${transaction.id}')" style="cursor:pointer; color:red;"></i>`;
-                }
-            });
-
-            calculateBalances();
-        }
-
-        function confirmRemoveTransaction(transactionId) {
-            if (confirm('Tem certeza que deseja remover esta transação?')) {
-                removeTransaction(transactionId);
-            }
-        }
-
-        function removeTransaction(transactionId) {
-            transactions = transactions.filter(transaction => transaction.id !== transactionId);
-            saveTransactions();
-            updateDescriptionList();
-            updateFilteredView();
-            calculateBalances();
-        }
-
-        function calculateBalances() {
-            const selectedDate = document.getElementById('date').value;
-            const currentMonth = selectedDate.slice(0, 7);
-            const currentYear = selectedDate.slice(0, 4);
-
-            let dailyBalance = 0;
-            let monthlyBalance = 0;
-            let annualBalance = 0;
-
-            transactions.forEach(transaction => {
-                if (transaction.date === selectedDate) {
-                    dailyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
-                }
-
-                if (transaction.date.startsWith(currentMonth)) {
-                    monthlyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
-                }
-
-                if (transaction.date.startsWith(currentYear)) {
-                    annualBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
-                }
-            });
-
-            const dailyBalanceSpan = document.getElementById('dailyBalance');
-            const monthlyBalanceSpan = document.getElementById('monthlyBalance');
-            const annualBalanceSpan = document.getElementById('annualBalance');
-
-            dailyBalanceSpan.innerText = formatCurrency(dailyBalance);
-            monthlyBalanceSpan.innerText = formatCurrency(monthlyBalance);
-            annualBalanceSpan.innerText = formatCurrency(annualBalance);
-
-            dailyBalanceSpan.classList.toggle('negative', dailyBalance < 0);
-            monthlyBalanceSpan.classList.toggle('negative', monthlyBalance < 0);
-            annualBalanceSpan.classList.toggle('negative', annualBalance < 0);
-        }
-
-        function filterByPeriod() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const filterType = document.getElementById('filterType').value;
-            const filterDescription = document.getElementById('filterDescription').value.toLowerCase();
-
-            let totalReceitas = 0;
-            let totalDespesas = 0;
-
-            const filteredTransactions = transactions.filter(transaction => 
-                transaction.date >= startDate && transaction.date <= endDate &&
-                (filterType === '' || transaction.type === filterType) &&
-                (filterDescription === '' || transaction.description.toLowerCase().includes(filterDescription))
-            );
-
-            const filteredTbody = document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0];
-            filteredTbody.innerHTML = '';
-
-            filteredTransactions.forEach(transaction => {
-                if (transaction.type === 'receita') {
-                    totalReceitas += transaction.amount;
-                } else if (transaction.type === 'despesa') {
-                    totalDespesas += transaction.amount;
-                }
-
-                const row = filteredTbody.insertRow();
-                const cellDate = row.insertCell(0);
-                const cellDescription = row.insertCell(1);
-                const cellAmount = row.insertCell(2);
-                const cellType = row.insertCell(3);
-
-                cellDate.innerText = transaction.date;
-                cellDescription.innerHTML = `<div class="transaction-description">
-                                                <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
-                                                ${transaction.description}
-                                             </div>`;
-                cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
-                cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
-            });
-
-            const totalSaldo = totalReceitas - totalDespesas;
-
-            const totalReceitasSpan = document.getElementById('totalReceitas');
-            const totalDespesasSpan = document.getElementById('totalDespesas');
-            const totalSaldoSpan = document.getElementById('totalSaldo');
-
-            totalReceitasSpan.innerText = formatCurrency(totalReceitas);
-            totalDespesasSpan.innerText = formatCurrency(totalDespesas);
-            totalSaldoSpan.innerText = formatCurrency(totalSaldo);
-
-            totalDespesasSpan.classList.add('negative');
-            totalSaldoSpan.classList.toggle('negative', totalSaldo < 0);
-        }
-
-        function clearFilter() {
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            document.getElementById('filterType').value = '';
-            document.getElementById('filterDescription').value = '';
-            document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0].innerHTML = '';
-            document.getElementById('totalReceitas').innerText = 'R$ 0,00';
-            document.getElementById('totalDespesas').innerText = 'R$ 0,00';
-            document.getElementById('totalSaldo').innerText = 'R$ 0,00';
-        }
-
-        const inputs = document.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.classList.remove('highlight');
-            });
+        })
+        .catch(error => {
+            alert('Erro ao registrar novo usuário: ' + error.message);
         });
+}
 
-        function validateAmount() {
-            const amountInput = document.getElementById('amount');
-            amountInput.value = amountInput.value.replace(/[^\d,]/g, '');
-            amountInput.value = amountInput.value.replace(/(,.*?),(.*?)/g, '$1'); // Ensure only one comma
-        }
+function openChangePasswordModal() {
+    document.getElementById('changePasswordModal').style.display = 'block';
+}
 
-        function getCurrentDate() {
-            const now = new Date();
-            const offset = -3; // Horário de Brasília (UTC-3)
-            const brasiliaTime = new Date(now.getTime() + offset * 3600 * 1000);
-            return brasiliaTime.toISOString().split('T')[0];
-        }
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').style.display = 'none';
+}
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateInput = document.getElementById('date');
-            dateInput.value = getCurrentDate();
-            updateFilteredView(); // Load transactions for the current date initially
-        });
+function changePassword() {
+    const newPassword = document.getElementById('newPassword').value;
+    const user = auth.currentUser;
 
-        function logout() {
-            auth.signOut().then(() => {
-                localStorage.removeItem('loggedIn');
-                localStorage.removeItem('username');
-                localStorage.removeItem('lastTransactionId');
-                window.location.href = 'index.html';
-            }).catch(error => {
-                console.error('Erro ao deslogar: ', error);
-            });
-        }
+    user.updatePassword(newPassword).then(() => {
+        alert('Senha alterada com sucesso.');
+        closeChangePasswordModal();
+    }).catch(error => {
+        alert('Erro ao alterar senha: ' + error.message);
+    });
+}
 
-        function toggleAdminSection() {
-            const adminSection = document.getElementById('adminSection');
-            adminSection.style.display = adminSection.style.display === 'block' ? 'none' : 'block';
-        }
+function goToLimitPage() {
+    window.location.href = 'definir_limite.html';
+}
 
-        function registerNewUser() {
-            const name = document.getElementById('newUserName').value;
-            const email = document.getElementById('newUserEmail').value;
-            const password = document.getElementById('newUserPassword').value;
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(userCredential => {
-                    const user = userCredential.user;
-                    database.ref('users/' + user.uid).set({
-                        name: name,
-                        email: email
-                    }).then(() => {
-                        alert('Novo usuário registrado com sucesso.');
-                        document.getElementById('newUserName').value = '';
-                        document.getElementById('newUserEmail').value = '';
-                        document.getElementById('newUserPassword').value = '';
-                        loadAllUsers();
-                    });
-                })
-                .catch(error => {
-                    alert('Erro ao registrar novo usuário: ' + error.message);
-                });
-        }
-
-        function openChangePasswordModal() {
-            document.getElementById('changePasswordModal').style.display = 'block';
-        }
-
-        function closeChangePasswordModal() {
-            document.getElementById('changePasswordModal').style.display = 'none';
-        }
-
-        function changePassword() {
-            const newPassword = document.getElementById('newPassword').value;
-            const user = auth.currentUser;
-
-            user.updatePassword(newPassword).then(() => {
-                alert('Senha alterada com sucesso.');
-                closeChangePasswordModal();
-            }).catch(error => {
-                alert('Erro ao alterar senha: ' + error.message);
-            });
-        }
-
-        function goToLimitPage() {
-            window.location.href = 'definir_limite.html';
-        }
-
-        function togglePasswordVisibility(inputId) {
-            const passwordField = document.getElementById(inputId);
-            const passwordToggle = passwordField.nextElementSibling;
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                passwordToggle.classList.remove('fa-eye');
-                passwordToggle.classList.add('fa-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                passwordToggle.classList.remove('fa-eye-slash');
-                passwordToggle.classList.add('fa-eye');
-            }
-        }
-    </script>
+function togglePasswordVisibility(inputId) {
+    const passwordField = document.getElementById(inputId);
+    const passwordToggle = passwordField.nextElementSibling;
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        passwordToggle.classList.remove('fa-eye');
+        passwordToggle.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        passwordToggle.classList.remove('fa-eye-slash');
+        passwordToggle.classList.add('fa-eye');
+    }
+}
+</script>
 </body>
 </html>
