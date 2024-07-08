@@ -244,6 +244,10 @@
                     <label for="endereco">Endereço:</label>
                     <input type="text" id="endereco" name="endereco" required>
                 </div>
+                <div class="form-group">
+                    <label for="hodometro">Hodômetro do Veículo:</label>
+                    <input type="number" id="hodometro" name="hodometro" required>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-modal" onclick="adicionarCliente()">Salvar Cliente</button>
                 </div>
@@ -279,6 +283,10 @@
                 <div class="form-group">
                     <label for="editar-endereco">Endereço:</label>
                     <input type="text" id="editar-endereco" name="editar-endereco" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-hodometro">Hodômetro do Veículo:</label>
+                    <input type="number" id="editar-hodometro" name="editar-hodometro" required>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-modal" onclick="salvarCliente()">Salvar Alterações</button>
@@ -330,9 +338,10 @@
             const placa = document.getElementById('placa').value;
             const telefone = document.getElementById('telefone').value;
             const endereco = document.getElementById('endereco').value;
+            const hodometro = document.getElementById('hodometro').value;
 
-            if (nome && carro && placa && telefone && endereco) {
-                const cliente = { nome, carro, placa, telefone, endereco };
+            if (nome && carro && placa && telefone && endereco && hodometro) {
+                const cliente = { nome, carro, placa, telefone, endereco, hodometro };
                 db.collection("clientes").add(cliente).then(() => {
                     atualizarListaClientes();
                     document.getElementById('form-cliente').reset();
@@ -383,6 +392,7 @@
                     document.getElementById('editar-placa').value = cliente.placa;
                     document.getElementById('editar-telefone').value = cliente.telefone;
                     document.getElementById('editar-endereco').value = cliente.endereco;
+                    document.getElementById('editar-hodometro').value = cliente.hodometro;
                     document.getElementById('modalEditarCliente').style.display = 'block';
                 } else {
                     console.log("No such document!");
@@ -421,13 +431,15 @@
             const placa = document.getElementById('editar-placa').value;
             const telefone = document.getElementById('editar-telefone').value;
             const endereco = document.getElementById('editar-endereco').value;
+            const hodometro = document.getElementById('editar-hodometro').value;
 
-            if (carro && placa && telefone && endereco) {
+            if (carro && placa && telefone && endereco && hodometro) {
                 db.collection("clientes").doc(id).update({
                     carro,
                     placa,
                     telefone,
-                    endereco
+                    endereco,
+                    hodometro
                 }).then(() => {
                     atualizarListaClientes();
                     fecharModalEditar();
