@@ -707,8 +707,14 @@ function gerarPDF(id) {
 
     doc.text('Produtos', 20, 70);
     let startY = 76;
+    doc.setFillColor(255, 0, 0);
+    doc.rect(20, startY - 6, 170, 6, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.text('Quantidade   Descrição                  Valor        Valor Total', 25, startY - 2);
+    doc.setTextColor(0, 0, 0);
+    startY += 2;
     orcamento.produtos.forEach((produto, index) => {
-        doc.text(`${index + 1}. ${produto.produto} - Quantidade: ${produto.quantidade} - Valor: R$ ${produto.preco.toFixed(2)} - Total: R$ ${(produto.preco * produto.quantidade).toFixed(2)}`, 20, startY);
+        doc.text(`${produto.quantidade}            ${produto.produto}                  R$ ${produto.preco.toFixed(2)}    R$ ${(produto.preco * produto.quantidade).toFixed(2)}`, 25, startY);
         startY += 10;
     });
 
@@ -727,6 +733,7 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
+
 
     </script>
 </body>
