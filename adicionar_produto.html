@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #e0f7fa;
+            background-color: #f2f2f2; /* Cor de fundo suave */
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -25,19 +25,18 @@
             width: 100%;
             max-width: 600px;
         }
-        .container h1 {
-            margin-bottom: 20px;
-            text-align: center;
-            color: #00796b;
-            font-size: 24px;
-            font-weight: bold;
+        .container img {
+            width: 100%;
+            max-width: 300px;
+            display: block;
+            margin: 0 auto 20px auto;
         }
         .btn {
             width: 100%;
             padding: 12px;
             border: none;
             border-radius: 5px;
-            background-color: #00796b;
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             cursor: pointer;
             font-size: 16px;
@@ -47,7 +46,7 @@
             text-align: center;
         }
         .btn:hover {
-            background-color: #004d40;
+            background-color: #9a0007; /* Cor mais escura para o hover */
         }
         .search-container {
             margin-bottom: 20px;
@@ -64,7 +63,7 @@
             display: flex;
             justify-content: space-between;
             padding: 10px;
-            background: #00796b;
+            background: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             border-radius: 5px;
             margin-bottom: 10px;
@@ -97,7 +96,7 @@
             flex: 1;
             text-align: center;
             font-weight: bold;
-            color: #00796b;
+            color: #d32f2f; /* Cor combinando com o logotipo */
         }
         .icon-remove {
             color: #e57373;
@@ -107,7 +106,7 @@
             transition: color 0.3s;
         }
         .icon-remove:hover {
-            color: #d32f2f;
+            color: #d32f2f; /* Cor combinando com o logotipo */
         }
         /* Estilo do modal */
         .modal {
@@ -151,7 +150,7 @@
         }
         .modal-header h2 {
             margin: 0;
-            color: #00796b;
+            color: #d32f2f; /* Cor combinando com o logotipo */
         }
         .close {
             color: #aaa;
@@ -170,7 +169,7 @@
         }
         .form-group label {
             margin-bottom: 5px;
-            color: #00796b;
+            color: #d32f2f; /* Cor combinando com o logotipo */
             font-weight: bold;
         }
         .form-group input {
@@ -182,7 +181,7 @@
             margin-bottom: 10px;
         }
         .btn-modal {
-            background-color: #00796b;
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             cursor: pointer;
             padding: 10px 20px;
@@ -193,13 +192,13 @@
             transition: background-color 0.3s;
         }
         .btn-modal:hover {
-            background-color: #004d40;
+            background-color: #9a0007; /* Cor mais escura para o hover */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Produtos</h1>
+        <img src="LogoGaragem87.png" alt="Logo da Garagem87">
         <button class="btn" onclick="abrirModal('modalAdicionarProduto')">Adicionar Produto</button>
         <div class="search-container">
             <input type="text" id="buscar-produto" onkeyup="filtrarProdutos()" placeholder="Buscar produto...">
@@ -292,14 +291,14 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
+            apiKey: "YOUR_API_KEY",
             authDomain: "garagem87-c652e.firebaseapp.com",
             databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
             projectId: "garagem87-c652e",
             storageBucket: "garagem87-c652e.appspot.com",
-            messagingSenderId: "325224720529",
-            appId: "1:325224720529:web:bfed4699261241f7ddf730",
-            measurementId: "G-83FY7T6X2D"
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
         firebase.initializeApp(firebaseConfig);
