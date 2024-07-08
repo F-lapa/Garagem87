@@ -12,7 +12,7 @@
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            background-color: #e0f7fa;
+            background-color: #f2f2f2; /* Cor de fundo suave */
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -27,11 +27,27 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .container h1 {
-            margin-bottom: 20px;
-            color: #00796b;
-            font-size: 24px;
+        .container img {
+            width: 100%;
+            max-width: 300px;
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
             font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #9a0007; /* Cor mais escura para o hover */
         }
         .form-group {
             margin-bottom: 20px;
@@ -41,7 +57,7 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: #00796b;
+            color: #d32f2f; /* Cor combinando com o logotipo */
         }
         .form-group input,
         .form-group select,
@@ -68,7 +84,7 @@
             font-size: 16px;
             text-align: center;
             cursor: pointer;
-            background-color: #00796b;
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             display: inline-block;
         }
@@ -86,22 +102,6 @@
         .product-list .product-item input {
             width: 60px;
             margin-left: 10px;
-        }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            background-color: #00796b;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #005e56;
         }
         .search-bar {
             margin-bottom: 20px;
@@ -136,11 +136,11 @@
             border: none;
             cursor: pointer;
             font-size: 18px;
-            color: #00796b;
+            color: #d32f2f; /* Cor combinando com o logotipo */
             margin-left: 10px;
         }
         .orcamento-item button:hover {
-            color: #004d40;
+            color: #9a0007; /* Cor mais escura para o hover */
         }
         .orcamento-details {
             display: none;
@@ -160,7 +160,7 @@
         }
         .details-section h2 {
             font-size: 18px;
-            color: #00796b;
+            color: #d32f2f; /* Cor combinando com o logotipo */
             margin-bottom: 10px;
             border-bottom: 1px solid #b2dfdb;
             padding-bottom: 5px;
@@ -213,7 +213,12 @@
         }
         .modal-header h2 {
             margin: 0;
-            color: #00796b;
+            color: #d32f2f; /* Cor combinando com o logotipo */
+        }
+        .modal-header img {
+            width: 100%;
+            max-width: 100px;
+            display: block;
         }
         .close {
             color: #aaa;
@@ -226,7 +231,7 @@
             color: black;
         }
         .btn-modal {
-            background-color: #00796b;
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             cursor: pointer;
             padding: 10px 20px;
@@ -237,7 +242,7 @@
             transition: background-color 0.3s;
         }
         .btn-modal:hover {
-            background-color: #004d40;
+            background-color: #9a0007; /* Cor mais escura para o hover */
         }
         .details-table {
             width: 100%;
@@ -253,14 +258,14 @@
             text-align: left;
         }
         .details-table th {
-            background-color: #00796b;
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
         }
         .details-table td {
             background-color: #e0f2f1;
         }
         .details-table .header {
-            background-color: #004d40;
+            background-color: #9a0007; /* Cor mais escura */
             color: white;
             text-align: center;
             font-weight: bold;
@@ -275,7 +280,7 @@
             cursor: pointer;
         }
         .btn-enviar {
-            background-color: #00796b;
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             cursor: pointer;
             padding: 10px 20px;
@@ -289,7 +294,7 @@
             width: 100%;
         }
         .btn-enviar:hover {
-            background-color: #005e56;
+            background-color: #9a0007; /* Cor mais escura para o hover */
         }
         .orcamento-item span {
             cursor: pointer;
@@ -303,6 +308,7 @@
 </head>
 <body>
     <div class="container">
+        <img src="LogoGaragem87.png" alt="Logo da Garagem87">
         <h1>Fazer Orçamento</h1>
         <form id="orcamento-form" onsubmit="enviarOrcamento(event)">
             <div class="form-group">
@@ -366,6 +372,7 @@
     <div id="modalDetalhes" class="modal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="LogoGaragem87.png" alt="Logo da Garagem87">
                 <h2>Detalhes do Orçamento</h2>
                 <span class="close" onclick="fecharModal('modalDetalhes')">&times;</span>
             </div>
@@ -380,7 +387,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
-        const firebaseConfig = {
+       const firebaseConfig = {
     apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
     authDomain: "garagem87-c652e.firebaseapp.com",
     projectId: "garagem87-c652e",
@@ -720,7 +727,6 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
-
 
     </script>
 </body>
