@@ -608,8 +608,8 @@ async function verDetalhes(id) {
         </div>
         <div class="details-section">
             <h2>Mão de obra</h2>
-            <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
             <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
+            <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
         </div>
         <div class="details-section">
             <h2>Totais</h2>
@@ -666,22 +666,24 @@ function fecharModal(modalId) {
 function exibirOrcamentos(filtro = "") {
     const orcamentoList = document.getElementById('orcamento-list');
     orcamentoList.innerHTML = '';
-    orcamentos.filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
-              .forEach(async orcamento => {
-        const cliente = await obterCliente(orcamento.nomeCliente);
-        const orcamentoItem = document.createElement('div');
-        orcamentoItem.className = 'orcamento-item';
-        orcamentoItem.innerHTML = `
-            <span onclick="verDetalhes(${orcamento.id})">${orcamento.nomeCliente} - ${cliente ? cliente.carro : 'N/A'}</span>
-            <div>
-                ${orcamento.confirmado ? '<span class="orcamento-confirmado">Confirmado</span>' : `
-                <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
-                `}
-                <button onclick="abrirModalConfirmacao('excluir', ${orcamento.id})"><i class="fas fa-trash"></i></button>
-            </div>
-        `;
-        orcamentoList.appendChild(orcamentoItem);
-    });
+    orcamentos
+        .filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
+        .sort((a, b) => b.id - a.id) // Ordenar do mais recente para o mais antigo
+        .forEach(async orcamento => {
+            const cliente = await obterCliente(orcamento.nomeCliente);
+            const orcamentoItem = document.createElement('div');
+            orcamentoItem.className = 'orcamento-item';
+            orcamentoItem.innerHTML = `
+                <span onclick="verDetalhes(${orcamento.id})">${orcamento.nomeCliente} - ${cliente ? cliente.carro : 'N/A'}</span>
+                <div>
+                    ${orcamento.confirmado ? '<span class="orcamento-confirmado">Confirmado</span>' : `
+                    <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
+                    `}
+                    <button onclick="abrirModalConfirmacao('excluir', ${orcamento.id})"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            orcamentoList.appendChild(orcamentoItem);
+        });
 }
 
 function buscarOrcamentos(event) {
@@ -719,8 +721,8 @@ function gerarPDF(id) {
     });
 
     doc.text('Mão de obra', 20, startY + 10);
-    doc.text(`Valor: R$ ${orcamento.servico.toFixed(2)}`, 20, startY + 16);
-    doc.text(`Descrição: ${orcamento.descricaoServico}`, 20, startY + 22);
+    doc.text(`Descrição: ${orcamento.descricaoServico}`, 20, startY + 16);
+    doc.text(`Valor: R$ ${orcamento.servico.toFixed(2)}`, 20, startY + 22);
 
     doc.text('Totais', 20, startY + 32);
     doc.text(`Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}`, 20, startY + 38);
@@ -733,8 +735,6 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
-
-
     </script>
 </body>
 </html>
