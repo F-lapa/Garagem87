@@ -574,7 +574,7 @@ async function verDetalhes(id) {
             <p><span>Carro:</span> ${cliente ? cliente.carro : 'N/A'}</p>
             <p><span>Placa:</span> ${cliente ? cliente.placa : 'N/A'}</p>
             <p><span>Telefone:</span> ${cliente ? cliente.telefone : 'N/A'}</p>
-            <p><span>Hidrômetro:</span> ${cliente && cliente.hidrometro ? cliente.hidrometro : 'N/A'}</p>
+            <p><span>Hidrômetro:</span> ${cliente && cliente.hidrometro !== undefined ? cliente.hidrometro : 'N/A'}</p>
         </div>
         <div class="details-section">
             <h2>Produtos</h2>
@@ -720,6 +720,7 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
+
     </script>
 </body>
 </html>
