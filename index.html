@@ -28,32 +28,10 @@
             max-width: 600px;
             text-align: center;
         }
-        .container h1 {
+        .container img {
+            width: 100%;
+            max-width: 300px;
             margin-bottom: 40px;
-            color: #d32f2f;
-            font-size: 48px;
-            font-weight: bold;
-            font-family: 'Bebas Neue', cursive;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            position: relative;
-        }
-        .container h1::before,
-        .container h1::after {
-            content: '';
-            position: absolute;
-            width: 60px;
-            height: 8px;
-            background-color: #d32f2f;
-            bottom: -10px;
-        }
-        .container h1::before {
-            left: 15%;
-            transform: rotate(-45deg);
-        }
-        .container h1::after {
-            right: 15%;
-            transform: rotate(45deg);
         }
         .icon-container {
             display: flex;
@@ -105,7 +83,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Garagem87</h1>
+        <img src="LogoGaragem87.png" alt="Logo da Garagem87">
         <div class="icon-container">
             <div class="icon-row">
                 <div class="icon-button" onclick="window.location.href='adicionar_cliente.html'">
