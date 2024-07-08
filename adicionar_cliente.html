@@ -29,7 +29,12 @@
             width: 100%;
             max-width: 300px;
             display: block;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 10px auto;
+        }
+        .container h2 {
+            text-align: center;
+            color: #d32f2f; /* Cor combinando com o logotipo */
+            margin-bottom: 20px;
         }
         .btn {
             width: 100%;
@@ -200,6 +205,7 @@
 <body>
     <div class="container">
         <img src="LogoGaragem87.png" alt="Logo da Garagem87">
+        <h2>Cadastro de Cliente</h2>
         <button class="btn" onclick="abrirModalAdicionar()">Adicionar Cliente</button>
         <div class="search-container">
             <input type="text" id="buscar-cliente" onkeyup="filtrarClientes()" placeholder="Buscar cliente...">
@@ -356,7 +362,7 @@
         function atualizarListaClientes() {
             const listaClientes = document.getElementById('lista-clientes');
             listaClientes.innerHTML = '';
-            db.collection("clientes").get().then((querySnapshot) => {
+            db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
                     const cliente = doc.data();
                     const li = document.createElement('li');
