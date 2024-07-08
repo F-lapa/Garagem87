@@ -506,7 +506,6 @@ function enviarOrcamento(event) {
         return;
     }
 
-    // Continue com o restante do código
     const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
         if (isNaN(item.preco) || isNaN(item.quantidade)) {
             console.error(`Dados inválidos para o produto: ${item.produto}`);
@@ -518,32 +517,33 @@ function enviarOrcamento(event) {
     const valorTotal = parseFloat(servico) + valorTotalProdutos;
 
     const orcamento = {
-        id: Date.now(), // Usando timestamp como ID
         nomeCliente,
         servico,
         descricaoServico,
         valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
         valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
         produtos: produtosSelecionados,
-        confirmado: false
+        confirmado: false,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    orcamentos.push(orcamento);
-    salvarOrcamentos();
-    exibirOrcamentos();
-    form.reset();
-}
-
-function salvarOrcamentos() {
-    localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+    db.collection("orcamentos").add(orcamento).then(() => {
+        form.reset();
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao salvar orçamento:", error);
+    });
 }
 
 function carregarOrcamentos() {
-    const orcamentosSalvos = localStorage.getItem('orcamentos');
-    if (orcamentosSalvos) {
-        orcamentos = JSON.parse(orcamentosSalvos);
+    db.collection("orcamentos").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+        orcamentos = querySnapshot.docs.map(doc => {
+            return { id: doc.id, ...doc.data() };
+        });
         exibirOrcamentos();
-    }
+    }).catch(error => {
+        console.error("Erro ao carregar orçamentos:", error);
+    });
 }
 
 async function obterCliente(nomeCliente) {
@@ -601,7 +601,6 @@ async function verDetalhes(id) {
                         <td>${produto.produto}</td>
                         <td>R$ ${produto.preco.toFixed(2)}</td>
                         <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
-                    </tr>
                     `).join('')}
                 </tbody>
             </table>
@@ -615,7 +614,6 @@ async function verDetalhes(id) {
             <h2>Totais</h2>
             <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
         </div>
-        <button class="btn-enviar" onclick="gerarPDF(${id})">Enviar Orçamento</button>
     `;
     abrirModal('modalDetalhes');
 }
@@ -643,16 +641,23 @@ function abrirModalConfirmacao(acao, id) {
 }
 
 function confirmarOrcamento(id) {
-    const orcamento = orcamentos.find(orc => orc.id === id);
-    orcamento.confirmado = true;
-    salvarOrcamentos();
-    exibirOrcamentos();
+    const orcamentoRef = db.collection("orcamentos").doc(id);
+    orcamentoRef.update({
+        confirmado: true
+    }).then(() => {
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao confirmar orçamento:", error);
+    });
 }
 
 function excluirOrcamento(id) {
-    orcamentos = orcamentos.filter(orcamento => orcamento.id !== id);
-    salvarOrcamentos();
-    exibirOrcamentos();
+    const orcamentoRef = db.collection("orcamentos").doc(id);
+    orcamentoRef.delete().then(() => {
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao excluir orçamento:", error);
+    });
 }
 
 function abrirModal(modalId) {
@@ -668,7 +673,7 @@ function exibirOrcamentos(filtro = "") {
     orcamentoList.innerHTML = '';
     orcamentos
         .filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
-        .sort((a, b) => b.id - a.id) // Ordenar do mais recente para o mais antigo
+        .sort((a, b) => b.timestamp - a.timestamp) // Ordenar do mais recente para o mais antigo
         .forEach(async orcamento => {
             const cliente = await obterCliente(orcamento.nomeCliente);
             const orcamentoItem = document.createElement('div');
