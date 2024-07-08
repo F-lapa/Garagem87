@@ -390,6 +390,8 @@
     <script>
         // Configuração do Firebase
 var firebaseConfig = {
+   // Configuração do Firebase
+var firebaseConfig = {
     apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
     authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
     databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
@@ -414,7 +416,7 @@ auth.onAuthStateChanged(user => {
             const userName = userData ? userData.name : "Usuário";
             localStorage.setItem('username', userName);
             document.getElementById('userGreeting').innerHTML = '<img src="LogoGaragem87.png" alt="Logo Garagem 87" style="width: 150px; margin-bottom: 20px;">';
-            loadTransactions();
+            loadTransactions(userId); // Carrega as transações ao logar
             checkAdmin(user.email);
         });
     } else {
@@ -429,18 +431,25 @@ let monthlyLimit = parseCurrency(localStorage.getItem('monthlyLimit') || '0,00')
 
 function saveTransactions() {
     const userId = auth.currentUser.uid;
-    database.ref('transactions/' + userId).set(transactions);
+    database.ref('transactions/' + userId).set(transactions).then(() => {
+        console.log("Transações salvas com sucesso.");
+    }).catch(error => {
+        console.error("Erro ao salvar transações: ", error);
+    });
 }
 
-function loadTransactions() {
-    const userId = auth.currentUser.uid;
-    database.ref('transactions/' + userId).once('value', function(snapshot) {
+function loadTransactions(userId) {
+    database.ref('transactions/' + userId).once('value').then(snapshot => {
         if (snapshot.val()) {
             transactions = snapshot.val();
             updateDescriptionList();
             updateFilteredView();
             calculateBalances();
+        } else {
+            transactions = [];
         }
+    }).catch(error => {
+        console.error("Erro ao carregar transações: ", error);
     });
 }
 
@@ -480,7 +489,7 @@ function addTransaction() {
     lastTransactionId = transaction.id;
     localStorage.setItem('lastTransactionId', lastTransactionId);
 
-    saveTransactions();
+    saveTransactions(); // Salva as transações após adicionar uma nova
     updateDescriptionList();
     updateFilteredView();
     calculateBalances();
@@ -763,6 +772,7 @@ function togglePasswordVisibility(inputId) {
         passwordToggle.classList.add('fa-eye');
     }
 }
+
 </script>
 </body>
 </html>
