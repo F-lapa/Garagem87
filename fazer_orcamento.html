@@ -499,6 +499,7 @@
                 return;
             }
 
+            // Continue com o restante do código
             const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
                 if (isNaN(item.preco) || isNaN(item.quantidade)) {
                     console.error(`Dados inválidos para o produto: ${item.produto}`);
@@ -573,6 +574,7 @@
                     <p><span>Carro:</span> ${cliente ? cliente.carro : 'N/A'}</p>
                     <p><span>Placa:</span> ${cliente ? cliente.placa : 'N/A'}</p>
                     <p><span>Telefone:</span> ${cliente ? cliente.telefone : 'N/A'}</p>
+                    <p><span>Hidrômetro:</span> ${cliente ? cliente.hidrometro : 'N/A'}</p>
                 </div>
                 <div class="details-section">
                     <h2>Produtos</h2>
@@ -622,7 +624,7 @@
                 confirmar: "Tem certeza que deseja confirmar este orçamento?"
             };
             document.getElementById('modalConfirmacaoTexto').innerText = modalTexto[acao];
-            document.getElementById('confirmarAcao').onclick = () => {
+            document.getElementById('confirmarAcao').onclick = function() {
                 if (acao === 'excluir') {
                     excluirOrcamento(id);
                 } else if (acao === 'confirmar') {
@@ -658,12 +660,12 @@
             const orcamentoList = document.getElementById('orcamento-list');
             orcamentoList.innerHTML = '';
             orcamentos.filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
-                      .forEach(orcamento => {
-                const valorTotal = orcamento.valorTotal || 0;
+                      .forEach(async orcamento => {
+                const cliente = await obterCliente(orcamento.nomeCliente);
                 const orcamentoItem = document.createElement('div');
                 orcamentoItem.className = 'orcamento-item';
                 orcamentoItem.innerHTML = `
-                    <span onclick="verDetalhes(${orcamento.id})">${orcamento.nomeCliente} - R$ ${valorTotal.toFixed(2)}</span>
+                    <span onclick="verDetalhes(${orcamento.id})">${orcamento.nomeCliente} - ${cliente ? cliente.carro : 'N/A'}</span>
                     <div>
                         ${orcamento.confirmado ? '<span class="orcamento-confirmado">Confirmado</span>' : `
                         <button onclick="abrirModalConfirmacao('confirmar', ${orcamento.id})"><i class="fas fa-check"></i></button>
@@ -694,9 +696,10 @@
             doc.text(`Carro: ${orcamento.carro || 'N/A'}`, 20, 42);
             doc.text(`Placa: ${orcamento.placa || 'N/A'}`, 20, 48);
             doc.text(`Telefone: ${orcamento.telefone || 'N/A'}`, 20, 54);
+            doc.text(`Hidrômetro: ${orcamento.hidrometro || 'N/A'}`, 20, 60);
 
-            doc.text('Produtos', 20, 64);
-            let startY = 70;
+            doc.text('Produtos', 20, 70);
+            let startY = 76;
             orcamento.produtos.forEach((produto, index) => {
                 doc.text(`${index + 1}. ${produto.produto} - Quantidade: ${produto.quantidade} - Valor: R$ ${produto.preco.toFixed(2)} - Total: R$ ${(produto.preco * produto.quantidade).toFixed(2)}`, 20, startY);
                 startY += 10;
