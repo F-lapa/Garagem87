@@ -410,6 +410,7 @@
                 });
                 const productSelects = document.querySelectorAll('select[name="produtos"]');
                 productSelects.forEach(select => {
+                    const selectedValue = select.value;  // Capturar o valor selecionado
                     select.innerHTML = '<option value="">Nenhum Produto</option>';
                     produtos.forEach(produto => {
                         const preco = produto.preco.toFixed(2);
@@ -418,6 +419,7 @@
                         option.textContent = `${produto.produto} - R$ ${preco}`;
                         select.appendChild(option);
                     });
+                    select.value = selectedValue;  // Restaurar o valor selecionado
                 });
             }).catch(error => {
                 console.error("Erro ao carregar produtos:", error);
