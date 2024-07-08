@@ -556,6 +556,12 @@ async function verDetalhes(id) {
         };
     }));
 
+    let dataConfirmacao = "";
+    if (orcamento.timestamp) {
+        const timestamp = orcamento.timestamp.toDate();
+        dataConfirmacao = `${timestamp.getDate()}/${timestamp.getMonth() + 1}/${timestamp.getFullYear()}`;
+    }
+
     const detalhesModalBody = document.getElementById('detalhes-modal-body');
     detalhesModalBody.innerHTML = `
         <div class="details-section">
@@ -597,6 +603,7 @@ async function verDetalhes(id) {
             <h2>Totais</h2>
             <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
         </div>
+        ${orcamento.confirmado ? `<div style="position: absolute; top: 10px; right: 10px; font-size: 12px; color: gray;">Confirmado em: ${dataConfirmacao}</div>` : ''}
     `;
     abrirModal('modalDetalhes');
 }
@@ -626,7 +633,8 @@ function abrirModalConfirmacao(acao, id) {
 function confirmarOrcamento(id) {
     const orcamentoRef = db.collection("orcamentos").doc(id);
     orcamentoRef.update({
-        confirmado: true
+        confirmado: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         carregarOrcamentos();
     }).catch(error => {
@@ -723,6 +731,7 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
+
     </script>
 </body>
 </html>
