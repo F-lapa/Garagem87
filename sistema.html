@@ -1,0 +1,759 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Receitas e Despesas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 300;
+        }
+        .greeting {
+            text-align: center;
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        .logout, .change-password {
+            position: absolute;
+            top: 20px;
+            cursor: pointer;
+            color: #007bff;
+            font-size: 1.2em;
+        }
+        .logout {
+            right: 20px;
+        }
+        .change-password {
+            right: 60px;
+        }
+        .admin-icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            color: #28a745;
+            font-size: 1.2em;
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="number"], input[type="date"], select, input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:invalid, input[type="date"]:invalid {
+            border-color: red;
+        }
+        input.highlight, select.highlight {
+            border: 2px solid #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            width: 48%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            background-color: #fff;
+        }
+        th {
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        tbody tr {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .totals, .filter {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .totals p, .filter p {
+            font-size: 20px;
+            color: #333;
+        }
+        .totals span, .filter span {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .negative {
+            color: red !important;
+        }
+        .transaction-description {
+            display: flex;
+            align-items: center;
+        }
+        .transaction-amount {
+            text-align: left;
+            color: green;
+        }
+        .transaction-amount.despesa {
+            color: red;
+        }
+        .transaction-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .filter-results {
+            margin-top: 20px;
+        }
+        .admin-section {
+            display: none;
+            margin-top: 30px;
+        }
+        .admin-section h2 {
+            text-align: center;
+            color: #28a745;
+        }
+        .admin-section .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .admin-section input, .admin-section select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .admin-section .buttons {
+            flex-direction: column;
+        }
+        .admin-section button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .password-field {
+            position: relative;
+        }
+        .password-field input {
+            width: calc(100% - 40px);
+            margin-bottom: 0;
+        }
+        .password-field i {
+            position: absolute;
+            right: 10px;
+            top: 12px;
+            cursor: pointer;
+            color: #007bff;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Novo CSS para ícone de remoção */
+        .fa-trash-alt {
+            cursor: pointer;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="greeting" id="userGreeting"></div>
+        <h1>Sistema de Receitas e Despesas</h1>
+        <i class="fas fa-sign-out-alt logout" onclick="logout()" title="Deslogar"></i>
+        <i class="fas fa-key change-password" onclick="openChangePasswordModal()" title="Alterar Senha"></i>
+        <i class="fas fa-user-shield admin-icon" id="adminIcon" onclick="toggleAdminSection()" title="Admin"></i>
+        
+        <!-- Campo escondido para desativar autocomplete -->
+        <input type="text" style="display:none;" autocomplete="username">
+        <input type="password" style="display:none;" autocomplete="new-password">
+        
+        <div class="form-group">
+            <label for="date">Data:</label>
+            <input type="date" id="date" class="highlight" onchange="updateFilteredView()">
+        </div>
+        <div class="form-group">
+            <label for="description">Descrição:</label>
+            <input type="text" id="description" class="highlight">
+        </div>
+        <div class="form-group">
+            <label for="amount">Valor (R$):</label>
+            <input type="text" id="amount" name="amount_field" placeholder="0,00" value="0,00" class="highlight" autocomplete="off" oninput="validateAmount()">
+        </div>
+        <div class="form-group">
+            <label for="type">Tipo:</label>
+            <select id="type" class="highlight">
+                <option value="receita">Receita</option>
+                <option value="despesa">Despesa</option>
+            </select>
+        </div>
+        <div class="buttons">
+            <button onclick="addTransaction()">Adicionar</button>
+            <button onclick="goToLimitPage()">Definir Limite de Gastos</button>
+        </div>
+
+        <table id="transactionsTable">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Tipo</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Transactions will be added here -->
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <p>Saldo do Dia: <span id="dailyBalance">R$ 0,00</span></p>
+            <p>Saldo do Mês: <span id="monthlyBalance">R$ 0,00</span></p>
+            <p>Saldo do Ano: <span id="annualBalance">R$ 0,00</span></p>
+        </div>
+
+        <div class="filter">
+            <h2>Filtrar por Período</h2>
+            <div class="date-group">
+                <div class="form-group">
+                    <label for="startDate">Data Inicial:</label>
+                    <input type="date" id="startDate" class="highlight">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">Data Final:</label>
+                    <input type="date" id="endDate" class="highlight">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="filterType">Tipo:</label>
+                <select id="filterType" class="highlight">
+                    <option value="">Todos</option>
+                    <option value="receita">Receita</option>
+                    <option value="despesa">Despesa</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filterDescription">Descrição:</label>
+                <select id="filterDescription" class="highlight">
+                    <option value="">Todos</option>
+                    <!-- Options will be populated here -->
+                </select>
+            </div>
+            <button onclick="filterByPeriod()">Filtrar</button>
+            <button onclick="clearFilter()">Limpar Filtro</button>
+            <div id="filteredResults">
+                <p>Total Receitas: <span id="totalReceitas">R$ 0,00</span></p>
+                <p>Total Despesas: <span id="totalDespesas" class="negative">R$ 0,00</span></p>
+                <p>Saldo: <span id="totalSaldo">R$ 0,00</span></p>
+            </div>
+            <div class="filter-results" id="filterResults">
+                <h3>Extrato</h3>
+                <table id="filteredTransactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Filtered transactions will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section" id="adminSection">
+            <h2>Gerenciamento de Usuários</h2>
+            <div class="form-group">
+                <label for="newUserName">Nome do Novo Usuário:</label>
+                <input type="text" id="newUserName" class="highlight">
+            </div>
+            <div class="form-group">
+                <label for="newUserEmail">Email do Novo Usuário:</label>
+                <input type="text" id="newUserEmail" class="highlight">
+            </div>
+            <div class="form-group password-field">
+                <label for="newUserPassword">Senha do Novo Usuário:</label>
+                <input type="password" id="newUserPassword" class="highlight" value="">
+                <i class="fas fa-eye" id="togglePassword" onclick="togglePasswordVisibility('newUserPassword')"></i>
+            </div>
+            <div class="buttons">
+                <button onclick="registerNewUser()">Registrar Novo Usuário</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para alterar senha -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            <h2>Alterar Senha</h2>
+            <div class="form-group password-field">
+                <label for="newPassword">Nova Senha:</label>
+                <input type="password" id="newPassword" class="highlight">
+                <i class="fas fa-eye" id="toggleChangePassword" onclick="togglePasswordVisibility('newPassword')"></i>
+            </div>
+            <button onclick="changePassword()">Alterar Senha</button>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script>
+        // Configuração do Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDgTFBPipaSGqJlahiT-THgzBH4JKuQSA4",
+  authDomain: "sistema-de-receitas-e-despesas.firebaseapp.com",
+  databaseURL: "https://sistema-de-receitas-e-despesas-default-rtdb.firebaseio.com",
+  projectId: "sistema-de-receitas-e-despesas",
+  storageBucket: "sistema-de-receitas-e-despesas.appspot.com",
+  messagingSenderId: "252102478972",
+  appId: "1:252102478972:web:c7e9e4c25b3bc7c6c50df9",
+  measurementId: "G-K2HCS7WNZV"
+        };
+        
+        // Inicialize o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // Função para monitorar mudanças na autenticação
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                const userId = user.uid;
+                database.ref('users/' + userId).once('value').then((snapshot) => {
+                    const userData = snapshot.val();
+                    const userName = userData ? userData.name : "Usuário";
+                    localStorage.setItem('username', userName);
+                    document.getElementById('userGreeting').innerHTML = user.email === 'fernandolapa1987@gmail.com' ? 
+                        '<span>Olá, <strong>Administrador!</strong></span>' : 
+                        '<span>Olá, <strong>' + userName + '</strong>!</span>';
+                    loadTransactions();
+                    checkAdmin(user.email);
+                });
+            } else {
+                window.location.href = 'index.html';  // Redirecionar para a página de login se não estiver autenticado
+            }
+        });
+
+        let transactions = [];
+        let lastTransactionId = localStorage.getItem('lastTransactionId');
+        let allUsers = [];
+        let monthlyLimit = parseCurrency(localStorage.getItem('monthlyLimit') || '0,00');
+
+        function saveTransactions() {
+            const userId = auth.currentUser.uid;
+            database.ref('transactions/' + userId).set(transactions);
+        }
+
+        function loadTransactions() {
+            const userId = auth.currentUser.uid;
+            database.ref('transactions/' + userId).once('value', function(snapshot) {
+                if (snapshot.val()) {
+                    transactions = snapshot.val();
+                    updateDescriptionList();
+                    updateFilteredView();
+                    calculateBalances();
+                }
+            });
+        }
+
+        function checkAdmin(email) {
+            if (email === 'fernandolapa1987@gmail.com') {
+                document.getElementById('adminIcon').style.display = 'block';
+                loadAllUsers();
+            }
+        }
+
+        function loadAllUsers() {
+            database.ref('users').once('value').then((snapshot) => {
+                const users = snapshot.val();
+                for (let uid in users) {
+                    allUsers.push({ uid, name: users[uid].name });
+                }
+            });
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function parseCurrency(value) {
+            return parseFloat(value.replace(/\./g, '').replace(',', '.').replace('R$', '')) || 0;
+        }
+
+        function addTransaction() {
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+            const amountInput = document.getElementById('amount');
+            const amount = parseCurrency(amountInput.value);
+            const type = document.getElementById('type').value;
+
+            const transaction = { id: generateTransactionId(), date, description, amount, type };
+            transactions.push(transaction);
+            lastTransactionId = transaction.id;
+            localStorage.setItem('lastTransactionId', lastTransactionId);
+
+            saveTransactions();
+            updateDescriptionList();
+            updateFilteredView();
+            calculateBalances();
+
+            // Reset form fields
+            document.getElementById('date').value = getCurrentDate();
+            document.getElementById('description').value = '';
+            amountInput.value = '0,00';
+            document.getElementById('type').value = 'receita';
+        }
+
+        function generateTransactionId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function updateDescriptionList() {
+            const filterDescription = document.getElementById('filterDescription');
+            filterDescription.innerHTML = '<option value="">Todos</option>';
+            const uniqueDescriptions = [...new Set(transactions.map(t => t.description))];
+            uniqueDescriptions.forEach(description => {
+                const option = document.createElement('option');
+                option.value = description;
+                option.text = description;
+                filterDescription.appendChild(option);
+            });
+        }
+
+        function updateFilteredView() {
+            const selectedDate = document.getElementById('date').value;
+            const tbody = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+
+            transactions.forEach(transaction => {
+                if (transaction.date === selectedDate) {
+                    const row = tbody.insertRow();
+                    
+                    const cellDate = row.insertCell(0);
+                    const cellDescription = row.insertCell(1);
+                    const cellAmount = row.insertCell(2);
+                    const cellType = row.insertCell(3);
+                    const cellAction = row.insertCell(4); // Nova célula para o ícone de remoção
+
+                    cellDate.innerText = transaction.date;
+                    cellDescription.innerHTML = `<div class="transaction-description">
+                                                    <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
+                                                    ${transaction.description}
+                                                 </div>`;
+                    cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
+                    cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
+                    cellAction.innerHTML = `<i class="fas fa-trash-alt" onclick="confirmRemoveTransaction('${transaction.id}')" style="cursor:pointer; color:red;"></i>`;
+                }
+            });
+
+            calculateBalances();
+        }
+
+        function confirmRemoveTransaction(transactionId) {
+            if (confirm('Tem certeza que deseja remover esta transação?')) {
+                removeTransaction(transactionId);
+            }
+        }
+
+        function removeTransaction(transactionId) {
+            transactions = transactions.filter(transaction => transaction.id !== transactionId);
+            saveTransactions();
+            updateDescriptionList();
+            updateFilteredView();
+            calculateBalances();
+        }
+
+        function calculateBalances() {
+            const selectedDate = document.getElementById('date').value;
+            const currentMonth = selectedDate.slice(0, 7);
+            const currentYear = selectedDate.slice(0, 4);
+
+            let dailyBalance = 0;
+            let monthlyBalance = 0;
+            let annualBalance = 0;
+
+            transactions.forEach(transaction => {
+                if (transaction.date === selectedDate) {
+                    dailyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
+                }
+
+                if (transaction.date.startsWith(currentMonth)) {
+                    monthlyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
+                }
+
+                if (transaction.date.startsWith(currentYear)) {
+                    annualBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
+                }
+            });
+
+            const dailyBalanceSpan = document.getElementById('dailyBalance');
+            const monthlyBalanceSpan = document.getElementById('monthlyBalance');
+            const annualBalanceSpan = document.getElementById('annualBalance');
+
+            dailyBalanceSpan.innerText = formatCurrency(dailyBalance);
+            monthlyBalanceSpan.innerText = formatCurrency(monthlyBalance);
+            annualBalanceSpan.innerText = formatCurrency(annualBalance);
+
+            dailyBalanceSpan.classList.toggle('negative', dailyBalance < 0);
+            monthlyBalanceSpan.classList.toggle('negative', monthlyBalance < 0);
+            annualBalanceSpan.classList.toggle('negative', annualBalance < 0);
+        }
+
+        function filterByPeriod() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const filterType = document.getElementById('filterType').value;
+            const filterDescription = document.getElementById('filterDescription').value.toLowerCase();
+
+            let totalReceitas = 0;
+            let totalDespesas = 0;
+
+            const filteredTransactions = transactions.filter(transaction => 
+                transaction.date >= startDate && transaction.date <= endDate &&
+                (filterType === '' || transaction.type === filterType) &&
+                (filterDescription === '' || transaction.description.toLowerCase().includes(filterDescription))
+            );
+
+            const filteredTbody = document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0];
+            filteredTbody.innerHTML = '';
+
+            filteredTransactions.forEach(transaction => {
+                if (transaction.type === 'receita') {
+                    totalReceitas += transaction.amount;
+                } else if (transaction.type === 'despesa') {
+                    totalDespesas += transaction.amount;
+                }
+
+                const row = filteredTbody.insertRow();
+                const cellDate = row.insertCell(0);
+                const cellDescription = row.insertCell(1);
+                const cellAmount = row.insertCell(2);
+                const cellType = row.insertCell(3);
+
+                cellDate.innerText = transaction.date;
+                cellDescription.innerHTML = `<div class="transaction-description">
+                                                <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
+                                                ${transaction.description}
+                                             </div>`;
+                cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
+                cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
+            });
+
+            const totalSaldo = totalReceitas - totalDespesas;
+
+            const totalReceitasSpan = document.getElementById('totalReceitas');
+            const totalDespesasSpan = document.getElementById('totalDespesas');
+            const totalSaldoSpan = document.getElementById('totalSaldo');
+
+            totalReceitasSpan.innerText = formatCurrency(totalReceitas);
+            totalDespesasSpan.innerText = formatCurrency(totalDespesas);
+            totalSaldoSpan.innerText = formatCurrency(totalSaldo);
+
+            totalDespesasSpan.classList.add('negative');
+            totalSaldoSpan.classList.toggle('negative', totalSaldo < 0);
+        }
+
+        function clearFilter() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterDescription').value = '';
+            document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0].innerHTML = '';
+            document.getElementById('totalReceitas').innerText = 'R$ 0,00';
+            document.getElementById('totalDespesas').innerText = 'R$ 0,00';
+            document.getElementById('totalSaldo').innerText = 'R$ 0,00';
+        }
+
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.classList.remove('highlight');
+            });
+        });
+
+        function validateAmount() {
+            const amountInput = document.getElementById('amount');
+            amountInput.value = amountInput.value.replace(/[^\d,]/g, '');
+            amountInput.value = amountInput.value.replace(/(,.*?),(.*?)/g, '$1'); // Ensure only one comma
+        }
+
+        function getCurrentDate() {
+            const now = new Date();
+            const offset = -3; // Horário de Brasília (UTC-3)
+            const brasiliaTime = new Date(now.getTime() + offset * 3600 * 1000);
+            return brasiliaTime.toISOString().split('T')[0];
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('date');
+            dateInput.value = getCurrentDate();
+            updateFilteredView(); // Load transactions for the current date initially
+        });
+
+        function logout() {
+            auth.signOut().then(() => {
+                localStorage.removeItem('loggedIn');
+                localStorage.removeItem('username');
+                localStorage.removeItem('lastTransactionId');
+                window.location.href = 'index.html';
+            }).catch(error => {
+                console.error('Erro ao deslogar: ', error);
+            });
+        }
+
+        function toggleAdminSection() {
+            const adminSection = document.getElementById('adminSection');
+            adminSection.style.display = adminSection.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function registerNewUser() {
+            const name = document.getElementById('newUserName').value;
+            const email = document.getElementById('newUserEmail').value;
+            const password = document.getElementById('newUserPassword').value;
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    database.ref('users/' + user.uid).set({
+                        name: name,
+                        email: email
+                    }).then(() => {
+                        alert('Novo usuário registrado com sucesso.');
+                        document.getElementById('newUserName').value = '';
+                        document.getElementById('newUserEmail').value = '';
+                        document.getElementById('newUserPassword').value = '';
+                        loadAllUsers();
+                    });
+                })
+                .catch(error => {
+                    alert('Erro ao registrar novo usuário: ' + error.message);
+                });
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'block';
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+        }
+
+        function changePassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            const user = auth.currentUser;
+
+            user.updatePassword(newPassword).then(() => {
+                alert('Senha alterada com sucesso.');
+                closeChangePasswordModal();
+            }).catch(error => {
+                alert('Erro ao alterar senha: ' + error.message);
+            });
+        }
+
+        function goToLimitPage() {
+            window.location.href = 'definir_limite.html';
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const passwordField = document.getElementById(inputId);
+            const passwordToggle = passwordField.nextElementSibling;
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                passwordToggle.classList.remove('fa-eye');
+                passwordToggle.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                passwordToggle.classList.remove('fa-eye-slash');
+                passwordToggle.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>
