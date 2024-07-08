@@ -574,7 +574,7 @@ async function verDetalhes(id) {
             <p><span>Carro:</span> ${cliente ? cliente.carro : 'N/A'}</p>
             <p><span>Placa:</span> ${cliente ? cliente.placa : 'N/A'}</p>
             <p><span>Telefone:</span> ${cliente ? cliente.telefone : 'N/A'}</p>
-            <p><span>Hidrômetro:</span> ${cliente && cliente.hidrometro !== undefined ? cliente.hidrometro : 'N/A'}</p>
+            <p><span>Hodômetro:</span> ${cliente && cliente.hodometro !== undefined ? cliente.hodometro : 'N/A'}</p>
         </div>
         <div class="details-section">
             <h2>Produtos</h2>
@@ -696,7 +696,7 @@ function gerarPDF(id) {
     doc.text(`Carro: ${orcamento.carro || 'N/A'}`, 20, 42);
     doc.text(`Placa: ${orcamento.placa || 'N/A'}`, 20, 48);
     doc.text(`Telefone: ${orcamento.telefone || 'N/A'}`, 20, 54);
-    doc.text(`Hidrômetro: ${orcamento.hidrometro || 'N/A'}`, 20, 60);
+    doc.text(`Hodômetro: ${orcamento.hodometro || 'N/A'}`, 20, 60);
 
     doc.text('Produtos', 20, 70);
     let startY = 76;
@@ -720,6 +720,7 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
+
 
     </script>
 </body>
