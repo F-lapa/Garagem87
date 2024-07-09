@@ -405,8 +405,12 @@ auth.onAuthStateChanged(user => {
             localStorage.setItem('username', userName);
             document.getElementById('userGreeting').innerHTML = '<img src="LogoGaragem87.png" alt="Logo Garagem 87">';
             loadTransactions();
+        }).catch(error => {
+            console.error("Erro ao obter dados do usuário:", error);
+            window.location.href = 'index.html'; // Redirecionar se houver erro ao obter dados do usuário
         });
     } else {
+        console.warn("Usuário não autenticado. Redirecionando para a página de login.");
         window.location.href = 'index.html';  // Redirecionar para a página de login se não estiver autenticado
     }
 });
@@ -417,7 +421,9 @@ let monthlyLimit = parseCurrency(localStorage.getItem('monthlyLimit') || '0,00')
 
 function saveTransactions() {
     const userId = auth.currentUser.uid;
-    db.collection('transactions').doc(userId).set({ transactions });
+    db.collection('transactions').doc(userId).set({ transactions }).catch(error => {
+        console.error("Erro ao salvar transações:", error);
+    });
 }
 
 function loadTransactions() {
@@ -429,6 +435,8 @@ function loadTransactions() {
             updateFilteredView();
             calculateBalances();
         }
+    }).catch(error => {
+        console.error("Erro ao carregar transações:", error);
     });
 }
 
@@ -674,6 +682,7 @@ function registerNewUser() {
             });
         })
         .catch(error => {
+            console.error("Erro ao registrar novo usuário:", error);
             alert('Erro ao registrar novo usuário: ' + error.message);
         });
 }
@@ -695,6 +704,30 @@ function togglePasswordVisibility(inputId) {
         passwordToggle.classList.add('fa-eye');
     }
 }
+
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').style.display = 'none';
+}
+
+function changePassword() {
+    const newPassword = document.getElementById('newPassword').value;
+    const user = auth.currentUser;
+    if (user) {
+        user.updatePassword(newPassword).then(() => {
+            alert('Senha alterada com sucesso!');
+            closeChangePasswordModal();
+        }).catch(error => {
+            console.error("Erro ao alterar senha:", error);
+            alert('Erro ao alterar senha: ' + error.message);
+        });
+    }
+}
+
+document.querySelectorAll('.close').forEach(closeBtn => {
+    closeBtn.addEventListener('click', function() {
+        this.closest('.modal').style.display = 'none';
+    });
+
     </script>
 </body>
 </html>
