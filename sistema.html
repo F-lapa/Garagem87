@@ -380,6 +380,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script>
         // Configuração do Firebase
+// Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
     authDomain: "garagem87-c652e.firebaseapp.com",
@@ -394,24 +395,28 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// Função para monitorar mudanças na autenticação
-auth.onAuthStateChanged(user => {
-    if (user) {
-        const userId = user.uid;
-        db.collection('users').doc(userId).get().then((snapshot) => {
-            const userData = snapshot.data();
-            const userName = userData ? userData.name : "Usuário";
-            localStorage.setItem('username', userName);
-            document.getElementById('userGreeting').innerHTML = '<img src="LogoGaragem87.png" alt="Logo Garagem 87">';
-            loadTransactions();
-        }).catch(error => {
-            console.error("Erro ao obter dados do usuário:", error);
-            window.location.href = 'index.html'; // Redirecionar se houver erro ao obter dados do usuário
-        });
-    } else {
-        console.warn("Usuário não autenticado. Redirecionando para a página de login.");
-        window.location.href = 'index.html';  // Redirecionar para a página de login se não estiver autenticado
-    }
+function verificarAutenticacao(callback) {
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            callback(user);
+        } else {
+            window.location.href = 'index.html'; // Redirecionar para a página de login se não estiver autenticado
+        }
+    });
+}
+
+verificarAutenticacao((user) => {
+    const userId = user.uid;
+    db.collection('users').doc(userId).get().then((snapshot) => {
+        const userData = snapshot.data();
+        const userName = userData ? userData.name : "Usuário";
+        localStorage.setItem('username', userName);
+        document.getElementById('userGreeting').innerHTML = '<img src="LogoGaragem87.png" alt="Logo Garagem 87">';
+        loadTransactions();
+    }).catch(error => {
+        console.error("Erro ao obter dados do usuário:", error);
+        window.location.href = 'index.html'; // Redirecionar se houver erro ao obter dados do usuário
+    });
 });
 
 let transactions = [];
@@ -740,6 +745,7 @@ function addTouchEvents() {
 document.addEventListener('DOMContentLoaded', function() {
     addTouchEvents();
 });
+
 </script>
 </body>
 </html>
