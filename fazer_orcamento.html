@@ -390,7 +390,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
-        const firebaseConfig = {
+       const firebaseConfig = {
     apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
     authDomain: "garagem87-c652e.firebaseapp.com",
     projectId: "garagem87-c652e",
@@ -719,46 +719,9 @@ function compartilharOrcamento(id) {
         return `${produto.quantidade}x ${produto.produto} - R$ ${produto.preco.toFixed(2)} cada\n`;
     }).join('');
 
-    const detalhes = `
-    Orçamento - Garagem 87
-
-    Cliente: ${orcamento.nomeCliente}
-    Carro: ${orcamento.carro || 'N/A'}
-    Placa: ${orcamento.placa || 'N/A'}
-    Telefone: ${orcamento.telefone || 'N/A'}
-    Hodômetro: ${orcamento.hodometro || 'N/A'}
-
-    Produtos:
-    ${produtosDetalhados}
-
-    Mão de Obra:
-    Descrição: ${orcamento.descricaoServico}
-    Valor: R$ ${orcamento.servico.toFixed(2)}
-
-    Totais:
-    Valor Total dos Produtos: R$ ${orcamento.valorTotalProdutos.toFixed(2)}
-    Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}
-
-    ${orcamento.confirmado ? `Confirmado em: ${new Date(orcamento.timestamp.toDate()).toLocaleDateString()}` : ''}
-    `;
-
-    if (navigator.share) {
-        navigator.share({
-            title: 'Orçamento - Garagem 87',
-            text: detalhes
-        }).catch(error => {
-            console.error("Erro ao compartilhar o orçamento:", error);
-        });
-    } else {
-        alert("Compartilhamento não suportado neste navegador.");
-    }
-}
-
-function gerarPDF(id) {
-    const orcamento = orcamentos.find(orc => orc.id === id);
     const { jsPDF } = window.jspdf;
-
     const doc = new jsPDF();
+
     doc.setFontSize(16);
     doc.text('Detalhes do Orçamento', 20, 20);
 
@@ -778,7 +741,7 @@ function gerarPDF(id) {
     doc.text('Quantidade   Descrição                  Valor        Valor Total', 25, startY - 2);
     doc.setTextColor(0, 0, 0);
     startY += 2;
-    orcamento.produtos.forEach((produto, index) => {
+    orcamento.produtos.forEach((produto) => {
         doc.text(`${produto.quantidade}            ${produto.produto}                  R$ ${produto.preco.toFixed(2)}    R$ ${(produto.preco * produto.quantidade).toFixed(2)}`, 25, startY);
         startY += 10;
     });
@@ -790,7 +753,30 @@ function gerarPDF(id) {
     doc.text('Totais', 20, startY + 32);
     doc.text(`Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}`, 20, startY + 38);
 
+    if (orcamento.confirmado && orcamento.timestamp) {
+        const timestamp = orcamento.timestamp.toDate();
+        const dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+        doc.text(`Confirmado em: ${dataConfirmacao}`, 20, startY + 48);
+    }
+
     doc.save(`Orcamento-${orcamento.nomeCliente}.pdf`);
+
+    const pdfBlob = doc.output('blob');
+    const file = new File([pdfBlob], `Orcamento-${orcamento.nomeCliente}.pdf`, {
+        type: 'application/pdf',
+    });
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Orçamento - Garagem 87',
+            text: `Olá, ${orcamento.nomeCliente}. Segue em anexo o orçamento detalhado.`,
+            files: [file]
+        }).catch(error => {
+            console.error("Erro ao compartilhar o orçamento:", error);
+        });
+    } else {
+        alert("Compartilhamento não suportado neste navegador.");
+    }
 }
 
 window.onload = function() {
@@ -798,6 +784,7 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
+
     </script>
 </body>
 </html>
