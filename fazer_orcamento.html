@@ -387,8 +387,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
-    const firebaseConfig = {
-    const firebaseConfig = {
+    
+        const firebaseConfig = {
     apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
     authDomain: "garagem87-c652e.firebaseapp.com",
     projectId: "garagem87-c652e",
@@ -623,7 +623,7 @@ async function verDetalhes(id) {
                 <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
             </div>
         </div>
-        <button class="btn-modal" onclick="compartilharOrcamento('${id}')"><i class="fas fa-share-alt"></i> Compartilhar</button>
+        <button id="btn-compartilhar" class="btn-modal" onclick="compartilharOrcamento('${id}')"><i class="fas fa-share-alt"></i> Compartilhar</button>
     `;
     abrirModal('modalDetalhes');
 }
@@ -715,6 +715,8 @@ function buscarOrcamentos(event) {
 function compartilharOrcamento(id) {
     const orcamento = orcamentos.find(orc => orc.id === id);
     const detalhesModalBody = document.getElementById('orcamento-detalhes');
+    const btnCompartilhar = document.getElementById('btn-compartilhar');
+    btnCompartilhar.style.display = 'none';
 
     html2canvas(detalhesModalBody, { scale: 2 }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
@@ -737,6 +739,7 @@ function compartilharOrcamento(id) {
         }
 
         pdf.save(`Orcamento-${orcamento.nomeCliente}.pdf`);
+        btnCompartilhar.style.display = 'block';
     });
 }
 
@@ -745,6 +748,7 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
+
 
     </script>
 </body>
