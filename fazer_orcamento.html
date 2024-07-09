@@ -744,6 +744,9 @@ function compartilharOrcamento(id) {
             type: 'application/pdf',
         });
 
+        const url = URL.createObjectURL(file);
+        const whatsappUrl = `https://api.whatsapp.com/send?text=Olá, ${orcamento.nomeCliente}. Segue em anexo o orçamento detalhado: ${url}`;
+
         if (navigator.share) {
             navigator.share({
                 title: 'Orçamento - Garagem 87',
@@ -753,7 +756,7 @@ function compartilharOrcamento(id) {
                 console.error("Erro ao compartilhar o orçamento:", error);
             });
         } else {
-            alert("Compartilhamento não suportado neste navegador.");
+            window.open(whatsappUrl, '_blank');
         }
     });
 }
@@ -763,6 +766,7 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
+
 
     </script>
 </body>
