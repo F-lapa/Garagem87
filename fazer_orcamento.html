@@ -623,7 +623,6 @@ async function verDetalhes(id) {
                 <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
             </div>
         </div>
-        <button id="btn-compartilhar" class="btn-modal" onclick="compartilharOrcamento('${id}')"><i class="fas fa-share-alt"></i> Compartilhar</button>
     `;
     abrirModal('modalDetalhes');
 }
@@ -710,37 +709,6 @@ function exibirOrcamentos(filtro = "") {
 function buscarOrcamentos(event) {
     const filtro = event.target.value;
     exibirOrcamentos(filtro);
-}
-
-function compartilharOrcamento(id) {
-    const orcamento = orcamentos.find(orc => orc.id === id);
-    const detalhesModalBody = document.getElementById('orcamento-detalhes');
-    const btnCompartilhar = document.getElementById('btn-compartilhar');
-    btnCompartilhar.style.display = 'none';
-
-    html2canvas(detalhesModalBody, { scale: 2 }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210; // Largura da página A4 em mm
-        const pageHeight = 295; // Altura da página A4 em mm
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
-        pdf.save(`Orcamento-${orcamento.nomeCliente}.pdf`);
-        btnCompartilhar.style.display = 'block';
-    });
 }
 
 window.onload = function() {
