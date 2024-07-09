@@ -240,6 +240,10 @@
             font-size: 16px;
             font-weight: bold;
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         .btn-modal:hover {
             background-color: #9a0007; /* Cor mais escura para o hover */
@@ -278,6 +282,23 @@
         .details-header .close {
             font-size: 20px;
             cursor: pointer;
+        }
+        .btn-enviar {
+            background-color: #d32f2f; /* Cor combinando com o logotipo */
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+            display: block;
+            width: 100%;
+        }
+        .btn-enviar:hover {
+            background-color: #9a0007; /* Cor mais escura para o hover */
         }
         .orcamento-item span {
             cursor: pointer;
@@ -358,19 +379,18 @@
                 <img src="LogoGaragem87.png" alt="Logo da Garagem87">
                 <h2>Detalhes do Orçamento</h2>
                 <span class="close" onclick="fecharModal('modalDetalhes')">&times;</span>
+                <div id="data-confirmacao" style="position: absolute; top: 10px; right: 10px; font-size: 12px; color: gray;"></div>
             </div>
             <div class="modal-body" id="detalhes-modal-body">
                 <!-- Detalhes do orçamento serão preenchidos aqui -->
             </div>
         </div>
     </div>
-
-    <!-- Firebase Configuration -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
-      const firebaseConfig = {
+        const firebaseConfig = {
     apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
     authDomain: "garagem87-c652e.firebaseapp.com",
     projectId: "garagem87-c652e",
@@ -560,6 +580,7 @@ async function verDetalhes(id) {
     if (orcamento.confirmado && orcamento.timestamp) {
         const timestamp = orcamento.timestamp.toDate();
         dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+        document.getElementById('data-confirmacao').innerText = `Confirmado em: ${dataConfirmacao}`;
     }
 
     const detalhesModalBody = document.getElementById('detalhes-modal-body');
@@ -603,7 +624,7 @@ async function verDetalhes(id) {
             <h2>Totais</h2>
             <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
         </div>
-        ${dataConfirmacao ? `<div style="position: absolute; top: 10px; right: 10px; font-size: 12px; color: gray;">Confirmado em: ${dataConfirmacao}</div>` : ''}
+        <button class="btn-modal" onclick="compartilharOrcamento('${id}')"><i class="fas fa-share-alt"></i> Compartilhar</button>
     `;
     abrirModal('modalDetalhes');
 }
@@ -667,12 +688,17 @@ function exibirOrcamentos(filtro = "") {
         .sort((a, b) => b.timestamp - a.timestamp) // Ordenar do mais recente para o mais antigo
         .forEach(async orcamento => {
             const cliente = await obterCliente(orcamento.nomeCliente);
+            let dataConfirmacao = "";
+            if (orcamento.confirmado && orcamento.timestamp) {
+                const timestamp = orcamento.timestamp.toDate();
+                dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+            }
             const orcamentoItem = document.createElement('div');
             orcamentoItem.className = 'orcamento-item';
             orcamentoItem.innerHTML = `
                 <span onclick="verDetalhes('${orcamento.id}')">${orcamento.nomeCliente} - ${cliente ? cliente.carro : 'N/A'}</span>
                 <div>
-                    ${orcamento.confirmado ? '<span class="orcamento-confirmado">Confirmado</span>' : `
+                    ${orcamento.confirmado ? `<span class="orcamento-confirmado">Confirmado em: ${dataConfirmacao}</span>` : `
                     <button onclick="abrirModalConfirmacao('confirmar', '${orcamento.id}')"><i class="fas fa-check"></i></button>
                     `}
                     <button onclick="abrirModalConfirmacao('excluir', '${orcamento.id}')"><i class="fas fa-trash"></i></button>
@@ -685,6 +711,47 @@ function exibirOrcamentos(filtro = "") {
 function buscarOrcamentos(event) {
     const filtro = event.target.value;
     exibirOrcamentos(filtro);
+}
+
+function compartilharOrcamento(id) {
+    const orcamento = orcamentos.find(orc => orc.id === id);
+    const produtosDetalhados = orcamento.produtos.map(produto => {
+        return `${produto.quantidade}x ${produto.produto} - R$ ${produto.preco.toFixed(2)} cada\n`;
+    }).join('');
+
+    const detalhes = `
+    Orçamento - Garagem 87
+
+    Cliente: ${orcamento.nomeCliente}
+    Carro: ${orcamento.carro || 'N/A'}
+    Placa: ${orcamento.placa || 'N/A'}
+    Telefone: ${orcamento.telefone || 'N/A'}
+    Hodômetro: ${orcamento.hodometro || 'N/A'}
+
+    Produtos:
+    ${produtosDetalhados}
+
+    Mão de Obra:
+    Descrição: ${orcamento.descricaoServico}
+    Valor: R$ ${orcamento.servico.toFixed(2)}
+
+    Totais:
+    Valor Total dos Produtos: R$ ${orcamento.valorTotalProdutos.toFixed(2)}
+    Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}
+
+    ${orcamento.confirmado ? `Confirmado em: ${new Date(orcamento.timestamp.toDate()).toLocaleDateString()}` : ''}
+    `;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Orçamento - Garagem 87',
+            text: detalhes
+        }).catch(error => {
+            console.error("Erro ao compartilhar o orçamento:", error);
+        });
+    } else {
+        alert("Compartilhamento não suportado neste navegador.");
+    }
 }
 
 function gerarPDF(id) {
@@ -731,8 +798,6 @@ window.onload = function() {
     carregarClientes();
     carregarOrcamentos();
 }
-
-
     </script>
 </body>
 </html>
