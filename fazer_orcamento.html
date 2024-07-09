@@ -310,6 +310,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -720,6 +721,7 @@ function compartilharOrcamento(id) {
 
     html2canvas(detalhesModalBody).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
         const imgWidth = 210;
         const pageHeight = 295;
