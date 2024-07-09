@@ -371,340 +371,398 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
-            authDomain: "garagem87-c652e.firebaseapp.com",
-            projectId: "garagem87-c652e",
-            storageBucket: "garagem87-c652e.appspot.com",
-            messagingSenderId: "325224720529",
-            appId: "1:325224720529:web:bfed4699261241f7ddf730",
-            measurementId: "G-83FY7T6X2D"
-        };
+    apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
+    authDomain: "garagem87-c652e.firebaseapp.com",
+    projectId: "garagem87-c652e",
+    storageBucket: "garagem87-c652e.appspot.com",
+    messagingSenderId: "325224720529",
+    appId: "1:325224720529:web:bfed4699261241f7ddf730",
+    measurementId: "G-83FY7T6X2D"
+};
+
 firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const auth = firebase.auth();
+const db = firebase.firestore();
 
-// Função para monitorar mudanças na autenticação
-auth.onAuthStateChanged(user => {
-    if (user) {
-        const userId = user.uid;
-        database.ref('users/' + userId).once('value').then((snapshot) => {
-            const userData = snapshot.val();
-            const userName = userData ? userData.name : "Usuário";
-            localStorage.setItem('username', userName);
-            document.getElementById('userGreeting').innerHTML = '<img src="LogoGaragem87.png" alt="Logo Garagem 87">';
-            loadTransactions();
+let produtos = [];
+let clientes = [];
+let orcamentos = [];
+let acaoConfirmada = null;
+
+function carregarProdutos() {
+    db.collection("produtos").get().then((querySnapshot) => {
+        produtos = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const preco = parseFloat(data.valor);
+            return {
+                produto: data.produto,
+                preco: isNaN(preco) ? 0 : preco
+            };
         });
-    } else {
-        window.location.href = 'index.html';  // Redirecionar para a página de login se não estiver autenticado
-    }
-});
-
-let transactions = [];
-let lastTransactionId = localStorage.getItem('lastTransactionId');
-let allUsers = [];
-let monthlyLimit = parseCurrency(localStorage.getItem('monthlyLimit') || '0,00');
-
-function saveTransactions() {
-    const userId = auth.currentUser.uid;
-    database.ref('transactions/' + userId).set(transactions);
-}
-
-function loadTransactions() {
-    const userId = auth.currentUser.uid;
-    database.ref('transactions/' + userId).once('value', function(snapshot) {
-        if (snapshot.val()) {
-            transactions = snapshot.val();
-            updateDescriptionList();
-            updateFilteredView();
-            calculateBalances();
-        }
-    });
-}
-
-function formatCurrency(value) {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function parseCurrency(value) {
-    return parseFloat(value.replace(/\./g, '').replace(',', '.').replace('R$', '')) || 0;
-}
-
-function addTransaction() {
-    const date = document.getElementById('date').value;
-    const description = document.getElementById('description').value;
-    const amountInput = document.getElementById('amount');
-    const amount = parseCurrency(amountInput.value);
-    const type = document.getElementById('type').value;
-
-    const transaction = { id: generateTransactionId(), date, description, amount, type };
-    transactions.push(transaction);
-    lastTransactionId = transaction.id;
-    localStorage.setItem('lastTransactionId', lastTransactionId);
-
-    saveTransactions();
-    updateDescriptionList();
-    updateFilteredView();
-    calculateBalances();
-
-    // Reset form fields
-    document.getElementById('date').value = getCurrentDate();
-    document.getElementById('description').value = '';
-    amountInput.value = '0,00';
-    document.getElementById('type').value = 'receita';
-}
-
-function generateTransactionId() {
-    return '_' + Math.random().toString(36).substr(2, 9);
-}
-
-function updateDescriptionList() {
-    const filterDescription = document.getElementById('filterDescription');
-    filterDescription.innerHTML = '<option value="">Todos</option>';
-    const uniqueDescriptions = [...new Set(transactions.map(t => t.description))];
-    uniqueDescriptions.forEach(description => {
-        const option = document.createElement('option');
-        option.value = description;
-        option.text = description;
-        filterDescription.appendChild(option);
-    });
-}
-
-function updateFilteredView() {
-    const selectedDate = document.getElementById('date').value;
-    const tbody = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
-    tbody.innerHTML = '';
-
-    transactions.forEach(transaction => {
-        if (transaction.date === selectedDate) {
-            const row = tbody.insertRow();
-            
-            const cellDate = row.insertCell(0);
-            const cellDescription = row.insertCell(1);
-            const cellAmount = row.insertCell(2);
-            const cellType = row.insertCell(3);
-            const cellAction = row.insertCell(4); // Nova célula para o ícone de remoção
-
-            cellDate.innerText = transaction.date;
-            cellDescription.innerHTML = `<div class="transaction-description">
-                                            <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
-                                            ${transaction.description}
-                                         </div>`;
-            cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
-            cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
-            cellAction.innerHTML = `<i class="fas fa-trash-alt" onclick="confirmRemoveTransaction('${transaction.id}')" style="cursor:pointer; color:red;"></i>`;
-        }
-    });
-
-    calculateBalances();
-}
-
-function confirmRemoveTransaction(transactionId) {
-    if (confirm('Tem certeza que deseja remover esta transação?')) {
-        removeTransaction(transactionId);
-    }
-}
-
-function removeTransaction(transactionId) {
-    transactions = transactions.filter(transaction => transaction.id !== transactionId);
-    saveTransactions();
-    updateDescriptionList();
-    updateFilteredView();
-    calculateBalances();
-}
-
-function calculateBalances() {
-    const selectedDate = document.getElementById('date').value;
-    const currentMonth = selectedDate.slice(0, 7);
-    const currentYear = selectedDate.slice(0, 4);
-
-    let dailyBalance = 0;
-    let monthlyBalance = 0;
-    let annualBalance = 0;
-
-    transactions.forEach(transaction => {
-        if (transaction.date === selectedDate) {
-            dailyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
-        }
-
-        if (transaction.date.startsWith(currentMonth)) {
-            monthlyBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
-        }
-
-        if (transaction.date.startsWith(currentYear)) {
-            annualBalance += transaction.type === 'receita' ? transaction.amount : -transaction.amount;
-        }
-    });
-
-    const dailyBalanceSpan = document.getElementById('dailyBalance');
-    const monthlyBalanceSpan = document.getElementById('monthlyBalance');
-    const annualBalanceSpan = document.getElementById('annualBalance');
-
-    dailyBalanceSpan.innerText = formatCurrency(dailyBalance);
-    monthlyBalanceSpan.innerText = formatCurrency(monthlyBalance);
-    annualBalanceSpan.innerText = formatCurrency(annualBalance);
-
-    dailyBalanceSpan.classList.toggle('negative', dailyBalance < 0);
-    monthlyBalanceSpan.classList.toggle('negative', monthlyBalance < 0);
-    annualBalanceSpan.classList.toggle('negative', annualBalance < 0);
-}
-
-function filterByPeriod() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const filterType = document.getElementById('filterType').value;
-    const filterDescription = document.getElementById('filterDescription').value.toLowerCase();
-
-    let totalReceitas = 0;
-    let totalDespesas = 0;
-
-    const filteredTransactions = transactions.filter(transaction => 
-        transaction.date >= startDate && transaction.date <= endDate &&
-        (filterType === '' || transaction.type === filterType) &&
-        (filterDescription === '' || transaction.description.toLowerCase().includes(filterDescription))
-    );
-
-    const filteredTbody = document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0];
-    filteredTbody.innerHTML = '';
-
-    filteredTransactions.forEach(transaction => {
-        if (transaction.type === 'receita') {
-            totalReceitas += transaction.amount;
-        } else if (transaction.type === 'despesa') {
-            totalDespesas += transaction.amount;
-        }
-
-        const row = filteredTbody.insertRow();
-        const cellDate = row.insertCell(0);
-        const cellDescription = row.insertCell(1);
-        const cellAmount = row.insertCell(2);
-        const cellType = row.insertCell(3);
-
-        cellDate.innerText = transaction.date;
-        cellDescription.innerHTML = `<div class="transaction-description">
-                                        <i class="transaction-icon ${transaction.type === 'receita' ? 'fas fa-arrow-circle-up' : 'fas fa-arrow-circle-down'}" style="color: ${transaction.type === 'receita' ? 'green' : 'red'};"></i>
-                                        ${transaction.description}
-                                     </div>`;
-        cellAmount.innerHTML = `<div class="transaction-amount ${transaction.type}">${formatCurrency(transaction.amount)}</div>`;
-        cellType.innerText = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
-    });
-
-    const totalSaldo = totalReceitas - totalDespesas;
-
-    const totalReceitasSpan = document.getElementById('totalReceitas');
-    const totalDespesasSpan = document.getElementById('totalDespesas');
-    const totalSaldoSpan = document.getElementById('totalSaldo');
-
-    totalReceitasSpan.innerText = formatCurrency(totalReceitas);
-    totalDespesasSpan.innerText = formatCurrency(totalDespesas);
-    totalSaldoSpan.innerText = formatCurrency(totalSaldo);
-
-    totalDespesasSpan.classList.add('negative');
-    totalSaldoSpan.classList.toggle('negative', totalSaldo < 0);
-}
-
-function clearFilter() {
-    document.getElementById('startDate').value = '';
-    document.getElementById('endDate').value = '';
-    document.getElementById('filterType').value = '';
-    document.getElementById('filterDescription').value = '';
-    document.getElementById('filteredTransactionsTable').getElementsByTagName('tbody')[0].innerHTML = '';
-    document.getElementById('totalReceitas').innerText = 'R$ 0,00';
-    document.getElementById('totalDespesas').innerText = 'R$ 0,00';
-    document.getElementById('totalSaldo').innerText = 'R$ 0,00';
-}
-
-const inputs = document.querySelectorAll('input, select');
-inputs.forEach(input => {
-    input.addEventListener('focus', function() {
-        this.classList.remove('highlight');
-    });
-});
-
-function validateAmount() {
-    const amountInput = document.getElementById('amount');
-    amountInput.value = amountInput.value.replace(/[^\d,]/g, '');
-    amountInput.value = amountInput.value.replace(/(,.*?),(.*?)/g, '$1'); // Ensure only one comma
-}
-
-function getCurrentDate() {
-    const now = new Date();
-    const offset = -3; // Horário de Brasília (UTC-3)
-    const brasiliaTime = new Date(now.getTime() + offset * 3600 * 1000);
-    return brasiliaTime.toISOString().split('T')[0];
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const dateInput = document.getElementById('date');
-    dateInput.value = getCurrentDate();
-    updateFilteredView(); // Load transactions for the current date initially
-});
-
-function toggleAdminSection() {
-    const adminSection = document.getElementById('adminSection');
-    adminSection.style.display = adminSection.style.display === 'block' ? 'none' : 'block';
-}
-
-function registerNewUser() {
-    const name = document.getElementById('newUserName').value;
-    const email = document.getElementById('newUserEmail').value;
-    const password = document.getElementById('newUserPassword').value;
-
-    auth.createUserWithEmailAndPassword(email, password)
-        .then(userCredential => {
-            const user = userCredential.user;
-            database.ref('users/' + user.uid).set({
-                name: name,
-                email: email
-            }).then(() => {
-                alert('Novo usuário registrado com sucesso.');
-                document.getElementById('newUserName').value = '';
-                document.getElementById('newUserEmail').value = '';
-                document.getElementById('newUserPassword').value = '';
-                loadAllUsers();
+        const productSelects = document.querySelectorAll('select[name="produtos"]');
+        productSelects.forEach(select => {
+            const selectedValue = select.value;  // Capturar o valor selecionado
+            select.innerHTML = '<option value="">Nenhum Produto</option>';
+            produtos.forEach(produto => {
+                const preco = produto.preco.toFixed(2);
+                const option = document.createElement('option');
+                option.value = produto.produto;
+                option.textContent = `${produto.produto} - R$ ${preco}`;
+                select.appendChild(option);
             });
-        })
-        .catch(error => {
-            alert('Erro ao registrar novo usuário: ' + error.message);
+            select.value = selectedValue;  // Restaurar o valor selecionado
         });
-}
-
-function openChangePasswordModal() {
-    document.getElementById('changePasswordModal').style.display = 'block';
-}
-
-function closeChangePasswordModal() {
-    document.getElementById('changePasswordModal').style.display = 'none';
-}
-
-function changePassword() {
-    const newPassword = document.getElementById('newPassword').value;
-    const user = auth.currentUser;
-
-    user.updatePassword(newPassword).then(() => {
-        alert('Senha alterada com sucesso.');
-        closeChangePasswordModal();
     }).catch(error => {
-        alert('Erro ao alterar senha: ' + error.message);
+        console.error("Erro ao carregar produtos:", error);
     });
 }
 
-function goToLimitPage() {
-    window.location.href = 'definir_limite.html';
+function carregarClientes() {
+    db.collection("clientes").get().then((querySnapshot) => {
+        clientes = querySnapshot.docs.map(doc => doc.data());
+        const clienteSelect = document.getElementById('nome-cliente');
+        clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.nome;
+            option.textContent = cliente.nome;
+            clienteSelect.appendChild(option);
+        });
+    }).catch(error => {
+        console.error("Erro ao carregar clientes:", error);
+    });
 }
 
-function togglePasswordVisibility(inputId) {
-    const passwordField = document.getElementById(inputId);
-    const passwordToggle = passwordField.nextElementSibling;
-    if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        passwordToggle.classList.remove('fa-eye');
-        passwordToggle.classList.add('fa-eye-slash');
+function adicionarProduto() {
+    const productList = document.getElementById('product-list');
+    const productItem = document.createElement('div');
+    productItem.className = 'product-item';
+    productItem.innerHTML = `
+        <select name="produtos" required>
+            <option value="">Nenhum Produto</option>
+            <!-- Os produtos serão adicionados aqui -->
+        </select>
+        <input type="number" name="quantidade" min="1" required>
+        <div class="add-product" onclick="adicionarProduto()">+</div>
+        <div class="remove-product" onclick="removerProduto(this)">-</div>
+    `;
+    productList.appendChild(productItem);
+    carregarProdutos();
+}
+
+function removerProduto(element) {
+    element.parentNode.remove();
+}
+
+function enviarOrcamento(event) {
+    event.preventDefault();
+    const form = document.getElementById('orcamento-form');
+    const nomeCliente = form['nome-cliente'].value;
+    const servico = parseFloat(form.servico.value);
+    const descricaoServico = form['descricao-servico'].value || '';
+    const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
+        .map((select, index) => {
+            const produtoNome = select.value.split(' - ')[0];
+            const produto = produtos.find(prod => prod.produto === produtoNome);
+            if (!produto) {
+                console.error(`Produto não encontrado: ${produtoNome}`);
+                return null;
+            }
+            const quantidade = parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value);
+            if (isNaN(quantidade) || quantidade <= 0) {
+                console.error(`Quantidade inválida para o produto: ${produto.produto}`);
+                return null;
+            }
+            if (isNaN(produto.preco)) {
+                console.error(`Preço inválido para o produto: ${produto.produto}`);
+                return null;
+            }
+            return {
+                produto: produto.produto,
+                quantidade,
+                preco: produto.preco
+            };
+        })
+        .filter(item => item !== null);  // Filtra produtos não preenchidos ou inválidos
+
+    if (produtosSelecionados.length === 0) {
+        alert("Nenhum produto selecionado.");
+        return;
+    }
+
+    const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
+        if (isNaN(item.preco) || isNaN(item.quantidade)) {
+            console.error(`Dados inválidos para o produto: ${item.produto}`);
+            return total;
+        }
+        return total + item.preco * item.quantidade;
+    }, 0);
+
+    const valorTotal = parseFloat(servico) + valorTotalProdutos;
+
+    const orcamento = {
+        nomeCliente,
+        servico,
+        descricaoServico,
+        valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
+        valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
+        produtos: produtosSelecionados,
+        confirmado: false,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection("orcamentos").add(orcamento).then(() => {
+        form.reset();
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao salvar orçamento:", error);
+    });
+}
+
+function carregarOrcamentos() {
+    db.collection("orcamentos").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+        orcamentos = querySnapshot.docs.map(doc => {
+            return { id: doc.id, ...doc.data() };
+        });
+        exibirOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao carregar orçamentos:", error);
+    });
+}
+
+async function obterCliente(nomeCliente) {
+    const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
+    if (!clienteSnapshot.empty) {
+        return clienteSnapshot.docs[0].data();
+    }
+    return null;
+}
+
+async function obterProduto(produtoNome) {
+    const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
+    if (!produtoSnapshot.empty) {
+        return produtoSnapshot.docs[0].data();
+    }
+    return null;
+}
+
+async function verDetalhes(id) {
+    const orcamento = orcamentos.find(orc => orc.id === id);
+    const cliente = await obterCliente(orcamento.nomeCliente);
+    const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
+        const produto = await obterProduto(item.produto);
+        return {
+            ...item,
+            preco: produto ? parseFloat(produto.valor) : 0
+        };
+    }));
+
+    let dataConfirmacao = "";
+    if (orcamento.confirmado && orcamento.timestamp) {
+        const timestamp = orcamento.timestamp.toDate();
+        dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+        document.getElementById('data-confirmacao').innerText = `Confirmado em: ${dataConfirmacao}`;
+    }
+
+    const detalhesModalBody = document.getElementById('detalhes-modal-body');
+    detalhesModalBody.innerHTML = `
+        <div class="details-section">
+            <h2>Cliente</h2>
+            <p><span>Nome:</span> ${orcamento.nomeCliente}</p>
+            <p><span>Carro:</span> ${cliente ? cliente.carro : 'N/A'}</p>
+            <p><span>Placa:</span> ${cliente ? cliente.placa : 'N/A'}</p>
+            <p><span>Telefone:</span> ${cliente ? cliente.telefone : 'N/A'}</p>
+            <p><span>Hodômetro:</span> ${cliente && cliente.hodometro !== undefined ? cliente.hodometro : 'N/A'}</p>
+        </div>
+        <div class="details-section">
+            <h2>Produtos</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Quantidade</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Valor Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${produtosDetalhados.map(produto => `
+                    <tr>
+                        <td>${produto.quantidade}</td>
+                        <td>${produto.produto}</td>
+                        <td>R$ ${produto.preco.toFixed(2)}</td>
+                        <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        <div class="details-section">
+            <h2>Mão de obra</h2>
+            <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
+            <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+        </div>
+        <div class="details-section">
+            <h2>Totais</h2>
+            <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
+        </div>
+        <button class="btn-modal" onclick="compartilharOrcamento('${id}')"><i class="fas fa-share-alt"></i> Compartilhar</button>
+    `;
+    abrirModal('modalDetalhes');
+}
+
+function fecharDetalhes(id) {
+    const detalhes = document.getElementById(`detalhes-${id}`);
+    detalhes.classList.remove('active');
+}
+
+function abrirModalConfirmacao(acao, id) {
+    const modalTexto = {
+        excluir: "Tem certeza que deseja excluir este orçamento?",
+        confirmar: "Tem certeza que deseja confirmar este orçamento?"
+    };
+    document.getElementById('modalConfirmacaoTexto').innerText = modalTexto[acao];
+    document.getElementById('confirmarAcao').onclick = function() {
+        if (acao === 'excluir') {
+            excluirOrcamento(id);
+        } else if (acao === 'confirmar') {
+            confirmarOrcamento(id);
+        }
+        fecharModal('modalConfirmacao');
+    };
+    abrirModal('modalConfirmacao');
+}
+
+function confirmarOrcamento(id) {
+    const orcamentoRef = db.collection("orcamentos").doc(id);
+    orcamentoRef.update({
+        confirmado: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao confirmar orçamento:", error);
+    });
+}
+
+function excluirOrcamento(id) {
+    const orcamentoRef = db.collection("orcamentos").doc(id);
+    orcamentoRef.delete().then(() => {
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao excluir orçamento:", error);
+    });
+}
+
+function abrirModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+}
+
+function fecharModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function exibirOrcamentos(filtro = "") {
+    const orcamentoList = document.getElementById('orcamento-list');
+    orcamentoList.innerHTML = '';
+    orcamentos
+        .filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
+        .sort((a, b) => b.timestamp - a.timestamp) // Ordenar do mais recente para o mais antigo
+        .forEach(async orcamento => {
+            const cliente = await obterCliente(orcamento.nomeCliente);
+            let dataConfirmacao = "";
+            if (orcamento.confirmado && orcamento.timestamp) {
+                const timestamp = orcamento.timestamp.toDate();
+                dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+            }
+            const orcamentoItem = document.createElement('div');
+            orcamentoItem.className = 'orcamento-item';
+            orcamentoItem.innerHTML = `
+                <span onclick="verDetalhes('${orcamento.id}')">${orcamento.nomeCliente} - ${cliente ? cliente.carro : 'N/A'}</span>
+                <div>
+                    ${orcamento.confirmado ? `<span class="orcamento-confirmado">Confirmado em: ${dataConfirmacao}</span>` : `
+                    <button onclick="abrirModalConfirmacao('confirmar', '${orcamento.id}')"><i class="fas fa-check"></i></button>
+                    `}
+                    <button onclick="abrirModalConfirmacao('excluir', '${orcamento.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            orcamentoList.appendChild(orcamentoItem);
+        });
+}
+
+function buscarOrcamentos(event) {
+    const filtro = event.target.value;
+    exibirOrcamentos(filtro);
+}
+
+function compartilharOrcamento(id) {
+    const orcamento = orcamentos.find(orc => orc.id === id);
+    const produtosDetalhados = orcamento.produtos.map(produto => {
+        return `${produto.quantidade}x ${produto.produto} - R$ ${produto.preco.toFixed(2)} cada\n`;
+    }).join('');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text('Detalhes do Orçamento', 20, 20);
+
+    doc.setFontSize(12);
+    doc.text('Cliente', 20, 30);
+    doc.text(`Nome: ${orcamento.nomeCliente}`, 20, 36);
+    doc.text(`Carro: ${orcamento.carro || 'N/A'}`, 20, 42);
+    doc.text(`Placa: ${orcamento.placa || 'N/A'}`, 20, 48);
+    doc.text(`Telefone: ${orcamento.telefone || 'N/A'}`, 20, 54);
+    doc.text(`Hodômetro: ${orcamento.hodometro || 'N/A'}`, 20, 60);
+
+    doc.text('Produtos', 20, 70);
+    let startY = 76;
+    doc.setFillColor(255, 0, 0);
+    doc.rect(20, startY - 6, 170, 6, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.text('Quantidade   Descrição                  Valor        Valor Total', 25, startY - 2);
+    doc.setTextColor(0, 0, 0);
+    startY += 2;
+    orcamento.produtos.forEach((produto) => {
+        doc.text(`${produto.quantidade}            ${produto.produto}                  R$ ${produto.preco.toFixed(2)}    R$ ${(produto.preco * produto.quantidade).toFixed(2)}`, 25, startY);
+        startY += 10;
+    });
+
+    doc.text('Mão de obra', 20, startY + 10);
+    doc.text(`Descrição: ${orcamento.descricaoServico}`, 20, startY + 16);
+    doc.text(`Valor: R$ ${orcamento.servico.toFixed(2)}`, 20, startY + 22);
+
+    doc.text('Totais', 20, startY + 32);
+    doc.text(`Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}`, 20, startY + 38);
+
+    if (orcamento.confirmado && orcamento.timestamp) {
+        const timestamp = orcamento.timestamp.toDate();
+        const dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+        doc.text(`Confirmado em: ${dataConfirmacao}`, 20, startY + 48);
+    }
+
+    const pdfBlob = doc.output('blob');
+    const file = new File([pdfBlob], `Orcamento-${orcamento.nomeCliente}.pdf`, {
+        type: 'application/pdf',
+    });
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Orçamento - Garagem 87',
+            text: `Olá, ${orcamento.nomeCliente}. Segue em anexo o orçamento detalhado.`,
+            files: [file]
+        }).catch(error => {
+            console.error("Erro ao compartilhar o orçamento:", error);
+        });
     } else {
-        passwordField.type = 'password';
-        passwordToggle.classList.remove('fa-eye-slash');
-        passwordToggle.classList.add('fa-eye');
+        alert("Compartilhamento não suportado neste navegador.");
     }
 }
+
+window.onload = function() {
+    carregarProdutos();
+    carregarClientes();
+    carregarOrcamentos();
+}
+
     </script>
 </body>
 </html>
