@@ -410,7 +410,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
-        const firebaseConfig = {
+       const firebaseConfig = {
     apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
     authDomain: "garagem87-c652e.firebaseapp.com",
     projectId: "garagem87-c652e",
@@ -678,6 +678,7 @@ async function confirmarOrcamento(id) {
     const orcamento = orcamentos.find(orc => orc.id === id);
     let estoqueInsuficiente = false;
 
+    // Verificar estoque disponível
     for (let item of orcamento.produtos) {
         const produto = produtos.find(prod => prod.produto === item.produto);
         if (produto.estoque < item.quantidade) {
@@ -691,6 +692,7 @@ async function confirmarOrcamento(id) {
 
     const batch = db.batch();
 
+    // Atualizar estoque no Firestore
     orcamento.produtos.forEach(item => {
         const produtoRef = db.collection("produtos").doc(item.id);
         batch.update(produtoRef, {
@@ -698,6 +700,7 @@ async function confirmarOrcamento(id) {
         });
     });
 
+    // Confirmar orçamento
     const orcamentoRef = db.collection("orcamentos").doc(id);
     batch.update(orcamentoRef, {
         confirmado: true,
