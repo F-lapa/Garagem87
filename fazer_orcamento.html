@@ -185,6 +185,7 @@
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
+            box-sizing: border-box;
         }
         .modal-content {
             background-color: #fefefe;
@@ -195,11 +196,13 @@
             max-width: 500px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
         }
         .modal-header, .modal-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         .modal-header {
             border-bottom: 1px solid #e0e0e0;
@@ -214,11 +217,13 @@
         .modal-header h2 {
             margin: 0;
             color: #d32f2f;
+            flex: 1 0 100%;
         }
         .modal-header img {
             width: 100%;
             max-width: 100px;
             display: block;
+            margin: 0 auto 10px;
         }
         .close {
             color: #aaa;
@@ -307,6 +312,24 @@
             color: green;
             font-size: 18px;
             margin-left: 10px;
+        }
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 90%;
+                padding: 10px;
+            }
+            .modal-header h2, .modal-header img {
+                text-align: center;
+            }
+            .details-table th, .details-table td {
+                padding: 4px;
+            }
+            .details-section p {
+                font-size: 14px;
+            }
+            .details-section h2 {
+                font-size: 16px;
+            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
