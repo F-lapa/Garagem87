@@ -238,7 +238,6 @@
             <img src="LogoGaragem87.png" alt="Logo Garagem 87">
         </div>
         <h1>Sistema de Receitas e Despesas</h1>
-        <i class="fas fa-key change-password" onclick="openChangePasswordModal()" title="Alterar Senha"></i>
         
         <!-- Campo escondido para desativar autocomplete -->
         <input type="text" style="display:none;" autocomplete="username">
@@ -680,26 +679,6 @@ function registerNewUser() {
         .catch(error => {
             alert('Erro ao registrar novo usuário: ' + error.message);
         });
-}
-
-function openChangePasswordModal() {
-    document.getElementById('changePasswordModal').style.display = 'block';
-}
-
-function closeChangePasswordModal() {
-    document.getElementById('changePasswordModal').style.display = 'none';
-}
-
-function changePassword() {
-    const newPassword = document.getElementById('newPassword').value;
-    const user = auth.currentUser;
-
-    user.updatePassword(newPassword).then(() => {
-        alert('Senha alterada com sucesso.');
-        closeChangePasswordModal();
-    }).catch(error => {
-        alert('Erro ao alterar senha: ' + error.message);
-    });
 }
 
 function goToLimitPage() {
