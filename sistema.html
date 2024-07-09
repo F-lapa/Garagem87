@@ -390,7 +390,6 @@ const firebaseConfig = {
     measurementId: "G-83FY7T6X2D"
 };
 
-// Inicialize o Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -727,6 +726,20 @@ document.querySelectorAll('.close').forEach(closeBtn => {
     closeBtn.addEventListener('click', function() {
         this.closest('.modal').style.display = 'none';
     });
+});
+
+// Função para garantir que os eventos de toque funcionem corretamente
+function addTouchEvents() {
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('touchstart', function() {
+            this.click();
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    addTouchEvents();
+});
 
     </script>
 </body>
