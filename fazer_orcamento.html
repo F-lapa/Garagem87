@@ -655,11 +655,6 @@
         abrirModal('modalDetalhes');
     }
 
-    function fecharDetalhes(id) {
-        const detalhes = document.getElementById(`detalhes-${id}`);
-        detalhes.classList.remove('active');
-    }
-
     function abrirModalConfirmacao(acao, id) {
         const modalTexto = {
             excluir: "Tem certeza que deseja excluir este orçamento?",
@@ -754,6 +749,7 @@
         carregarClientes();
         carregarOrcamentos();
     }
-</script>    
+</script>
+
 </body>
 </html>
