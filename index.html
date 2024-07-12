@@ -100,7 +100,7 @@
                     <i class="fas fa-file-alt"></i>
                     <span>Fazer Orçamento</span>
                 </div>
-                <div class="icon-button" onclick="window.location.href='sistema.html'">
+                <div class="icon-button" onclick="window.location.href='login.html'">
                     <i class="fas fa-cash-register"></i>
                     <span>Caixa</span>
                 </div>
@@ -112,98 +112,97 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script>
-      var firebaseConfig = {
-    apiKey: "API_KEY_HERE",
-    authDomain: "garagem87-c652e.firebaseapp.com",
-    databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
-    projectId: "garagem87-c652e",
-    storageBucket: "garagem87-c652e.appspot.com",
-    messagingSenderId: "MESSAGING_SENDER_ID_HERE",
-    appId: "APP_ID_HERE",
-    measurementId: "MEASUREMENT_ID_HERE"
-};
-firebase.initializeApp(firebaseConfig);
+        var firebaseConfig = {
+            apiKey: "API_KEY_HERE",
+            authDomain: "garagem87-c652e.firebaseapp.com",
+            databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+            projectId: "garagem87-c652e",
+            storageBucket: "garagem87-c652e.appspot.com",
+            messagingSenderId: "MESSAGING_SENDER_ID_HERE",
+            appId: "APP_ID_HERE",
+            measurementId: "MEASUREMENT_ID_HERE"
+        };
+        firebase.initializeApp(firebaseConfig);
 
-const database = firebase.database();
-const auth = firebase.auth();
+        const database = firebase.database();
+        const auth = firebase.auth();
 
-// Função para adicionar um novo cliente
-function adicionarCliente(nome, email) {
-    const newClientRef = database.ref('clientes').push();
-    newClientRef.set({
-        nome: nome,
-        email: email
-    }, (error) => {
-        if (error) {
-            console.error('Erro ao adicionar cliente:', error);
-        } else {
-            console.log('Cliente adicionado com sucesso!');
+        // Função para adicionar um novo cliente
+        function adicionarCliente(nome, email) {
+            const newClientRef = database.ref('clientes').push();
+            newClientRef.set({
+                nome: nome,
+                email: email
+            }, (error) => {
+                if (error) {
+                    console.error('Erro ao adicionar cliente:', error);
+                } else {
+                    console.log('Cliente adicionado com sucesso!');
+                }
+            });
         }
-    });
-}
 
-// Função para adicionar um novo produto
-function adicionarProduto(nome, preco) {
-    const newProductRef = database.ref('produtos').push();
-    newProductRef.set({
-        nome: nome,
-        preco: preco
-    }, (error) => {
-        if (error) {
-            console.error('Erro ao adicionar produto:', error);
-        } else {
-            console.log('Produto adicionado com sucesso!');
+        // Função para adicionar um novo produto
+        function adicionarProduto(nome, preco) {
+            const newProductRef = database.ref('produtos').push();
+            newProductRef.set({
+                nome: nome,
+                preco: preco
+            }, (error) => {
+                if (error) {
+                    console.error('Erro ao adicionar produto:', error);
+                } else {
+                    console.log('Produto adicionado com sucesso!');
+                }
+            });
         }
-    });
-}
 
-// Função para fazer um novo orçamento
-function fazerOrcamento(clienteId, produtoId, quantidade) {
-    const newOrcamentoRef = database.ref('orcamentos').push();
-    newOrcamentoRef.set({
-        clienteId: clienteId,
-        produtoId: produtoId,
-        quantidade: quantidade,
-        status: 'Pendente'
-    }, (error) => {
-        if (error) {
-            console.error('Erro ao fazer orçamento:', error);
-        } else {
-            console.log('Orçamento criado com sucesso!');
+        // Função para fazer um novo orçamento
+        function fazerOrcamento(clienteId, produtoId, quantidade) {
+            const newOrcamentoRef = database.ref('orcamentos').push();
+            newOrcamentoRef.set({
+                clienteId: clienteId,
+                produtoId: produtoId,
+                quantidade: quantidade,
+                status: 'Pendente'
+            }, (error) => {
+                if (error) {
+                    console.error('Erro ao fazer orçamento:', error);
+                } else {
+                    console.log('Orçamento criado com sucesso!');
+                }
+            });
         }
-    });
-}
 
-// Função para confirmar um orçamento
-function confirmarOrcamento(orcamentoId) {
-    const orcamentoRef = database.ref('orcamentos/' + orcamentoId);
-    orcamentoRef.update({
-        status: 'Confirmado'
-    }, (error) => {
-        if (error) {
-            console.error('Erro ao confirmar orçamento:', error);
-        } else {
-            console.log('Orçamento confirmado com sucesso!');
+        // Função para confirmar um orçamento
+        function confirmarOrcamento(orcamentoId) {
+            const orcamentoRef = database.ref('orcamentos/' + orcamentoId);
+            orcamentoRef.update({
+                status: 'Confirmado'
+            }, (error) => {
+                if (error) {
+                    console.error('Erro ao confirmar orçamento:', error);
+                } else {
+                    console.log('Orçamento confirmado com sucesso!');
+                }
+            });
         }
-    });
-}
 
-function verificarAutenticacao(callback) {
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            callback();
-        } else {
-            window.location.href = 'index.html'; // Redirecionar para a página de login se não estiver autenticado
+        function verificarAutenticacao(callback) {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    callback();
+                } else {
+                    window.location.href = 'login.html'; // Redirecionar para a página de login se não estiver autenticado
+                }
+            });
         }
-    });
-}
 
-document.querySelector('.icon-button.caixa').addEventListener('click', function() {
-    verificarAutenticacao(function() {
-        window.location.href = 'sistema.html';
-    });
-});
+        document.querySelector('.icon-button.caixa').addEventListener('click', function() {
+            verificarAutenticacao(function() {
+                window.location.href = 'sistema.html';
+            });
+        });
     </script>
 </body>
 </html>
-        
