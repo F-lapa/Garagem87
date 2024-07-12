@@ -90,6 +90,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+
     <script>
         // Configuração do Firebase
         var firebaseConfig = {
@@ -136,20 +137,14 @@
             }
         }
 
-        function createInitialUser() {
-            auth.createUserWithEmailAndPassword('ssocarroes@gmail.com', '140412')
-                .then(userCredential => {
-                    // Usuário criado com sucesso
-                    console.log('Usuário inicial criado com sucesso.');
-                })
-                .catch(error => {
-                    // Erro ao criar usuário
-                    console.error('Erro ao criar usuário inicial:', error.message);
-                });
-        }
-
-        // Chame a função para criar o usuário inicial (executar apenas uma vez)
-        createInitialUser();
+        // Função para criar o usuário inicial
+        auth.createUserWithEmailAndPassword('ssocarroes@gmail.com', '140412')
+            .then(userCredential => {
+                console.log('Usuário inicial criado com sucesso');
+            })
+            .catch(error => {
+                console.error('Erro ao criar usuário inicial: ' + error.message);
+            });
     </script>
 </body>
 </html>
