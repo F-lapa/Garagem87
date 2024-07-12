@@ -608,6 +608,10 @@
         const detalhesModalBody = document.getElementById('detalhes-modal-body');
         detalhesModalBody.innerHTML = `
             <div id="orcamento-detalhes">
+                <div class="details-header">
+                    <h2>Detalhes do Orçamento</h2>
+                    <span class="close" onclick="fecharModal('modalDetalhes')">&times;</span>
+                </div>
                 <div class="details-section">
                     <h2>Cliente</h2>
                     <p><span>Nome:</span> ${orcamento.nomeCliente}</p>
@@ -751,8 +755,6 @@
         carregarClientes();
         carregarOrcamentos();
     }
-
 </script>
-
 </body>
 </html>
