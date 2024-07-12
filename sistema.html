@@ -47,6 +47,17 @@
         .home-icon {
             left: 20px;
         }
+        .home-icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            color: red;
+            font-size: 1.5em;
+        }
+        .home-icon:hover {
+            color: #cc0000;
+        }
         .admin-icon {
             position: absolute;
             top: 20px;
@@ -242,6 +253,9 @@
         </div>
         <h1>Sistema de Receitas e Despesas</h1>
         
+        <!-- Ícone de Página Inicial -->
+        <i class="fas fa-home home-icon" onclick="goToHomePage()"></i>
+        
         <!-- Campo escondido para desativar autocomplete -->
         <input type="text" style="display:none;" autocomplete="username">
         <input type="password" style="display:none;" autocomplete="new-password">
@@ -381,8 +395,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
-    <script>
-        // Configuração do Firebase
+    <script// Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
     authDomain: "garagem87-c652e.firebaseapp.com",
@@ -749,9 +762,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Função para redirecionar para a página inicial
-document.querySelector('.home-icon').addEventListener('click', function() {
+function goToHomePage() {
     window.location.href = 'index.html';
-});
-</script>
+}
+    </script>
 </body>
 </html>
+
+       
