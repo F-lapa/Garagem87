@@ -184,7 +184,7 @@
             height: auto;
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
-            padding: 20px;
+            padding-top: 60px;
             box-sizing: border-box;
         }
         .modal-content {
@@ -746,7 +746,10 @@
         html2canvas(modalContent).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jspdf.jsPDF();
-            pdf.addImage(imgData, 'PNG', 10, 10, 180, canvas.height * 180 / canvas.width);
+            const imgProps= pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save('orcamento.pdf');
         });
     }
