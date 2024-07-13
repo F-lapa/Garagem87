@@ -31,13 +31,14 @@
         .container img {
             width: 100%;
             max-width: 300px;
-            margin-bottom: 40px;
+            margin-bottom: 20px; /* Reduzi a margem inferior do logotipo */
         }
         .icon-container {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 40px;
+            margin-top: -20px; /* Adicionei uma margem negativa para mover os ícones para cima */
         }
         .icon-row {
             width: 100%;
@@ -100,7 +101,7 @@
                     <i class="fas fa-file-alt"></i>
                     <span>Fazer Orçamento</span>
                 </div>
-                <div class="icon-button" onclick="window.location.href='login.html'">
+                <div class="icon-button caixa" onclick="verificarAutenticacao(function() { window.location.href='sistema.html'; })">
                     <i class="fas fa-cash-register"></i>
                     <span>Caixa</span>
                 </div>
@@ -197,12 +198,6 @@
                 }
             });
         }
-
-        document.querySelector('.icon-button.caixa').addEventListener('click', function() {
-            verificarAutenticacao(function() {
-                window.location.href = 'sistema.html';
-            });
-        });
     </script>
 </body>
 </html>
