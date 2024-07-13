@@ -103,13 +103,13 @@
             font-weight: bold;
             color: #d32f2f; /* Cor combinando com o logotipo */
         }
-        .icon-remove {
+        #lista-clientes li .icon-remove {
             color: #e57373;
             font-size: 20px;
             cursor: pointer;
             transition: color 0.3s;
         }
-        .icon-remove:hover {
+        #lista-clientes li .icon-remove:hover {
             color: #d32f2f; /* Cor combinando com o logotipo */
         }
         /* Estilo do modal */
@@ -209,11 +209,11 @@
             <input type="text" id="buscar-cliente" onkeyup="filtrarClientes()" placeholder="Buscar cliente...">
         </div>
         <div class="lista-cabecalho">
-            <span>Nome</span>
-            <span>Carro</span>
-            <span>Cor</span>
-            <span>Placa</span>
-            <span>Ação</span>
+            <span style="flex: 2;">Nome</span>
+            <span style="flex: 2;">Carro</span>
+            <span style="flex: 1;">Cor</span>
+            <span style="flex: 1;">Placa</span>
+            <span style="flex: 0.5;">Ação</span>
         </div>
         <ul id="lista-clientes">
             <!-- Lista de clientes adicionados -->
@@ -366,8 +366,8 @@
                     const cliente = doc.data();
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span style="flex: 1;">${cliente.nome}</span>
-                        <span style="flex: 1;">${cliente.carro}</span>
+                        <span style="flex: 2;">${cliente.nome}</span>
+                        <span style="flex: 2;">${cliente.carro}</span>
                         <span style="flex: 1;">${cliente.cor}</span>
                         <span style="flex: 1;">${cliente.placa}</span>
                         <span style="flex: 0.5; text-align: center;"><i class="fas fa-trash icon-remove" onclick="abrirModalRemover('${doc.id}', event)"></i></span>
