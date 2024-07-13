@@ -19,7 +19,7 @@
         }
         .container {
             background: #ffffff;
-            padding: 20px 30px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
@@ -65,57 +65,43 @@
             font-size: 14px;
         }
         .lista-cabecalho {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: #d32f2f;
-            color: white;
-            border-radius: 5px 5px 0 0;
-            font-weight: bold;
-            border-bottom: 2px solid #b2dfdb;
-        }
-        .lista-cabecalho span {
-            flex: 1;
-            text-align: center;
-            padding: 5px;
+            display: none;
         }
         #lista-clientes {
             list-style-type: none;
             padding: 0;
             margin: 0;
-            border: 1px solid #b2dfdb;
-            border-top: none;
-            border-radius: 0 0 5px 5px;
-            overflow: hidden;
         }
         #lista-clientes li {
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             padding: 10px;
-            border-bottom: 1px solid #b2dfdb;
-            transition: background-color 0.3s;
-        }
-        #lista-clientes li:last-child {
-            border-bottom: none;
+            margin: 5px 0;
+            background: #ffffff;
+            border-radius: 5px;
+            border: 1px solid #b2dfdb;
+            transition: box-shadow 0.3s;
         }
         #lista-clientes li:hover {
-            background-color: #f9f9f9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         #lista-clientes li span {
-            flex: 1;
-            text-align: center;
+            display: block;
+            width: 100%;
             font-weight: bold;
             color: #d32f2f;
-            padding: 5px;
+            padding: 5px 0;
         }
-        .icon-remove {
+        #lista-clientes li .icon-remove {
             color: #e57373;
             font-size: 20px;
             cursor: pointer;
             transition: color 0.3s;
+            align-self: flex-end;
         }
-        .icon-remove:hover {
+        #lista-clientes li .icon-remove:hover {
             color: #d32f2f;
         }
         .modal {
@@ -203,30 +189,6 @@
         .btn-modal:hover {
             background-color: #9a0007;
         }
-        @media (max-width: 600px) {
-            .lista-cabecalho,
-            #lista-clientes li {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .lista-cabecalho span,
-            #lista-clientes li span {
-                text-align: left;
-                border-right: none;
-                border-bottom: 1px solid #b2dfdb;
-                width: 100%;
-                padding: 10px 0;
-            }
-            .lista-cabecalho span:last-child,
-            #lista-clientes li span:last-child {
-                border-bottom: none;
-            }
-            #lista-clientes li span.icon-remove {
-                text-align: center;
-                padding: 10px 0;
-                border-bottom: none;
-            }
-        }
     </style>
 </head>
 <body>
@@ -236,13 +198,6 @@
         <button class="btn" onclick="abrirModalAdicionar()">Adicionar Cliente</button>
         <div class="search-container">
             <input type="text" id="buscar-cliente" onkeyup="filtrarClientes()" placeholder="Buscar cliente...">
-        </div>
-        <div class="lista-cabecalho">
-            <span>Nome</span>
-            <span>Carro</span>
-            <span>Cor</span>
-            <span>Placa</span>
-            <span>Ação</span>
         </div>
         <ul id="lista-clientes">
             <!-- Lista de clientes adicionados -->
@@ -393,11 +348,11 @@
                     const cliente = doc.data();
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span>${cliente.nome}</span>
-                        <span>${cliente.carro}</span>
-                        <span>${cliente.cor}</span>
-                        <span>${cliente.placa}</span>
-                        <span class="icon-remove" style="text-align: center;"><i class="fas fa-trash" onclick="abrirModalRemover('${doc.id}', event)"></i></span>
+                        <span>Nome: ${cliente.nome}</span>
+                        <span>Carro: ${cliente.carro}</span>
+                        <span>Cor: ${cliente.cor}</span>
+                        <span>Placa: ${cliente.placa}</span>
+                        <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
                     `;
                     li.onclick = () => abrirModalEditar(doc.id);
                     listaClientes.appendChild(li);
