@@ -240,12 +240,8 @@
                     <input type="text" id="placa" name="placa" required>
                 </div>
                 <div class="form-group">
-                    <label for="telefone">Telefone:</label>
-                    <input type="text" id="telefone" name="telefone" required>
-                </div>
-                <div class="form-group">
-                    <label for="endereco">Endereço:</label>
-                    <input type="text" id="endereco" name="endereco" required>
+                    <label for="ano">Ano do Veículo:</label>
+                    <input type="number" id="ano" name="ano" required>
                 </div>
                 <div class="form-group">
                     <label for="hodometro">Hodômetro do Veículo:</label>
@@ -280,12 +276,8 @@
                     <input type="text" id="editar-placa" name="editar-placa" required>
                 </div>
                 <div class="form-group">
-                    <label for="editar-telefone">Telefone:</label>
-                    <input type="text" id="editar-telefone" name="editar-telefone" required>
-                </div>
-                <div class="form-group">
-                    <label for="editar-endereco">Endereço:</label>
-                    <input type="text" id="editar-endereco" name="editar-endereco" required>
+                    <label for="editar-ano">Ano do Veículo:</label>
+                    <input type="number" id="editar-ano" name="editar-ano" required>
                 </div>
                 <div class="form-group">
                     <label for="editar-hodometro">Hodômetro do Veículo:</label>
@@ -339,12 +331,11 @@
             const nome = document.getElementById('nome').value;
             const carro = document.getElementById('carro').value;
             const placa = document.getElementById('placa').value;
-            const telefone = document.getElementById('telefone').value;
-            const endereco = document.getElementById('endereco').value;
+            const ano = document.getElementById('ano').value;
             const hodometro = document.getElementById('hodometro').value;
 
-            if (nome && carro && placa && telefone && endereco && hodometro) {
-                const cliente = { nome, carro, placa, telefone, endereco, hodometro };
+            if (nome && carro && placa && ano && hodometro) {
+                const cliente = { nome, carro, placa, ano, hodometro };
                 db.collection("clientes").add(cliente).then(() => {
                     atualizarListaClientes();
                     document.getElementById('form-cliente').reset();
@@ -393,8 +384,7 @@
                     document.getElementById('editar-nome').value = cliente.nome;
                     document.getElementById('editar-carro').value = cliente.carro;
                     document.getElementById('editar-placa').value = cliente.placa;
-                    document.getElementById('editar-telefone').value = cliente.telefone;
-                    document.getElementById('editar-endereco').value = cliente.endereco;
+                    document.getElementById('editar-ano').value = cliente.ano;
                     document.getElementById('editar-hodometro').value = cliente.hodometro;
                     document.getElementById('modalEditarCliente').style.display = 'block';
                 } else {
@@ -432,16 +422,14 @@
             const id = document.getElementById('editar-index').value;
             const carro = document.getElementById('editar-carro').value;
             const placa = document.getElementById('editar-placa').value;
-            const telefone = document.getElementById('editar-telefone').value;
-            const endereco = document.getElementById('editar-endereco').value;
+            const ano = document.getElementById('editar-ano').value;
             const hodometro = document.getElementById('editar-hodometro').value;
 
-            if (carro && placa && telefone && endereco && hodometro) {
+            if (carro && placa && ano && hodometro) {
                 db.collection("clientes").doc(id).update({
                     carro,
                     placa,
-                    telefone,
-                    endereco,
+                    ano,
                     hodometro
                 }).then(() => {
                     atualizarListaClientes();
