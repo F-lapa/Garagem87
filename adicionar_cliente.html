@@ -368,7 +368,7 @@
                         <span style="flex: 1;">${cliente.nome}</span>
                         <span style="flex: 1;">${cliente.carro}</span>
                         <span style="flex: 1;">${cliente.placa}</span>
-                        <i class="fas fa-trash icon-remove" onclick="abrirModalRemover('${doc.id}', event)" style="flex: 0.2;"></i>
+                        <span style="flex: 0.5; text-align: center;"><i class="fas fa-trash icon-remove" onclick="abrirModalRemover('${doc.id}', event)"></i></span>
                     `;
                     li.onclick = () => abrirModalEditar(doc.id);
                     listaClientes.appendChild(li);
