@@ -742,9 +742,9 @@
 
     function printOrcamento() {
         const modalContent = document.querySelector('#modalDetalhes .modal-content');
-        html2canvas(modalContent).then(canvas => {
+        html2canvas(modalContent, { scale: 2 }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jspdf.jsPDF();
+            const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
             const imgProps = pdf.getImageProperties(imgData);
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
