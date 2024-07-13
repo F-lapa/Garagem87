@@ -211,6 +211,7 @@
         <div class="lista-cabecalho">
             <span>Nome</span>
             <span>Carro</span>
+            <span>Cor</span>
             <span>Placa</span>
             <span>Ação</span>
         </div>
@@ -234,6 +235,10 @@
                 <div class="form-group">
                     <label for="carro">Carro:</label>
                     <input type="text" id="carro" name="carro" required>
+                </div>
+                <div class="form-group">
+                    <label for="cor">Cor do Veículo:</label>
+                    <input type="text" id="cor" name="cor" required>
                 </div>
                 <div class="form-group">
                     <label for="placa">Placa do Carro:</label>
@@ -270,6 +275,10 @@
                 <div class="form-group">
                     <label for="editar-carro">Carro:</label>
                     <input type="text" id="editar-carro" name="editar-carro" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-cor">Cor do Veículo:</label>
+                    <input type="text" id="editar-cor" name="editar-cor" required>
                 </div>
                 <div class="form-group">
                     <label for="editar-placa">Placa do Carro:</label>
@@ -330,12 +339,13 @@
         function adicionarCliente() {
             const nome = document.getElementById('nome').value;
             const carro = document.getElementById('carro').value;
+            const cor = document.getElementById('cor').value;
             const placa = document.getElementById('placa').value;
             const ano = document.getElementById('ano').value;
             const hodometro = document.getElementById('hodometro').value;
 
-            if (nome && carro && placa && ano && hodometro) {
-                const cliente = { nome, carro, placa, ano, hodometro };
+            if (nome && carro && cor && placa && ano && hodometro) {
+                const cliente = { nome, carro, cor, placa, ano, hodometro };
                 db.collection("clientes").add(cliente).then(() => {
                     atualizarListaClientes();
                     document.getElementById('form-cliente').reset();
@@ -358,6 +368,7 @@
                     li.innerHTML = `
                         <span style="flex: 1;">${cliente.nome}</span>
                         <span style="flex: 1;">${cliente.carro}</span>
+                        <span style="flex: 1;">${cliente.cor}</span>
                         <span style="flex: 1;">${cliente.placa}</span>
                         <span style="flex: 0.5; text-align: center;"><i class="fas fa-trash icon-remove" onclick="abrirModalRemover('${doc.id}', event)"></i></span>
                     `;
@@ -383,6 +394,7 @@
                     document.getElementById('editar-index').value = id;
                     document.getElementById('editar-nome').value = cliente.nome;
                     document.getElementById('editar-carro').value = cliente.carro;
+                    document.getElementById('editar-cor').value = cliente.cor;
                     document.getElementById('editar-placa').value = cliente.placa;
                     document.getElementById('editar-ano').value = cliente.ano;
                     document.getElementById('editar-hodometro').value = cliente.hodometro;
@@ -421,13 +433,15 @@
         function salvarCliente() {
             const id = document.getElementById('editar-index').value;
             const carro = document.getElementById('editar-carro').value;
+            const cor = document.getElementById('editar-cor').value;
             const placa = document.getElementById('editar-placa').value;
             const ano = document.getElementById('editar-ano').value;
             const hodometro = document.getElementById('editar-hodometro').value;
 
-            if (carro && placa && ano && hodometro) {
+            if (carro && cor && placa && ano && hodometro) {
                 db.collection("clientes").doc(id).update({
                     carro,
+                    cor,
                     placa,
                     ano,
                     hodometro
