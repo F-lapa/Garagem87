@@ -184,7 +184,7 @@
             height: auto;
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
+            padding: 20px;
             box-sizing: border-box;
         }
         .modal-content {
@@ -192,7 +192,7 @@
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%;
+            width: 100%;
             max-width: 500px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -420,7 +420,6 @@
     </div>
 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
@@ -743,14 +742,15 @@
 
     function printOrcamento() {
         const modalContent = document.querySelector('#modalDetalhes .modal-content');
-        const opt = {
-            margin:       1,
-            filename:     'orcamento.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        html2pdf().from(modalContent).set(opt).save();
+        html2canvas(modalContent).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jspdf.jsPDF();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save('orcamento.pdf');
+        });
     }
 
     window.onload = function() {
@@ -759,6 +759,5 @@
         carregarOrcamentos();
     }
 </script>
-<script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 </body>
 </html>
