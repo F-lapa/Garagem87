@@ -30,6 +30,15 @@
             max-width: 300px;
             display: block;
             margin: 0 auto 10px auto;
+            animation: glow 1.5s infinite alternate;
+        }
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px #d32f2f;
+            }
+            100% {
+                box-shadow: 0 0 20px #d32f2f;
+            }
         }
         .container h2 {
             text-align: center;
@@ -82,10 +91,11 @@
             background: #ffffff;
             border-radius: 5px;
             border: 1px solid #b2dfdb;
-            transition: box-shadow 0.3s;
+            transition: box-shadow 0.3s, transform 0.3s;
         }
         #lista-clientes li:hover {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
         }
         #lista-clientes li span {
             display: block;
