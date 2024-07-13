@@ -78,10 +78,6 @@
             flex: 1;
             text-align: center;
             padding: 5px;
-            border-right: 1px solid #b2dfdb;
-        }
-        .lista-cabecalho span:last-child {
-            border-right: none;
         }
         #lista-clientes {
             list-style-type: none;
@@ -112,10 +108,6 @@
             font-weight: bold;
             color: #d32f2f;
             padding: 5px;
-            border-right: 1px solid #b2dfdb;
-        }
-        #lista-clientes li span:last-child {
-            border-right: none;
         }
         .icon-remove {
             color: #e57373;
@@ -357,7 +349,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
            apiKey: "YOUR_API_KEY",
            authDomain: "garagem87-c652e.firebaseapp.com",
@@ -369,7 +360,6 @@
            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
