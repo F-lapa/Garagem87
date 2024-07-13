@@ -210,9 +210,9 @@
         </div>
         <div class="lista-cabecalho">
             <span>Produto</span>
-            <span>Qtd.</span>
-            <span>Valor</span>
-            <span></span>
+            <span style="flex: 0.5;">Qtd.</span>
+            <span style="flex: 0.5;">Valor</span>
+            <span style="flex: 0.2;"></span>
         </div>
         <ul id="lista-produtos">
             <!-- Lista de produtos adicionados -->
@@ -340,10 +340,10 @@
                     const item = doc.data();
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span>${item.produto}</span>
-                        <span>${item.quantidade}</span>
-                        <span>R$ ${parseFloat(item.valor).toFixed(2)}</span>
-                        <i class="fas fa-trash icon-remove" onclick="abrirModalRemover('${doc.id}', event)"></i>
+                        <span style="flex: 1;">${item.produto}</span>
+                        <span style="flex: 0.5;">${item.quantidade}</span>
+                        <span style="flex: 0.5;">R$ ${parseFloat(item.valor).toFixed(2)}</span>
+                        <i class="fas fa-trash icon-remove" onclick="abrirModalRemover('${doc.id}', event)" style="flex: 0.2;"></i>
                     `;
                     li.onclick = (e) => {
                         if (e.target.classList.contains('icon-remove')) {
