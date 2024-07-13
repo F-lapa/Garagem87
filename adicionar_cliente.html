@@ -24,30 +24,20 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 600px;
-            text-align: center;
         }
         .container img {
             width: 100%;
             max-width: 300px;
             display: block;
             margin: 0 auto 10px auto;
+            animation: glow 1.5s infinite alternate;
         }
-        .logo-brilho {
-            font-size: 0;
-        }
-        .logo-brilho::after {
-            content: "Garagem87";
-            font-size: 30px;
-            font-weight: bold;
-            color: #d32f2f;
-            animation: logoGlow 1.5s infinite alternate;
-        }
-        @keyframes logoGlow {
+        @keyframes glow {
             0% {
-                text-shadow: 0 0 5px #d32f2f;
+                box-shadow: 0 0 5px #d32f2f;
             }
             100% {
-                text-shadow: 0 0 20px #d32f2f;
+                box-shadow: 0 0 20px #d32f2f;
             }
         }
         .container h2 {
@@ -138,17 +128,6 @@
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
         }
-        .modal.fade-in {
-            animation: fadeIn 0.5s;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
         .modal-content {
             background-color: #fefefe;
             margin: auto;
@@ -224,7 +203,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="logo-brilho"></div>
+        <img src="LogoGaragem87.png" alt="Logo da Garagem87">
         <h2>Cadastro de Cliente</h2>
         <button class="btn" onclick="abrirModalAdicionar()">Adicionar Cliente</button>
         <div class="search-container">
@@ -330,366 +309,177 @@
             </div>
         </div>
     </div>
-      
+
     <!-- Firebase Configuration -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-    const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "garagem87-c652e.firebaseapp.com",
-    databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
-    projectId: "garagem87-c652e",
-    storageBucket: "garagem87-c652e.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
-};
+        const firebaseConfig = {
+           apiKey: "YOUR_API_KEY",
+           authDomain: "garagem87-c652e.firebaseapp.com",
+           databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+           projectId: "garagem87-c652e",
+           storageBucket: "garagem87-c652e.appspot.com",
+           messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+           appId: "YOUR_APP_ID",
+           measurementId: "YOUR_MEASUREMENT_ID"
+        };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-function adicionarCliente() {
-    const nome = document.getElementById('nome').value;
-    const carro = document.getElementById('carro').value;
-    const cor = document.getElementById('cor').value;
-    const placa = document.getElementById('placa').value;
-    const ano = document.getElementById('ano').value;
-    const hodometro = document.getElementById('hodometro').value;
+        function adicionarCliente() {
+            const nome = document.getElementById('nome').value;
+            const carro = document.getElementById('carro').value;
+            const cor = document.getElementById('cor').value;
+            const placa = document.getElementById('placa').value;
+            const ano = document.getElementById('ano').value;
+            const hodometro = document.getElementById('hodometro').value;
 
-    if (nome && carro && cor && placa && ano && hodometro) {
-        const cliente = { nome, carro, cor, placa, ano, hodometro };
-        db.collection("clientes").add(cliente).then(() => {
-            atualizarListaClientes();
-            document.getElementById('form-cliente').reset();
-            fecharModalAdicionar();
-        }).catch((error) => {
-            console.error("Error adding document: ", error);
-        });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
-
-function atualizarListaClientes() {
-    const listaClientes = document.getElementById('lista-clientes');
-    listaClientes.innerHTML = '';
-    db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            const cliente = doc.data();
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>Nome: ${cliente.nome}</span>
-                <span>Carro: ${cliente.carro}</span>
-                <span>Cor: ${cliente.cor}</span>
-                <span>Placa: ${cliente.placa}</span>
-                <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
-            `;
-            li.onclick = () => abrirModalEditar(doc.id);
-            listaClientes.appendChild(li);
-        });
-    });
-}
-
-function abrirModalAdicionar() {
-    const modal = document.getElementById('modalAdicionarCliente');
-    modal.classList.add('fade-in');
-    modal.style.display = 'block';
-}
-
-function fecharModalAdicionar() {
-    const modal = document.getElementById('modalAdicionarCliente');
-    modal.style.display = 'none';
-    modal.classList.remove('fade-in');
-}
-
-function abrirModalEditar(id) {
-    const modal = document.getElementById('modalEditarCliente');
-    modal.classList.add('fade-in');
-    const docRef = db.collection("clientes").doc(id);
-    docRef.get().then((doc) => {
-        if (doc.exists) {
-            const cliente = doc.data();
-            document.getElementById('editar-index').value = id;
-            document.getElementById('editar-nome').value = cliente.nome;
-            document.getElementById('editar-carro').value = cliente.carro;
-            document.getElementById('editar-cor').value = cliente.cor;
-            document.getElementById('editar-placa').value = cliente.placa;
-            document.getElementById('editar-ano').value = cliente.ano;
-            document.getElementById('editar-hodometro').value = cliente.hodometro;
-            modal.style.display = 'block';
-        } else {
-            console.log("No such document!");
+            if (nome && carro && cor && placa && ano && hodometro) {
+                const cliente = { nome, carro, cor, placa, ano, hodometro };
+                db.collection("clientes").add(cliente).then(() => {
+                    atualizarListaClientes();
+                    document.getElementById('form-cliente').reset();
+                    fecharModalAdicionar();
+                }).catch((error) => {
+                    console.error("Error adding document: ", error);
+                });
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
         }
-    }).catch((error) => {
-        console.log("Error getting document:", error);
-    });
-}
 
-function fecharModalEditar() {
-    const modal = document.getElementById('modalEditarCliente');
-    modal.style.display = 'none';
-    modal.classList.remove('fade-in');
-}
-
-function abrirModalRemover(id, event) {
-    event.stopPropagation();
-    clienteParaRemover = id;
-    const modal = document.getElementById('modalRemoverCliente');
-    modal.classList.add('fade-in');
-    modal.style.display = 'block';
-}
-
-function fecharModalRemover() {
-    const modal = document.getElementById('modalRemoverCliente');
-    modal.style.display = 'none';
-    modal.classList.remove('fade-in');
-}
-
-function removerClienteConfirmado() {
-    db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
-        atualizarListaClientes();
-        fecharModalRemover();
-    }).catch((error) => {
-        console.error("Error removing document: ", error);
-    });
-}
-
-function salvarCliente() {
-    const id = document.getElementById('editar-index').value;
-    const carro = document.getElementById('editar-carro').value;
-    const cor = document.getElementById('editar-cor').value;
-    const placa = document.getElementById('editar-placa').value;
-    const ano = document.getElementById('editar-ano').value;
-    const hodometro = document.getElementById('editar-hodometro').value;
-
-    if (carro && cor && placa && ano && hodometro) {
-        db.collection("clientes").doc(id).update({
-            carro,
-            cor,
-            placa,
-            ano,
-            hodometro
-        }).then(() => {
-            atualizarListaClientes();
-            fecharModalEditar();
-        }).catch((error) => {
-            console.error("Error updating document: ", error);
-        });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
-
-function filtrarClientes() {
-    const input = document.getElementById('buscar-cliente');
-    const filter = input.value.toUpperCase();
-    const ul = document.getElementById('lista-clientes');
-    const li = ul.getElementsByTagName('li');
-
-    for (let i = 0; i < li.length; i++) {
-        const txtValue = li[i].textContent || li[i].innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            li[i].style.display = "";
-        } else {
-            li[i].style.display = "none";
+        function atualizarListaClientes() {
+            const listaClientes = document.getElementById('lista-clientes');
+            listaClientes.innerHTML = '';
+            db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const cliente = doc.data();
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>Nome: ${cliente.nome}</span>
+                        <span>Carro: ${cliente.carro}</span>
+                        <span>Cor: ${cliente.cor}</span>
+                        <span>Placa: ${cliente.placa}</span>
+                        <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
+                    `;
+                    li.onclick = () => abrirModalEditar(doc.id);
+                    listaClientes.appendChild(li);
+                });
+            });
         }
-    }
-}
 
-window.onclick = function(event) {
-    const modalAdicionar = document.getElementById('modalAdicionarCliente');
-    const modalEditar = document.getElementById('modalEditarCliente');
-    const modalRemover = document.getElementById('modalRemoverCliente');
-    if (event.target == modalAdicionar) {
-        modalAdicionar.style.display = "none";
-        modalAdicionar.classList.remove('fade-in');
-    }
-    if (event.target == modalEditar) {
-        modalEditar.style.display = "none";
-        modalEditar.classList.remove('fade-in');
-    }
-    if (event.target == modalRemover) {
-        modalRemover.style.display = "none";
-        modalRemover.classList.remove('fade-in');
-    }
-}
-
-window.onload = atualizarListaClientes;
-
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-function adicionarCliente() {
-    const nome = document.getElementById('nome').value;
-    const carro = document.getElementById('carro').value;
-    const cor = document.getElementById('cor').value;
-    const placa = document.getElementById('placa').value;
-    const ano = document.getElementById('ano').value;
-    const hodometro = document.getElementById('hodometro').value;
-
-    if (nome && carro && cor && placa && ano && hodometro) {
-        const cliente = { nome, carro, cor, placa, ano, hodometro };
-        db.collection("clientes").add(cliente).then(() => {
-            atualizarListaClientes();
-            document.getElementById('form-cliente').reset();
-            fecharModalAdicionar();
-        }).catch((error) => {
-            console.error("Error adding document: ", error);
-        });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
-
-function atualizarListaClientes() {
-    const listaClientes = document.getElementById('lista-clientes');
-    listaClientes.innerHTML = '';
-    db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            const cliente = doc.data();
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>Nome: ${cliente.nome}</span>
-                <span>Carro: ${cliente.carro}</span>
-                <span>Cor: ${cliente.cor}</span>
-                <span>Placa: ${cliente.placa}</span>
-                <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
-            `;
-            li.onclick = () => abrirModalEditar(doc.id);
-            listaClientes.appendChild(li);
-        });
-    });
-}
-
-function abrirModalAdicionar() {
-    const modal = document.getElementById('modalAdicionarCliente');
-    modal.classList.add('fade-in');
-    modal.style.display = 'block';
-}
-
-function fecharModalAdicionar() {
-    const modal = document.getElementById('modalAdicionarCliente');
-    modal.style.display = 'none';
-    modal.classList.remove('fade-in');
-}
-
-function abrirModalEditar(id) {
-    const modal = document.getElementById('modalEditarCliente');
-    modal.classList.add('fade-in');
-    const docRef = db.collection("clientes").doc(id);
-    docRef.get().then((doc) => {
-        if (doc.exists) {
-            const cliente = doc.data();
-            document.getElementById('editar-index').value = id;
-            document.getElementById('editar-nome').value = cliente.nome;
-            document.getElementById('editar-carro').value = cliente.carro;
-            document.getElementById('editar-cor').value = cliente.cor;
-            document.getElementById('editar-placa').value = cliente.placa;
-            document.getElementById('editar-ano').value = cliente.ano;
-            document.getElementById('editar-hodometro').value = cliente.hodometro;
-            modal.style.display = 'block';
-        } else {
-            console.log("No such document!");
+        function abrirModalAdicionar() {
+            document.getElementById('modalAdicionarCliente').style.display = 'block';
         }
-    }).catch((error) => {
-        console.log("Error getting document:", error);
-    });
-}
 
-function fecharModalEditar() {
-    const modal = document.getElementById('modalEditarCliente');
-    modal.style.display = 'none';
-    modal.classList.remove('fade-in');
-}
-
-function abrirModalRemover(id, event) {
-    event.stopPropagation();
-    clienteParaRemover = id;
-    const modal = document.getElementById('modalRemoverCliente');
-    modal.classList.add('fade-in');
-    modal.style.display = 'block';
-}
-
-function fecharModalRemover() {
-    const modal = document.getElementById('modalRemoverCliente');
-    modal.style.display = 'none';
-    modal.classList.remove('fade-in');
-}
-
-function removerClienteConfirmado() {
-    db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
-        atualizarListaClientes();
-        fecharModalRemover();
-    }).catch((error) => {
-        console.error("Error removing document: ", error);
-    });
-}
-
-function salvarCliente() {
-    const id = document.getElementById('editar-index').value;
-    const carro = document.getElementById('editar-carro').value;
-    const cor = document.getElementById('editar-cor').value;
-    const placa = document.getElementById('editar-placa').value;
-    const ano = document.getElementById('editar-ano').value;
-    const hodometro = document.getElementById('editar-hodometro').value;
-
-    if (carro && cor && placa && ano && hodometro) {
-        db.collection("clientes").doc(id).update({
-            carro,
-            cor,
-            placa,
-            ano,
-            hodometro
-        }).then(() => {
-            atualizarListaClientes();
-            fecharModalEditar();
-        }).catch((error) => {
-            console.error("Error updating document: ", error);
-        });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
-
-function filtrarClientes() {
-    const input = document.getElementById('buscar-cliente');
-    const filter = input.value.toUpperCase();
-    const ul = document.getElementById('lista-clientes');
-    const li = ul.getElementsByTagName('li');
-
-    for (let i = 0; i < li.length; i++) {
-        const txtValue = li[i].textContent || li[i].innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            li[i].style.display = "";
-        } else {
-            li[i].style.display = "none";
+        function fecharModalAdicionar() {
+            document.getElementById('modalAdicionarCliente').style.display = 'none';
         }
-    }
-}
 
-window.onclick = function(event) {
-    const modalAdicionar = document.getElementById('modalAdicionarCliente');
-    const modalEditar = document.getElementById('modalEditarCliente');
-    const modalRemover = document.getElementById('modalRemoverCliente');
-    if (event.target == modalAdicionar) {
-        modalAdicionar.style.display = "none";
-        modalAdicionar.classList.remove('fade-in');
-    }
-    if (event.target == modalEditar) {
-        modalEditar.style.display = "none";
-        modalEditar.classList.remove('fade-in');
-    }
-    if (event.target == modalRemover) {
-        modalRemover.style.display = "none";
-        modalRemover.classList.remove('fade-in');
-    }
-}
+        function abrirModalEditar(id) {
+            const docRef = db.collection("clientes").doc(id);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const cliente = doc.data();
+                    document.getElementById('editar-index').value = id;
+                    document.getElementById('editar-nome').value = cliente.nome;
+                    document.getElementById('editar-carro').value = cliente.carro;
+                    document.getElementById('editar-cor').value = cliente.cor;
+                    document.getElementById('editar-placa').value = cliente.placa;
+                    document.getElementById('editar-ano').value = cliente.ano;
+                    document.getElementById('editar-hodometro').value = cliente.hodometro;
+                    document.getElementById('modalEditarCliente').style.display = 'block';
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting document:", error);
+            });
+        }
 
-window.onload = atualizarListaClientes;
-    
+        function fecharModalEditar() {
+            document.getElementById('modalEditarCliente').style.display = 'none';
+        }
+
+        function abrirModalRemover(id, event) {
+            event.stopPropagation();
+            clienteParaRemover = id;
+            document.getElementById('modalRemoverCliente').style.display = 'block';
+        }
+
+        function fecharModalRemover() {
+            document.getElementById('modalRemoverCliente').style.display = 'none';
+        }
+
+        function removerClienteConfirmado() {
+            db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
+                atualizarListaClientes();
+                fecharModalRemover();
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+            });
+        }
+
+        function salvarCliente() {
+            const id = document.getElementById('editar-index').value;
+            const carro = document.getElementById('editar-carro').value;
+            const cor = document.getElementById('editar-cor').value;
+            const placa = document.getElementById('editar-placa').value;
+            const ano = document.getElementById('editar-ano').value;
+            const hodometro = document.getElementById('editar-hodometro').value;
+
+            if (carro && cor && placa && ano && hodometro) {
+                db.collection("clientes").doc(id).update({
+                    carro,
+                    cor,
+                    placa,
+                    ano,
+                    hodometro
+                }).then(() => {
+                    atualizarListaClientes();
+                    fecharModalEditar();
+                }).catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        function filtrarClientes() {
+            const input = document.getElementById('buscar-cliente');
+            const filter = input.value.toUpperCase();
+            const ul = document.getElementById('lista-clientes');
+            const li = ul.getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const txtValue = li[i].textContent || li[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
+        window.onclick = function(event) {
+            const modalAdicionar = document.getElementById('modalAdicionarCliente');
+            const modalEditar = document.getElementById('modalEditarCliente');
+            const modalRemover = document.getElementById('modalRemoverCliente');
+            if (event.target == modalAdicionar) {
+                modalAdicionar.style.display = "none";
+            }
+            if (event.target == modalEditar) {
+                modalEditar.style.display = "none";
+            }
+            if (event.target == modalRemover) {
+                modalRemover.style.display = "none";
+            }
+        }
+
+        window.onload = atualizarListaClientes;
     </script>
 </body>
 </html>
