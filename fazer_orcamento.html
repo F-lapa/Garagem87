@@ -184,7 +184,7 @@
             height: auto;
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
+            padding: 20px;
             box-sizing: border-box;
         }
         .modal-content {
@@ -197,6 +197,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             box-sizing: border-box;
+            position: relative;
         }
         .modal-header, .modal-footer {
             display: flex;
@@ -331,6 +332,17 @@
                 font-size: 16px;
             }
         }
+        .print-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #d32f2f;
+        }
+        .print-btn:hover {
+            color: #9a0007;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
@@ -395,6 +407,7 @@
 
     <div id="modalDetalhes" class="modal">
         <div class="modal-content">
+            <span class="print-btn" onclick="printOrcamento()"><i class="fas fa-print"></i></span>
             <div class="modal-header">
                 <img src="LogoGaragem87.png" alt="Logo da Garagem87">
                 <h2>Detalhes do Orçamento</h2>
@@ -726,6 +739,16 @@
     function buscarOrcamentos(event) {
         const filtro = event.target.value;
         exibirOrcamentos(filtro);
+    }
+
+    function printOrcamento() {
+        const modalContent = document.querySelector('#modalDetalhes .modal-content');
+        html2canvas(modalContent).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jspdf.jsPDF();
+            pdf.addImage(imgData, 'PNG', 10, 10, 180, canvas.height * 180 / canvas.width);
+            pdf.save('orcamento.pdf');
+        });
     }
 
     window.onload = function() {
