@@ -11,7 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #f2f2f2;
             margin: 0;
             padding: 20px;
@@ -23,7 +23,7 @@
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
         }
         .container img {
             width: 100%;
@@ -117,13 +117,13 @@
         #lista-clientes li span:last-child {
             border-right: none;
         }
-        #lista-clientes li .icon-remove {
+        .icon-remove {
             color: #e57373;
             font-size: 20px;
             cursor: pointer;
             transition: color 0.3s;
         }
-        #lista-clientes li .icon-remove:hover {
+        .icon-remove:hover {
             color: #d32f2f;
         }
         .modal {
