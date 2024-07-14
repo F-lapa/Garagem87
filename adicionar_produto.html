@@ -27,24 +27,37 @@
         }
         .container img {
             width: 100%;
-            max-width: 300px;
+            max-width: 250px; /* Reduzi o tamanho máximo da imagem */
             display: block;
-            margin: 0 auto 10px auto;
+            margin: 0 auto 10px;
+            animation: shine 1.5s infinite;
+        }
+        @keyframes shine {
+            0% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.5);
+            }
+            100% {
+                filter: brightness(1);
+            }
         }
         .container h2 {
             text-align: center;
             color: #d32f2f; /* Cor combinando com o logotipo */
             margin-bottom: 20px;
+            font-size: 20px; /* Diminuir o tamanho do texto */
         }
         .btn {
             width: 100%;
-            padding: 12px;
+            padding: 10px; /* Diminuir o padding */
             border: none;
             border-radius: 5px;
             background-color: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             font-weight: bold;
             margin-bottom: 20px;
             transition: background-color 0.3s;
@@ -58,7 +71,7 @@
         }
         #buscar-produto {
             width: 100%;
-            padding: 12px;
+            padding: 10px; /* Diminuir o padding */
             box-sizing: border-box;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
@@ -67,12 +80,13 @@
         .lista-cabecalho {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
+            padding: 8px; /* Diminuir o padding */
             background: #d32f2f; /* Cor combinando com o logotipo */
             color: white;
             border-radius: 5px;
             margin-bottom: 10px;
             font-weight: bold;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
         }
         .lista-cabecalho span {
             flex: 1;
@@ -87,7 +101,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
+            padding: 8px; /* Diminuir o padding */
             margin: 5px 0;
             background: #ffffff;
             border-radius: 5px;
@@ -102,10 +116,11 @@
             text-align: center;
             font-weight: bold;
             color: #d32f2f; /* Cor combinando com o logotipo */
+            font-size: 14px; /* Diminuir o tamanho da fonte */
         }
         .icon-remove {
             color: #e57373;
-            font-size: 20px;
+            font-size: 18px; /* Diminuir o tamanho do ícone */
             cursor: pointer;
             transition: color 0.3s;
         }
@@ -121,11 +136,16 @@
             top: 50%;
             transform: translate(-50%, -50%);
             width: 100%;
-            max-width: 400px;
+            max-width: 350px; /* Diminuir o tamanho máximo */
             height: auto;
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
+            animation: fadeIn 0.5s; /* Adicionado efeito de fade in */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .modal-content {
             background-color: #fefefe;
@@ -133,7 +153,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 350px;
+            max-width: 300px; /* Diminuir o tamanho máximo */
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -155,10 +175,11 @@
         .modal-header h2 {
             margin: 0;
             color: #d32f2f; /* Cor combinando com o logotipo */
+            font-size: 18px; /* Diminuir o tamanho da fonte */
         }
         .close {
             color: #aaa;
-            font-size: 28px;
+            font-size: 24px; /* Diminuir o tamanho do ícone */
             font-weight: bold;
             cursor: pointer;
         }
@@ -175,6 +196,7 @@
             margin-bottom: 5px;
             color: #d32f2f; /* Cor combinando com o logotipo */
             font-weight: bold;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
         }
         .form-group input {
             padding: 10px;
@@ -191,7 +213,7 @@
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             font-weight: bold;
             transition: background-color 0.3s;
         }
@@ -359,10 +381,16 @@
 
         function abrirModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
+            setTimeout(() => {
+                document.getElementById(modalId).classList.add('modal-show');
+            }, 10);
         }
 
         function fecharModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+            document.getElementById(modalId).classList.remove('modal-show');
+            setTimeout(() => {
+                document.getElementById(modalId).style.display = 'none';
+            }, 500);
         }
 
         function abrirModalEditar(id) {
@@ -440,13 +468,13 @@
             const modalEditar = document.getElementById('modalEditarProduto');
             const modalRemover = document.getElementById('modalRemoverProduto');
             if (event.target == modalAdicionar) {
-                modalAdicionar.style.display = "none";
+                fecharModal('modalAdicionarProduto');
             }
             if (event.target == modalEditar) {
-                modalEditar.style.display = "none";
+                fecharModal('modalEditarProduto');
             }
             if (event.target == modalRemover) {
-                modalRemover.style.display = "none";
+                fecharModal('modalRemoverProduto');
             }
         }
     </script>
