@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -29,19 +30,31 @@
         }
         .container img {
             width: 100%;
-            max-width: 300px;
+            max-width: 250px; /* Reduzi o tamanho máximo da imagem */
             display: block;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 20px;
+            animation: shine 1.5s infinite;
+        }
+        @keyframes shine {
+            0% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.5);
+            }
+            100% {
+                filter: brightness(1);
+            }
         }
         .btn {
             width: 100%;
-            padding: 12px;
+            padding: 10px; /* Diminuir o padding */
             border: none;
             border-radius: 5px;
             background-color: #d32f2f;
             color: white;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             font-weight: bold;
             margin-top: 20px;
             transition: background-color 0.3s;
@@ -62,26 +75,26 @@
         .form-group input,
         .form-group select,
         .form-group textarea {
-            width: calc(100% - 50px);
-            padding: 10px;
+            width: calc(100% - 40px); /* Ajuste para caber melhor no mobile */
+            padding: 8px; /* Diminuir o padding */
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             box-sizing: border-box;
             display: inline-block;
         }
         .form-group textarea {
-            height: 100px;
+            height: 80px; /* Diminuir a altura */
             resize: vertical;
         }
         .form-group .add-product,
         .form-group .remove-product {
-            width: 30px;
-            padding: 10px;
+            width: 25px; /* Diminuir o tamanho */
+            padding: 8px; /* Diminuir o padding */
             margin-left: 10px;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             text-align: center;
             cursor: pointer;
             background-color: #d32f2f;
@@ -97,10 +110,10 @@
             margin-bottom: 10px;
         }
         .product-list .product-item select {
-            width: calc(100% - 100px);
+            width: calc(100% - 85px); /* Ajuste para caber melhor no mobile */
         }
         .product-list .product-item input {
-            width: 60px;
+            width: 50px; /* Diminuir o tamanho */
             margin-left: 10px;
         }
         .search-bar {
@@ -111,10 +124,10 @@
         }
         .search-bar input {
             width: 100%;
-            padding: 10px;
+            padding: 10px; /* Diminuir o padding */
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             box-sizing: border-box;
         }
         .orcamento-list {
@@ -167,7 +180,7 @@
         }
         .details-section p {
             margin: 5px 0;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
         }
         .details-section p span {
             font-weight: bold;
@@ -180,12 +193,17 @@
             top: 50%;
             transform: translate(-50%, -50%);
             width: 100%;
-            max-width: 600px;
+            max-width: 500px; /* Diminuir o tamanho máximo */
             height: auto;
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
             padding: 20px;
             box-sizing: border-box;
+            animation: fadeIn 0.5s; /* Adicionado efeito de fade in */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .modal-content {
             background-color: #fefefe;
@@ -193,7 +211,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 100%;
-            max-width: 500px;
+            max-width: 400px; /* Diminuir o tamanho máximo */
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             box-sizing: border-box;
@@ -219,6 +237,7 @@
             margin: 0;
             color: #d32f2f;
             flex: 1 0 100%;
+            font-size: 18px; /* Diminuir o tamanho da fonte */
         }
         .modal-header img {
             width: 100%;
@@ -228,7 +247,7 @@
         }
         .close {
             color: #aaa;
-            font-size: 28px;
+            font-size: 24px; /* Diminuir o tamanho do ícone */
             font-weight: bold;
             cursor: pointer;
         }
@@ -243,7 +262,7 @@
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             font-weight: bold;
             transition: background-color 0.3s;
             display: flex;
@@ -296,7 +315,7 @@
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             font-weight: bold;
             margin-top: 20px;
             transition: background-color 0.3s;
@@ -311,7 +330,7 @@
         }
         .orcamento-confirmado {
             color: green;
-            font-size: 18px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             margin-left: 10px;
         }
         @media (max-width: 600px) {
@@ -326,7 +345,7 @@
                 padding: 4px;
             }
             .details-section p {
-                font-size: 14px;
+                font-size: 12px;
             }
             .details-section h2 {
                 font-size: 16px;
@@ -700,10 +719,16 @@ function excluirOrcamento(id) {
 
 function abrirModal(modalId) {
     document.getElementById(modalId).style.display = 'block';
+    setTimeout(() => {
+        document.getElementById(modalId).classList.add('modal-show');
+    }, 10);
 }
 
 function fecharModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
+    document.getElementById(modalId).classList.remove('modal-show');
+    setTimeout(() => {
+        document.getElementById(modalId).style.display = 'none';
+    }, 500);
 }
 
 function exibirOrcamentos(filtro = "") {
