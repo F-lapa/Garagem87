@@ -27,33 +27,37 @@
         }
         .container img {
             width: 100%;
-            max-width: 300px;
+            max-width: 250px; /* Reduzi o tamanho máximo da imagem */
             display: block;
-            margin: 0 auto 10px auto;
-            animation: glow 1.5s infinite alternate;
+            margin: 0 auto 10px;
+            animation: shine 1.5s infinite;
         }
-        @keyframes glow {
+        @keyframes shine {
             0% {
-                box-shadow: 0 0 5px #d32f2f;
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.5);
             }
             100% {
-                box-shadow: 0 0 20px #d32f2f;
+                filter: brightness(1);
             }
         }
         .container h2 {
             text-align: center;
             color: #d32f2f;
             margin-bottom: 20px;
+            font-size: 20px; /* Diminuir o tamanho do texto */
         }
         .btn {
             width: 100%;
-            padding: 12px;
+            padding: 10px; /* Diminuir o padding */
             border: none;
             border-radius: 5px;
             background-color: #d32f2f;
             color: white;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             font-weight: bold;
             margin-bottom: 20px;
             transition: background-color 0.3s;
@@ -67,11 +71,11 @@
         }
         #buscar-cliente {
             width: 100%;
-            padding: 12px;
+            padding: 10px; /* Diminuir o padding */
             box-sizing: border-box;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
         }
         .lista-cabecalho {
             display: none;
@@ -86,7 +90,7 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 10px;
+            padding: 10px; /* Diminuir o padding */
             margin: 5px 0;
             background: #ffffff;
             border-radius: 5px;
@@ -103,10 +107,11 @@
             font-weight: bold;
             color: #d32f2f;
             padding: 5px 0;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
         }
         #lista-clientes li .icon-remove {
             color: #e57373;
-            font-size: 20px;
+            font-size: 18px; /* Diminuir o tamanho do ícone */
             cursor: pointer;
             transition: color 0.3s;
             align-self: flex-end;
@@ -127,6 +132,11 @@
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
+            animation: fadeIn 0.5s; /* Adicionado efeito de fade in */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .modal-content {
             background-color: #fefefe;
@@ -134,7 +144,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 350px;
+            max-width: 350px; /* Diminuir o tamanho máximo */
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -156,10 +166,11 @@
         .modal-header h2 {
             margin: 0;
             color: #d32f2f;
+            font-size: 18px; /* Diminuir o tamanho da fonte */
         }
         .close {
             color: #aaa;
-            font-size: 28px;
+            font-size: 24px; /* Diminuir o tamanho do ícone */
             font-weight: bold;
             cursor: pointer;
         }
@@ -176,6 +187,7 @@
             margin-bottom: 5px;
             color: #d32f2f;
             font-weight: bold;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
         }
         .form-group input {
             padding: 10px;
@@ -192,7 +204,7 @@
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px; /* Diminuir o tamanho da fonte */
             font-weight: bold;
             transition: background-color 0.3s;
         }
@@ -372,10 +384,16 @@
 
         function abrirModalAdicionar() {
             document.getElementById('modalAdicionarCliente').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('modalAdicionarCliente').classList.add('modal-show');
+            }, 10);
         }
 
         function fecharModalAdicionar() {
-            document.getElementById('modalAdicionarCliente').style.display = 'none';
+            document.getElementById('modalAdicionarCliente').classList.remove('modal-show');
+            setTimeout(() => {
+                document.getElementById('modalAdicionarCliente').style.display = 'none';
+            }, 500);
         }
 
         function abrirModalEditar(id) {
@@ -391,6 +409,9 @@
                     document.getElementById('editar-ano').value = cliente.ano;
                     document.getElementById('editar-hodometro').value = cliente.hodometro;
                     document.getElementById('modalEditarCliente').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('modalEditarCliente').classList.add('modal-show');
+                    }, 10);
                 } else {
                     console.log("No such document!");
                 }
@@ -400,17 +421,26 @@
         }
 
         function fecharModalEditar() {
-            document.getElementById('modalEditarCliente').style.display = 'none';
+            document.getElementById('modalEditarCliente').classList.remove('modal-show');
+            setTimeout(() => {
+                document.getElementById('modalEditarCliente').style.display = 'none';
+            }, 500);
         }
 
         function abrirModalRemover(id, event) {
             event.stopPropagation();
             clienteParaRemover = id;
             document.getElementById('modalRemoverCliente').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('modalRemoverCliente').classList.add('modal-show');
+            }, 10);
         }
 
         function fecharModalRemover() {
-            document.getElementById('modalRemoverCliente').style.display = 'none';
+            document.getElementById('modalRemoverCliente').classList.remove('modal-show');
+            setTimeout(() => {
+                document.getElementById('modalRemoverCliente').style.display = 'none';
+            }, 500);
         }
 
         function removerClienteConfirmado() {
@@ -469,13 +499,13 @@
             const modalEditar = document.getElementById('modalEditarCliente');
             const modalRemover = document.getElementById('modalRemoverCliente');
             if (event.target == modalAdicionar) {
-                modalAdicionar.style.display = "none";
+                fecharModalAdicionar();
             }
             if (event.target == modalEditar) {
-                modalEditar.style.display = "none";
+                fecharModalEditar();
             }
             if (event.target == modalRemover) {
-                modalRemover.style.display = "none";
+                fecharModalRemover();
             }
         }
 
