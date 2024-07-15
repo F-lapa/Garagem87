@@ -448,169 +448,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 <script>
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "garagem87-c652e.firebaseapp.com",
-        projectId: "garagem87-c652e",
-        storageBucket: "garagem87-c652e.appspot.com",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID",
-        measurementId: "YOUR_MEASUREMENT_ID"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    let produtos = [];
-    let clientes = [];
-    let orcamentos = [];
-    let acaoConfirmada = null;
-
-    function carregarProdutos() {
-        db.collection("produtos").get().then((querySnapshot) => {
-            produtos = querySnapshot.docs.map(doc => {
-                const data = doc.data();
-                const preco = parseFloat(data.valor);
-                return {
-                    id: doc.id,
-                    produto: data.produto,
-                    preco: isNaN(preco) ? 0 : preco,
-                    estoque: data.estoque
-                };
-            });
-            const productSelects = document.querySelectorAll('select[name="produtos"]');
-            productSelects.forEach(select => {
-                const selectedValue = select.value; 
-                select.innerHTML = '<option value="">Nenhum Produto</option>';
-                produtos.forEach(produto => {
-                    const preco = produto.preco.toFixed(2);
-                    const option = document.createElement('option');
-                    option.value = produto.produto;
-                    option.textContent = `${produto.produto} - R$ ${preco}`;
-                    select.appendChild(option);
-                });
-                select.value = selectedValue; 
-            });
-        }).catch(error => {
-            console.error("Erro ao carregar produtos:", error);
-        });
-    }
-
-    function carregarClientes() {
-        db.collection("clientes").get().then((querySnapshot) => {
-            clientes = querySnapshot.docs.map(doc => doc.data());
-            const clienteSelect = document.getElementById('nome-cliente');
-            clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
-            clientes.forEach(cliente => {
-                const option = document.createElement('option');
-                option.value = cliente.nome;
-                option.textContent = cliente.nome;
-                clienteSelect.appendChild(option);
-            });
-        }).catch(error => {
-            console.error("Erro ao carregar clientes:", error);
-        });
-    }
-
-    function adicionarProduto() {
-        const productList = document.getElementById('product-list');
-        const productItem = document.createElement('div');
-        productItem.className = 'product-item';
-        productItem.innerHTML = `
-            <select name="produtos">
-                <option value="">Nenhum Produto</option>
-            </select>
-            <input type="number" name="quantidade" min="1">
-            <div class="add-product" onclick="adicionarProduto()">+</div>
-            <div class="remove-product" onclick="removerProduto(this)">-</div>
-        `;
-        productList.appendChild(productItem);
-        carregarProdutos();
-    }
-
-    function removerProduto(element) {
-        element.parentNode.remove();
-    }
-
-    function enviarOrcamento(event) {
-        event.preventDefault();
-        const form = document.getElementById('orcamento-form');
-        const nomeCliente = form['nome-cliente'].value || '';
-        const servico = parseFloat(form.servico.value);
-        const descricaoServico = form['descricao-servico'].value || '';
-        const hodometro = form['hodometro'].value || ''; 
-        const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
-            .map((select, index) => {
-                const produtoNome = select.value.split(' - ')[0];
-                const produto = produtos.find(prod => prod.produto === produtoNome);
-                if (!produto) {
-                    return null;
-                }
-                const quantidade = parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value);
-                if (isNaN(quantidade) || quantidade <= 0) {
-                    return null;
-                }
-                return {
-                    id: produto.id,
-                    produto: produto.produto,
-                    quantidade,
-                    preco: produto.preco
-                };
-            })
-            .filter(item => item !== null); 
-
-        const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
-            return total + item.preco * item.quantidade;
-        }, 0);
-
-        const valorTotal = parseFloat(servico) + valorTotalProdutos;
-
-        const orcamento = {
-            nomeCliente,
-            servico,
-            descricaoServico,
-            valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
-            valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
-            produtos: produtosSelecionados,
-            hodometro, 
-            confirmado: false,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        db.collection("orcamentos").add(orcamento).then(() => {
-            form.reset();
-            carregarOrcamentos();
-        }).catch(error => {
-            console.error("Erro ao salvar orçamento:", error);
-        });
-    }
-
-    function carregarOrcamentos() {
-        db.collection("orcamentos").orderBy("timestamp", "desc").get().then((querySnapshot) => {
-            orcamentos = querySnapshot.docs.map(doc => {
-                return { id: doc.id, ...doc.data() };
-            });
-            exibirOrcamentos();
-        }).catch(error => {
-            console.error("Erro ao carregar orçamentos:", error);
-        });
-    }
-
-    async function obterCliente(nomeCliente) {
-        const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
-        if (!clienteSnapshot.empty) {
-            return clienteSnapshot.docs[0].data();
         }
-        return null;
-    }
-
-    async function obterProduto(produtoNome) {
-        const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
-        if (!produtoSnapshot.empty) {
-            return produtoSnapshot.docs[0].data();
-        }
-        return null;
-    }
 
     async function verDetalhes(id) {
         const orcamento = orcamentos.find(orc => orc.id === id);
@@ -676,143 +514,377 @@
                     <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
                 </div>
             </div>
-        `;
-        abrirModal('modalDetalhes');
-    }
+        <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+<script>
 
-    function abrirModalConfirmacao(acao, id) {
-        const modalTexto = {
-            excluir: "Tem certeza que deseja excluir este orçamento?",
-            confirmar: "Tem certeza que deseja confirmar este orçamento?"
-        };
-        document.getElementById('modalConfirmacaoTexto').innerText = modalTexto[acao];
-        document.getElementById('confirmarAcao').onclick = function() {
-            if (acao === 'excluir') {
-                excluirOrcamento(id);
-            } else if (acao === 'confirmar') {
-                confirmarOrcamento(id);
+    const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "garagem87-c652e.firebaseapp.com",
+    projectId: "garagem87-c652e",
+    storageBucket: "garagem87-c652e.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let produtos = [];
+let clientes = [];
+let orcamentos = [];
+let acaoConfirmada = null;
+
+function carregarProdutos() {
+    db.collection("produtos").get().then((querySnapshot) => {
+        produtos = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const preco = parseFloat(data.valor);
+            return {
+                id: doc.id,
+                produto: data.produto,
+                preco: isNaN(preco) ? 0 : preco,
+                estoque: data.estoque
+            };
+        });
+        const productSelects = document.querySelectorAll('select[name="produtos"]');
+        productSelects.forEach(select => {
+            const selectedValue = select.value; 
+            select.innerHTML = '<option value="">Nenhum Produto</option>';
+            produtos.forEach(produto => {
+                const preco = produto.preco.toFixed(2);
+                const option = document.createElement('option');
+                option.value = produto.produto;
+                option.textContent = `${produto.produto} - R$ ${preco}`;
+                select.appendChild(option);
+            });
+            select.value = selectedValue; 
+        });
+    }).catch(error => {
+        console.error("Erro ao carregar produtos:", error);
+    });
+}
+
+function carregarClientes() {
+    db.collection("clientes").get().then((querySnapshot) => {
+        clientes = querySnapshot.docs.map(doc => doc.data());
+        const clienteSelect = document.getElementById('nome-cliente');
+        clienteSelect.innerHTML = '<option value="">Nenhum Cliente</option>';
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.nome;
+            option.textContent = cliente.nome;
+            clienteSelect.appendChild(option);
+        });
+    }).catch(error => {
+        console.error("Erro ao carregar clientes:", error);
+    });
+}
+
+function adicionarProduto() {
+    const productList = document.getElementById('product-list');
+    const productItem = document.createElement('div');
+    productItem.className = 'product-item';
+    productItem.innerHTML = `
+        <select name="produtos">
+            <option value="">Nenhum Produto</option>
+        </select>
+        <input type="number" name="quantidade" min="1">
+        <div class="add-product" onclick="adicionarProduto()">+</div>
+        <div class="remove-product" onclick="removerProduto(this)">-</div>
+    `;
+    productList.appendChild(productItem);
+    carregarProdutos();
+}
+
+function removerProduto(element) {
+    element.parentNode.remove();
+}
+
+function enviarOrcamento(event) {
+    event.preventDefault();
+    const form = document.getElementById('orcamento-form');
+    const nomeCliente = form['nome-cliente'].value || '';
+    const servico = parseFloat(form.servico.value);
+    const descricaoServico = form['descricao-servico'].value || '';
+    const hodometro = form['hodometro'].value || ''; 
+    const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
+        .map((select, index) => {
+            const produtoNome = select.value.split(' - ')[0];
+            const produto = produtos.find(prod => prod.produto === produtoNome);
+            if (!produto) {
+                return null;
             }
-            fecharModal('modalConfirmacao');
+            const quantidade = parseInt(form.querySelectorAll('input[name="quantidade"]')[index].value);
+            if (isNaN(quantidade) || quantidade <= 0) {
+                return null;
+            }
+            return {
+                id: produto.id,
+                produto: produto.produto,
+                quantidade,
+                preco: produto.preco
+            };
+        })
+        .filter(item => item !== null); 
+
+    const valorTotalProdutos = produtosSelecionados.reduce((total, item) => {
+        return total + item.preco * item.quantidade;
+    }, 0);
+
+    const valorTotal = parseFloat(servico) + valorTotalProdutos;
+
+    const orcamento = {
+        nomeCliente,
+        servico,
+        descricaoServico,
+        valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
+        valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
+        produtos: produtosSelecionados,
+        hodometro, 
+        confirmado: false,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection("orcamentos").add(orcamento).then(() => {
+        form.reset();
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao salvar orçamento:", error);
+    });
+}
+
+function carregarOrcamentos() {
+    db.collection("orcamentos").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+        orcamentos = querySnapshot.docs.map(doc => {
+            return { id: doc.id, ...doc.data() };
+        });
+        exibirOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao carregar orçamentos:", error);
+    });
+}
+
+async function obterCliente(nomeCliente) {
+    const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
+    if (!clienteSnapshot.empty) {
+        return clienteSnapshot.docs[0].data();
+    }
+    return null;
+}
+
+async function obterProduto(produtoNome) {
+    const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
+    if (!produtoSnapshot.empty) {
+        return produtoSnapshot.docs[0].data();
+    }
+    return null;
+}
+
+async function verDetalhes(id) {
+    const orcamento = orcamentos.find(orc => orc.id === id);
+    const cliente = await obterCliente(orcamento.nomeCliente);
+    const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
+        const produto = await obterProduto(item.produto);
+        return {
+            ...item,
+            preco: produto ? parseFloat(produto.valor) : 0
         };
-        abrirModal('modalConfirmacao');
+    }));
+
+    let dataConfirmacao = "";
+    if (orcamento.confirmado && orcamento.timestamp) {
+        const timestamp = orcamento.timestamp.toDate();
+        dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+        document.getElementById('data-confirmacao').innerText = `Confirmado em: ${dataConfirmacao}`;
     }
 
-    async function confirmarOrcamento(id) {
-        const orcamentoRef = db.collection("orcamentos").doc(id);
-        await orcamentoRef.update({
-            confirmado: true,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    const detalhesModalBody = document.getElementById('detalhes-modal-body');
+    detalhesModalBody.innerHTML = `
+        <div id="orcamento-detalhes">
+            <div class="details-header">
+                <h2>Detalhes do Orçamento</h2>
+            </div>
+            <div class="details-section">
+                <h2>Cliente</h2>
+                <p><span>Nome:</span> ${orcamento.nomeCliente || ''}</p>
+                <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
+                <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
+                <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
+                <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
+            </div>
+            <div class="details-section">
+                <h2>Produtos</h2>
+                <table class="details-table">
+                    <thead>
+                        <tr>
+                            <th>Quantidade</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Valor Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${produtosDetalhados.map(produto => `
+                        <tr>
+                            <td>${produto.quantidade}</td>
+                            <td>${produto.produto}</td>
+                            <td>R$ ${produto.preco.toFixed(2)}</td>
+                            <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="details-section">
+                <h2>Mão de obra</h2>
+                <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
+                <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+            </div>
+            <div class="details-section">
+                <h2>Totais</h2>
+                <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
+            </div>
+        </div>
+    `;
+    abrirModal('modalDetalhes');
+}
 
-        orcamentos.find(orc => orc.id === id).produtos.forEach(item => {
-            const produtoRef = db.collection("produtos").doc(item.id);
-            produtoRef.update({
-                quantidade: firebase.firestore.FieldValue.increment(-item.quantidade)
-            }).then(() => {
-                console.log("Quantidade do produto atualizada com sucesso!");
-            }).catch(error => {
-                console.error("Erro ao atualizar quantidade do produto:", error);
-            });
-        });
+function abrirModalConfirmacao(acao, id) {
+    const modalTexto = {
+        excluir: "Tem certeza que deseja excluir este orçamento?",
+        confirmar: "Tem certeza que deseja confirmar este orçamento?"
+    };
+    document.getElementById('modalConfirmacaoTexto').innerText = modalTexto[acao];
+    document.getElementById('confirmarAcao').onclick = function() {
+        if (acao === 'excluir') {
+            excluirOrcamento(id);
+        } else if (acao === 'confirmar') {
+            confirmarOrcamento(id);
+        }
+        fecharModal('modalConfirmacao');
+    };
+    abrirModal('modalConfirmacao');
+}
 
-        // Atualizar a lista de clientes
-        atualizarListaClientes();
-        carregarOrcamentos();
-    }
-
-    function excluirOrcamento(id) {
-        const orcamentoRef = db.collection("orcamentos").doc(id);
-        orcamentoRef.delete().then(() => {
-            carregarOrcamentos();
-        }).catch(error => {
-            console.error("Erro ao excluir orçamento:", error);
-        });
-    }
-
-    function abrirModal(modalId) {
-        document.getElementById(modalId).style.display = 'block';
-        setTimeout(() => {
-            document.getElementById(modalId).classList.add('modal-show');
-        }, 10);
-    }
-
-    function fecharModal(modalId) {
-        document.getElementById(modalId).classList.remove('modal-show');
-        setTimeout(() => {
-            document.getElementById(modalId).style.display = 'none';
-        }, 500);
-    }
-
-    function exibirOrcamentos(filtro = "") {
-        const orcamentoList = document.getElementById('orcamento-list');
-        orcamentoList.innerHTML = '';
-        orcamentos
-            .filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
-            .sort((a, b) => b.timestamp - a.timestamp)
-            .forEach(async orcamento => {
-                const cliente = await obterCliente(orcamento.nomeCliente);
-                let dataConfirmacao = "";
-                if (orcamento.confirmado && orcamento.timestamp) {
-                    const timestamp = orcamento.timestamp.toDate();
-                    dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
-                }
-                const orcamentoItem = document.createElement('div');
-                orcamentoItem.className = 'orcamento-item';
-                orcamentoItem.innerHTML = `
-                    <span onclick="verDetalhes('${orcamento.id}')">${orcamento.nomeCliente || ''} - ${cliente ? cliente.carro : ''}</span>
-                    <div>
-                        ${orcamento.confirmado ? `<span class="orcamento-confirmado">Confirmado em: ${dataConfirmacao}</span>` : `
-                        <button onclick="abrirModalConfirmacao('confirmar', '${orcamento.id}')"><i class="fas fa-check"></i></button>
-                        `}
-                        <button onclick="abrirModalConfirmacao('excluir', '${orcamento.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
-                orcamentoList.appendChild(orcamentoItem);
-            });
-    }
-
-    function buscarOrcamentos(event) {
-        const filtro = event.target.value;
-        exibirOrcamentos(filtro);
-    }
-
-    function printOrcamento() {
-        const modalContent = document.querySelector('#modalDetalhes .modal-content');
-        html2canvas(modalContent, { scale: 2, scrollY: -window.scrollY }).then(canvas => {
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = 'detalhes_orcamento.jpg';
-            link.click();
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        carregarProdutos();
-        carregarClientes();
-        carregarOrcamentos();
+async function confirmarOrcamento(id) {
+    const orcamentoRef = db.collection("orcamentos").doc(id);
+    await orcamentoRef.update({
+        confirmado: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    function atualizarListaClientes() {
-        const listaClientes = document.getElementById('lista-clientes');
-        listaClientes.innerHTML = '';
-        db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const cliente = doc.data();
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>Nome: ${cliente.nome}</span>
-                    <span>Carro: ${cliente.carro}</span>
-                    <span>Cor: ${cliente.cor}</span>
-                    <span>Placa: ${cliente.placa}</span>
-                    <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
-                    <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
-                `;
-                li.onclick = () => abrirModalEditar(doc.id);
-                listaClientes.appendChild(li);
-            });
+    orcamentos.find(orc => orc.id === id).produtos.forEach(item => {
+        const produtoRef = db.collection("produtos").doc(item.id);
+        produtoRef.update({
+            quantidade: firebase.firestore.FieldValue.increment(-item.quantidade)
+        }).then(() => {
+            console.log("Quantidade do produto atualizada com sucesso!");
+        }).catch(error => {
+            console.error("Erro ao atualizar quantidade do produto:", error);
         });
-    }
+    });
+
+    // Atualizar a lista de clientes
+    atualizarListaClientes();
+    carregarOrcamentos();
+}
+
+function excluirOrcamento(id) {
+    const orcamentoRef = db.collection("orcamentos").doc(id);
+    orcamentoRef.delete().then(() => {
+        carregarOrcamentos();
+    }).catch(error => {
+        console.error("Erro ao excluir orçamento:", error);
+    });
+}
+
+function abrirModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+    setTimeout(() => {
+        document.getElementById(modalId).classList.add('modal-show');
+    }, 10);
+}
+
+function fecharModal(modalId) {
+    document.getElementById(modalId).classList.remove('modal-show');
+    setTimeout(() => {
+        document.getElementById(modalId).style.display = 'none';
+    }, 500);
+}
+
+function exibirOrcamentos(filtro = "") {
+    const orcamentoList = document.getElementById('orcamento-list');
+    orcamentoList.innerHTML = '';
+    orcamentos
+        .filter(orcamento => orcamento.nomeCliente.toLowerCase().includes(filtro.toLowerCase()))
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .forEach(async orcamento => {
+            const cliente = await obterCliente(orcamento.nomeCliente);
+            let dataConfirmacao = "";
+            if (orcamento.confirmado && orcamento.timestamp) {
+                const timestamp = orcamento.timestamp.toDate();
+                dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+            }
+            const orcamentoItem = document.createElement('div');
+            orcamentoItem.className = 'orcamento-item';
+            orcamentoItem.innerHTML = `
+                <span onclick="verDetalhes('${orcamento.id}')">${orcamento.nomeCliente || ''} - ${cliente ? cliente.carro : ''}</span>
+                <div>
+                    ${orcamento.confirmado ? `<span class="orcamento-confirmado">Confirmado em: ${dataConfirmacao}</span>` : `
+                    <button onclick="abrirModalConfirmacao('confirmar', '${orcamento.id}')"><i class="fas fa-check"></i></button>
+                    `}
+                    <button onclick="abrirModalConfirmacao('excluir', '${orcamento.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            orcamentoList.appendChild(orcamentoItem);
+        });
+}
+
+function buscarOrcamentos(event) {
+    const filtro = event.target.value;
+    exibirOrcamentos(filtro);
+}
+
+function printOrcamento() {
+    const modalContent = document.querySelector('#modalDetalhes .modal-content');
+    html2canvas(modalContent, { scale: 2, scrollY: -window.scrollY }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = 'detalhes_orcamento.jpg';
+        link.click();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    carregarProdutos();
+    carregarClientes();
+    carregarOrcamentos();
+});
+
+function atualizarListaClientes() {
+    const listaClientes = document.getElementById('lista-clientes');
+    listaClientes.innerHTML = '';
+    db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const cliente = doc.data();
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>Nome: ${cliente.nome}</span>
+                <span>Carro: ${cliente.carro}</span>
+                <span>Cor: ${cliente.cor}</span>
+                <span>Placa: ${cliente.placa}</span>
+                <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
+                <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
+            `;
+            li.onclick = () => abrirModalEditar(doc.id);
+            listaClientes.appendChild(li);
+        });
+    });
+}
+    
+        
 </script>
 </body>
 </html>
