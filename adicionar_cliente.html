@@ -27,7 +27,7 @@
         }
         .container img {
             width: 100%;
-            max-width: 250px; /* Reduzi o tamanho máximo da imagem */
+            max-width: 250px;
             display: block;
             margin: 0 auto 10px;
             animation: shine 1.5s infinite;
@@ -47,17 +47,17 @@
             text-align: center;
             color: #d32f2f;
             margin-bottom: 20px;
-            font-size: 20px; /* Diminuir o tamanho do texto */
+            font-size: 20px;
         }
         .btn {
             width: 100%;
-            padding: 10px; /* Diminuir o padding */
+            padding: 10px;
             border: none;
             border-radius: 5px;
             background-color: #d32f2f;
             color: white;
             cursor: pointer;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
             font-weight: bold;
             margin-bottom: 20px;
             transition: background-color 0.3s;
@@ -71,11 +71,11 @@
         }
         #buscar-cliente {
             width: 100%;
-            padding: 10px; /* Diminuir o padding */
+            padding: 10px;
             box-sizing: border-box;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
         }
         .lista-cabecalho {
             display: none;
@@ -90,7 +90,7 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 10px; /* Diminuir o padding */
+            padding: 10px;
             margin: 5px 0;
             background: #ffffff;
             border-radius: 5px;
@@ -107,14 +107,15 @@
             font-weight: bold;
             color: #d32f2f;
             padding: 5px 0;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
         }
         #lista-clientes li .icon-remove {
             color: #e57373;
-            font-size: 18px; /* Diminuir o tamanho do ícone */
+            font-size: 18px;
             cursor: pointer;
             transition: color 0.3s;
             align-self: flex-end;
+            margin-left: 10px;
         }
         #lista-clientes li .icon-remove:hover {
             color: #d32f2f;
@@ -132,7 +133,7 @@
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
-            animation: fadeIn 0.5s; /* Adicionado efeito de fade in */
+            animation: fadeIn 0.5s;
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -144,7 +145,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 350px; /* Diminuir o tamanho máximo */
+            max-width: 350px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -166,11 +167,11 @@
         .modal-header h2 {
             margin: 0;
             color: #d32f2f;
-            font-size: 18px; /* Diminuir o tamanho da fonte */
+            font-size: 18px;
         }
         .close {
             color: #aaa;
-            font-size: 24px; /* Diminuir o tamanho do ícone */
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -187,7 +188,7 @@
             margin-bottom: 5px;
             color: #d32f2f;
             font-weight: bold;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
         }
         .form-group input {
             padding: 10px;
@@ -204,7 +205,7 @@
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
             font-weight: bold;
             transition: background-color 0.3s;
         }
@@ -254,10 +255,6 @@
                     <label for="ano">Ano do Veículo:</label>
                     <input type="number" id="ano" name="ano" required>
                 </div>
-                <div class="form-group">
-                    <label for="hodometro">Hodômetro do Veículo:</label>
-                    <input type="number" id="hodometro" name="hodometro" required>
-                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-modal" onclick="adicionarCliente()">Salvar Cliente</button>
                 </div>
@@ -294,10 +291,6 @@
                     <label for="editar-ano">Ano do Veículo:</label>
                     <input type="number" id="editar-ano" name="editar-ano" required>
                 </div>
-                <div class="form-group">
-                    <label for="editar-hodometro">Hodômetro do Veículo:</label>
-                    <input type="number" id="editar-hodometro" name="editar-hodometro" required>
-                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-modal" onclick="salvarCliente()">Salvar Alterações</button>
                 </div>
@@ -322,19 +315,32 @@
         </div>
     </div>
 
+    <!-- Modal para Histórico de Orçamentos -->
+    <div id="modalHistoricoOrcamentos" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Histórico de Orçamentos</h2>
+                <span class="close" onclick="fecharModalHistorico()">&times;</span>
+            </div>
+            <div class="modal-body" id="historico-orcamentos-lista">
+                <!-- Lista de Orçamentos -->
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase Configuration -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
         const firebaseConfig = {
-           apiKey: "YOUR_API_KEY",
-           authDomain: "garagem87-c652e.firebaseapp.com",
-           databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
-           projectId: "garagem87-c652e",
-           storageBucket: "garagem87-c652e.appspot.com",
-           messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-           appId: "YOUR_APP_ID",
-           measurementId: "YOUR_MEASUREMENT_ID"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "garagem87-c652e.firebaseapp.com",
+            databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+            projectId: "garagem87-c652e",
+            storageBucket: "garagem87-c652e.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -346,10 +352,9 @@
             const cor = document.getElementById('cor').value;
             const placa = document.getElementById('placa').value;
             const ano = document.getElementById('ano').value;
-            const hodometro = document.getElementById('hodometro').value;
 
-            if (nome && carro && cor && placa && ano && hodometro) {
-                const cliente = { nome, carro, cor, placa, ano, hodometro };
+            if (nome && carro && cor && placa && ano) {
+                const cliente = { nome, carro, cor, placa, ano };
                 db.collection("clientes").add(cliente).then(() => {
                     atualizarListaClientes();
                     document.getElementById('form-cliente').reset();
@@ -374,12 +379,48 @@
                         <span>Carro: ${cliente.carro}</span>
                         <span>Cor: ${cliente.cor}</span>
                         <span>Placa: ${cliente.placa}</span>
+                        <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
                         <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
                     `;
                     li.onclick = () => abrirModalEditar(doc.id);
                     listaClientes.appendChild(li);
                 });
             });
+        }
+
+        function abrirHistoricoOrcamentos(clienteNome) {
+            const historicoLista = document.getElementById('historico-orcamentos-lista');
+            historicoLista.innerHTML = '';
+            db.collection("orcamentos").where("nomeCliente", "==", clienteNome).get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const orcamento = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'orcamento-item';
+                    div.innerHTML = `
+                        <span onclick="verDetalhesOrcamento('${doc.id}')">${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}</span>
+                    `;
+                    historicoLista.appendChild(div);
+                });
+            });
+            abrirModal('modalHistoricoOrcamentos');
+        }
+
+        function verDetalhesOrcamento(id) {
+            // Função para exibir detalhes do orçamento em uma modal
+        }
+
+        function abrirModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            setTimeout(() => {
+                document.getElementById(modalId).classList.add('modal-show');
+            }, 10);
+        }
+
+        function fecharModalHistorico() {
+            document.getElementById('modalHistoricoOrcamentos').classList.remove('modal-show');
+            setTimeout(() => {
+                document.getElementById('modalHistoricoOrcamentos').style.display = 'none';
+            }, 500);
         }
 
         function abrirModalAdicionar() {
@@ -407,7 +448,6 @@
                     document.getElementById('editar-cor').value = cliente.cor;
                     document.getElementById('editar-placa').value = cliente.placa;
                     document.getElementById('editar-ano').value = cliente.ano;
-                    document.getElementById('editar-hodometro').value = cliente.hodometro;
                     document.getElementById('modalEditarCliente').style.display = 'block';
                     setTimeout(() => {
                         document.getElementById('modalEditarCliente').classList.add('modal-show');
@@ -458,15 +498,13 @@
             const cor = document.getElementById('editar-cor').value;
             const placa = document.getElementById('editar-placa').value;
             const ano = document.getElementById('editar-ano').value;
-            const hodometro = document.getElementById('editar-hodometro').value;
 
-            if (carro && cor && placa && ano && hodometro) {
+            if (carro && cor && placa && ano) {
                 db.collection("clientes").doc(id).update({
                     carro,
                     cor,
                     placa,
-                    ano,
-                    hodometro
+                    ano
                 }).then(() => {
                     atualizarListaClientes();
                     fecharModalEditar();
