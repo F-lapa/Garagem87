@@ -395,6 +395,10 @@
                 </div>
             </div>
             <div class="form-group">
+                <label for="hodometro">Hodômetro do Veículo:</label>
+                <input type="number" id="hodometro" name="hodometro" min="0" step="1" placeholder="Digite o hodômetro (opcional)">
+            </div>
+            <div class="form-group">
                 <label for="descricao-servico">Serviços:</label>
                 <textarea id="descricao-servico" name="descricao-servico" placeholder="Descreva o que foi feito"></textarea>
             </div>
@@ -534,6 +538,7 @@
         const nomeCliente = form['nome-cliente'].value || '';
         const servico = parseFloat(form.servico.value);
         const descricaoServico = form['descricao-servico'].value || '';
+        const hodometro = form['hodometro'].value || ''; 
         const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
             .map((select, index) => {
                 const produtoNome = select.value.split(' - ')[0];
@@ -567,6 +572,7 @@
             valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
             valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
             produtos: produtosSelecionados,
+            hodometro, 
             confirmado: false,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -636,7 +642,7 @@
                     <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
                     <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
                     <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
-                    <p><span>Hodômetro:</span> ${cliente && cliente.hodometro !== undefined ? cliente.hodometro : ''}</p>
+                    <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
                 </div>
                 <div class="details-section">
                     <h2>Produtos</h2>
@@ -709,6 +715,8 @@
             });
         });
 
+        // Atualizar a lista de clientes
+        atualizarListaClientes();
         carregarOrcamentos();
     }
 
@@ -784,6 +792,27 @@
         carregarClientes();
         carregarOrcamentos();
     });
+
+    function atualizarListaClientes() {
+        const listaClientes = document.getElementById('lista-clientes');
+        listaClientes.innerHTML = '';
+        db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const cliente = doc.data();
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>Nome: ${cliente.nome}</span>
+                    <span>Carro: ${cliente.carro}</span>
+                    <span>Cor: ${cliente.cor}</span>
+                    <span>Placa: ${cliente.placa}</span>
+                    <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
+                    <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
+                `;
+                li.onclick = () => abrirModalEditar(doc.id);
+                listaClientes.appendChild(li);
+            });
+        });
+    }
 </script>
 </body>
 </html>
