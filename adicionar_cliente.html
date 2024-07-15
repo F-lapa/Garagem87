@@ -332,222 +332,223 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "garagem87-c652e.firebaseapp.com",
-            databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
-            projectId: "garagem87-c652e",
-            storageBucket: "garagem87-c652e.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
-        };
+         const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "garagem87-c652e.firebaseapp.com",
+    databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+    projectId: "garagem87-c652e",
+    storageBucket: "garagem87-c652e.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
+};
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-        function adicionarCliente() {
-            const nome = document.getElementById('nome').value;
-            const carro = document.getElementById('carro').value;
-            const cor = document.getElementById('cor').value;
-            const placa = document.getElementById('placa').value;
-            const ano = document.getElementById('ano').value;
+function adicionarCliente() {
+    const nome = document.getElementById('nome').value;
+    const carro = document.getElementById('carro').value;
+    const cor = document.getElementById('cor').value;
+    const placa = document.getElementById('placa').value;
+    const ano = document.getElementById('ano').value;
 
-            if (nome && carro && cor && placa && ano) {
-                const cliente = { nome, carro, cor, placa, ano };
-                db.collection("clientes").add(cliente).then(() => {
-                    atualizarListaClientes();
-                    document.getElementById('form-cliente').reset();
-                    fecharModalAdicionar();
-                }).catch((error) => {
-                    console.error("Error adding document: ", error);
-                });
-            } else {
-                alert("Por favor, preencha todos os campos.");
-            }
-        }
+    if (nome && carro && cor && placa && ano) {
+        const cliente = { nome, carro, cor, placa, ano };
+        db.collection("clientes").add(cliente).then(() => {
+            atualizarListaClientes();
+            document.getElementById('form-cliente').reset();
+            fecharModalAdicionar();
+        }).catch((error) => {
+            console.error("Error adding document: ", error);
+        });
+    } else {
+        alert("Por favor, preencha todos os campos.");
+    }
+}
 
-        function atualizarListaClientes() {
-            const listaClientes = document.getElementById('lista-clientes');
-            listaClientes.innerHTML = '';
-            db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const cliente = doc.data();
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span>Nome: ${cliente.nome}</span>
-                        <span>Carro: ${cliente.carro}</span>
-                        <span>Cor: ${cliente.cor}</span>
-                        <span>Placa: ${cliente.placa}</span>
-                        <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
-                        <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
-                    `;
-                    li.onclick = () => abrirModalEditar(doc.id);
-                    listaClientes.appendChild(li);
-                });
-            });
-        }
+function atualizarListaClientes() {
+    const listaClientes = document.getElementById('lista-clientes');
+    listaClientes.innerHTML = '';
+    db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const cliente = doc.data();
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>Nome: ${cliente.nome}</span>
+                <span>Carro: ${cliente.carro}</span>
+                <span>Cor: ${cliente.cor}</span>
+                <span>Placa: ${cliente.placa}</span>
+                <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
+                <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
+            `;
+            li.onclick = () => abrirModalEditar(doc.id);
+            listaClientes.appendChild(li);
+        });
+    });
+}
 
-        function abrirHistoricoOrcamentos(clienteNome) {
-            const historicoLista = document.getElementById('historico-orcamentos-lista');
-            historicoLista.innerHTML = '';
-            db.collection("orcamentos").where("nomeCliente", "==", clienteNome).get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const orcamento = doc.data();
-                    const div = document.createElement('div');
-                    div.className = 'orcamento-item';
-                    div.innerHTML = `
-                        <span onclick="verDetalhesOrcamento('${doc.id}')">${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}</span>
-                    `;
-                    historicoLista.appendChild(div);
-                });
-            });
-            abrirModal('modalHistoricoOrcamentos');
-        }
+function abrirHistoricoOrcamentos(clienteNome) {
+    const historicoLista = document.getElementById('historico-orcamentos-lista');
+    historicoLista.innerHTML = '';
+    db.collection("orcamentos").where("nomeCliente", "==", clienteNome).get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const orcamento = doc.data();
+            const div = document.createElement('div');
+            div.className = 'orcamento-item';
+            div.innerHTML = `
+                <span onclick="verDetalhesOrcamento('${doc.id}')">${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}</span>
+            `;
+            historicoLista.appendChild(div);
+        });
+    });
+    abrirModal('modalHistoricoOrcamentos');
+}
 
-        function verDetalhesOrcamento(id) {
-            // Função para exibir detalhes do orçamento em uma modal
-        }
+function verDetalhesOrcamento(id) {
+    // Função para exibir detalhes do orçamento em uma modal
+}
 
-        function abrirModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
+function abrirModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+    setTimeout(() => {
+        document.getElementById(modalId).classList.add('modal-show');
+    }, 10);
+}
+
+function fecharModalHistorico() {
+    document.getElementById('modalHistoricoOrcamentos').classList.remove('modal-show');
+    setTimeout(() => {
+        document.getElementById('modalHistoricoOrcamentos').style.display = 'none';
+    }, 500);
+}
+
+function abrirModalAdicionar() {
+    document.getElementById('modalAdicionarCliente').style.display = 'block';
+    setTimeout(() => {
+        document.getElementById('modalAdicionarCliente').classList.add('modal-show');
+    }, 10);
+}
+
+function fecharModalAdicionar() {
+    document.getElementById('modalAdicionarCliente').classList.remove('modal-show');
+    setTimeout(() => {
+        document.getElementById('modalAdicionarCliente').style.display = 'none';
+    }, 500);
+}
+
+function abrirModalEditar(id) {
+    const docRef = db.collection("clientes").doc(id);
+    docRef.get().then((doc) => {
+        if (doc.exists) {
+            const cliente = doc.data();
+            document.getElementById('editar-index').value = id;
+            document.getElementById('editar-nome').value = cliente.nome;
+            document.getElementById('editar-carro').value = cliente.carro;
+            document.getElementById('editar-cor').value = cliente.cor;
+            document.getElementById('editar-placa').value = cliente.placa;
+            document.getElementById('editar-ano').value = cliente.ano;
+            document.getElementById('modalEditarCliente').style.display = 'block';
             setTimeout(() => {
-                document.getElementById(modalId).classList.add('modal-show');
+                document.getElementById('modalEditarCliente').classList.add('modal-show');
             }, 10);
+        } else {
+            console.log("No such document!");
         }
+    }).catch((error) => {
+        console.log("Error getting document:", error);
+    });
+}
 
-        function fecharModalHistorico() {
-            document.getElementById('modalHistoricoOrcamentos').classList.remove('modal-show');
-            setTimeout(() => {
-                document.getElementById('modalHistoricoOrcamentos').style.display = 'none';
-            }, 500);
+function fecharModalEditar() {
+    document.getElementById('modalEditarCliente').classList.remove('modal-show');
+    setTimeout(() => {
+        document.getElementById('modalEditarCliente').style.display = 'none';
+    }, 500);
+}
+
+function abrirModalRemover(id, event) {
+    event.stopPropagation();
+    clienteParaRemover = id;
+    document.getElementById('modalRemoverCliente').style.display = 'block';
+    setTimeout(() => {
+        document.getElementById('modalRemoverCliente').classList.add('modal-show');
+    }, 10);
+}
+
+function fecharModalRemover() {
+    document.getElementById('modalRemoverCliente').classList.remove('modal-show');
+    setTimeout(() => {
+        document.getElementById('modalRemoverCliente').style.display = 'none';
+    }, 500);
+}
+
+function removerClienteConfirmado() {
+    db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
+        atualizarListaClientes();
+        fecharModalRemover();
+    }).catch((error) => {
+        console.error("Error removing document: ", error);
+    });
+}
+
+function salvarCliente() {
+    const id = document.getElementById('editar-index').value;
+    const carro = document.getElementById('editar-carro').value;
+    const cor = document.getElementById('editar-cor').value;
+    const placa = document.getElementById('editar-placa').value;
+    const ano = document.getElementById('editar-ano').value;
+
+    if (carro && cor && placa && ano) {
+        db.collection("clientes").doc(id).update({
+            carro,
+            cor,
+            placa,
+            ano
+        }).then(() => {
+            atualizarListaClientes();
+            fecharModalEditar();
+        }).catch((error) => {
+            console.error("Error updating document: ", error);
+        });
+    } else {
+        alert("Por favor, preencha todos os campos.");
+    }
+}
+
+function filtrarClientes() {
+    const input = document.getElementById('buscar-cliente');
+    const filter = input.value.toUpperCase();
+    const ul = document.getElementById('lista-clientes');
+    const li = ul.getElementsByTagName('li');
+
+    for (let i = 0; i < li.length; i++) {
+        const txtValue = li[i].textContent || li[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
         }
+    }
+}
 
-        function abrirModalAdicionar() {
-            document.getElementById('modalAdicionarCliente').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('modalAdicionarCliente').classList.add('modal-show');
-            }, 10);
-        }
+window.onclick = function(event) {
+    const modalAdicionar = document.getElementById('modalAdicionarCliente');
+    const modalEditar = document.getElementById('modalEditarCliente');
+    const modalRemover = document.getElementById('modalRemoverCliente');
+    if (event.target == modalAdicionar) {
+        fecharModalAdicionar();
+    }
+    if (event.target == modalEditar) {
+        fecharModalEditar();
+    }
+    if (event.target == modalRemover) {
+        fecharModalRemover();
+    }
+}
 
-        function fecharModalAdicionar() {
-            document.getElementById('modalAdicionarCliente').classList.remove('modal-show');
-            setTimeout(() => {
-                document.getElementById('modalAdicionarCliente').style.display = 'none';
-            }, 500);
-        }
-
-        function abrirModalEditar(id) {
-            const docRef = db.collection("clientes").doc(id);
-            docRef.get().then((doc) => {
-                if (doc.exists) {
-                    const cliente = doc.data();
-                    document.getElementById('editar-index').value = id;
-                    document.getElementById('editar-nome').value = cliente.nome;
-                    document.getElementById('editar-carro').value = cliente.carro;
-                    document.getElementById('editar-cor').value = cliente.cor;
-                    document.getElementById('editar-placa').value = cliente.placa;
-                    document.getElementById('editar-ano').value = cliente.ano;
-                    document.getElementById('modalEditarCliente').style.display = 'block';
-                    setTimeout(() => {
-                        document.getElementById('modalEditarCliente').classList.add('modal-show');
-                    }, 10);
-                } else {
-                    console.log("No such document!");
-                }
-            }).catch((error) => {
-                console.log("Error getting document:", error);
-            });
-        }
-
-        function fecharModalEditar() {
-            document.getElementById('modalEditarCliente').classList.remove('modal-show');
-            setTimeout(() => {
-                document.getElementById('modalEditarCliente').style.display = 'none';
-            }, 500);
-        }
-
-        function abrirModalRemover(id, event) {
-            event.stopPropagation();
-            clienteParaRemover = id;
-            document.getElementById('modalRemoverCliente').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('modalRemoverCliente').classList.add('modal-show');
-            }, 10);
-        }
-
-        function fecharModalRemover() {
-            document.getElementById('modalRemoverCliente').classList.remove('modal-show');
-            setTimeout(() => {
-                document.getElementById('modalRemoverCliente').style.display = 'none';
-            }, 500);
-        }
-
-        function removerClienteConfirmado() {
-            db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
-                atualizarListaClientes();
-                fecharModalRemover();
-            }).catch((error) => {
-                console.error("Error removing document: ", error);
-            });
-        }
-
-        function salvarCliente() {
-            const id = document.getElementById('editar-index').value;
-            const carro = document.getElementById('editar-carro').value;
-            const cor = document.getElementById('editar-cor').value;
-            const placa = document.getElementById('editar-placa').value;
-            const ano = document.getElementById('editar-ano').value;
-
-            if (carro && cor && placa && ano) {
-                db.collection("clientes").doc(id).update({
-                    carro,
-                    cor,
-                    placa,
-                    ano
-                }).then(() => {
-                    atualizarListaClientes();
-                    fecharModalEditar();
-                }).catch((error) => {
-                    console.error("Error updating document: ", error);
-                });
-            } else {
-                alert("Por favor, preencha todos os campos.");
-            }
-        }
-
-        function filtrarClientes() {
-            const input = document.getElementById('buscar-cliente');
-            const filter = input.value.toUpperCase();
-            const ul = document.getElementById('lista-clientes');
-            const li = ul.getElementsByTagName('li');
-
-            for (let i = 0; i < li.length; i++) {
-                const txtValue = li[i].textContent || li[i].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    li[i].style.display = "";
-                } else {
-                    li[i].style.display = "none";
-                }
-            }
-        }
-
-        window.onclick = function(event) {
-            const modalAdicionar = document.getElementById('modalAdicionarCliente');
-            const modalEditar = document.getElementById('modalEditarCliente');
-            const modalRemover = document.getElementById('modalRemoverCliente');
-            if (event.target == modalAdicionar) {
-                fecharModalAdicionar();
-            }
-            if (event.target == modalEditar) {
-                fecharModalEditar();
-            }
-            if (event.target == modalRemover) {
-                fecharModalRemover();
-            }
-        }
-
-        window.onload = atualizarListaClientes;
+window.onload = atualizarListaClientes;
+        
     </script>
 </body>
 </html>
