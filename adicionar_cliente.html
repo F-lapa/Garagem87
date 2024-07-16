@@ -332,7 +332,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-         const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "garagem87-c652e.firebaseapp.com",
     databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
@@ -405,8 +405,93 @@ function abrirHistoricoOrcamentos(clienteNome) {
     abrirModal('modalHistoricoOrcamentos');
 }
 
-function verDetalhesOrcamento(id) {
-    // Função para exibir detalhes do orçamento em uma modal
+async function verDetalhesOrcamento(id) {
+    const orcamentoDoc = await db.collection("orcamentos").doc(id).get();
+    if (orcamentoDoc.exists) {
+        const orcamento = orcamentoDoc.data();
+        const cliente = await obterCliente(orcamento.nomeCliente);
+        const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
+            const produto = await obterProduto(item.produto);
+            return {
+                ...item,
+                preco: produto ? parseFloat(produto.valor) : 0
+            };
+        }));
+
+        let dataConfirmacao = "";
+        if (orcamento.confirmado && orcamento.timestamp) {
+            const timestamp = orcamento.timestamp.toDate();
+            dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+            document.getElementById('data-confirmacao').innerText = `Confirmado em: ${dataConfirmacao}`;
+        }
+
+        const detalhesModalBody = document.getElementById('detalhes-modal-body');
+        detalhesModalBody.innerHTML = `
+            <div id="orcamento-detalhes">
+                <div class="details-header">
+                    <h2>Detalhes do Orçamento</h2>
+                </div>
+                <div class="details-section">
+                    <h2>Cliente</h2>
+                    <p><span>Nome:</span> ${orcamento.nomeCliente || ''}</p>
+                    <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
+                    <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
+                    <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
+                    <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
+                </div>
+                <div class="details-section">
+                    <h2>Produtos</h2>
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th>Quantidade</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${produtosDetalhados.map(produto => `
+                            <tr>
+                                <td>${produto.quantidade}</td>
+                                <td>${produto.produto}</td>
+                                <td>R$ ${produto.preco.toFixed(2)}</td>
+                                <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="details-section">
+                    <h2>Mão de obra</h2>
+                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
+                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+                </div>
+                <div class="details-section">
+                    <h2>Totais</h2>
+                    <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
+                </div>
+            </div>
+        `;
+        abrirModal('modalDetalhes');
+    } else {
+        console.log("Orçamento não encontrado.");
+    }
+}
+
+async function obterCliente(nomeCliente) {
+    const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
+    if (!clienteSnapshot.empty) {
+        return clienteSnapshot.docs[0].data();
+    }
+    return null;
+}
+
+async function obterProduto(produtoNome) {
+    const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
+    if (!produtoSnapshot.empty) {
+        return produtoSnapshot.docs[0].data();
+    }
+    return null;
 }
 
 function abrirModal(modalId) {
@@ -548,6 +633,7 @@ window.onclick = function(event) {
 }
 
 window.onload = atualizarListaClientes;
+
         
     </script>
 </body>
