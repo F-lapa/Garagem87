@@ -546,11 +546,11 @@ async function verDetalhesOrcamento(id) {
                 </div>
                 <div class="details-section">
                     <h2>Cliente</h2>
-                    <p><span>Nome:</span> ${orcamento.nomeCliente || ''}</p>
-                    <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
-                    <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
-                    <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
-                    <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
+                    <p>${orcamento.nomeCliente || ''}</p>
+                    <p>Carro: ${cliente ? cliente.carro : ''}</p>
+                    <p>Placa: ${cliente ? cliente.placa : ''}</p>
+                    <p>Ano do Veículo: ${cliente ? cliente.ano : ''}</p>
+                    <p>Hodômetro: ${orcamento.hodometro || ''}</p>
                 </div>
                 <div class="details-section">
                     <h2>Produtos</h2>
@@ -576,12 +576,12 @@ async function verDetalhesOrcamento(id) {
                 </div>
                 <div class="details-section">
                     <h2>Mão de obra</h2>
-                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
-                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+                    <p>Descrição: ${orcamento.descricaoServico}</p>
+                    <p>Valor: R$ ${orcamento.servico.toFixed(2)}</p>
                 </div>
                 <div class="details-section">
                     <h2>Totais</h2>
-                    <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
+                    <p>Valor Total: <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
                 </div>
             </div>
         `;
@@ -750,8 +750,6 @@ window.onclick = function(event) {
 }
 
 window.onload = atualizarListaClientes;
- 
-
-    </script>
+</script>
 </body>
 </html>
