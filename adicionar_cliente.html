@@ -382,7 +382,6 @@ function atualizarListaClientes() {
                 <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
                 <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
             `;
-            li.onclick = () => abrirModalEditar(doc.id);
             listaClientes.appendChild(li);
         });
     });
@@ -472,7 +471,7 @@ async function verDetalhesOrcamento(id) {
                 </div>
             </div>
         `;
-        abrirModal('modalDetalhes');
+        abrirModal('modalDetalhesOrcamento');
     } else {
         console.log("Orçamento não encontrado.");
     }
@@ -501,10 +500,10 @@ function abrirModal(modalId) {
     }, 10);
 }
 
-function fecharModalHistorico() {
-    document.getElementById('modalHistoricoOrcamentos').classList.remove('modal-show');
+function fecharModal(modalId) {
+    document.getElementById(modalId).classList.remove('modal-show');
     setTimeout(() => {
-        document.getElementById('modalHistoricoOrcamentos').style.display = 'none';
+        document.getElementById(modalId).style.display = 'none';
     }, 500);
 }
 
