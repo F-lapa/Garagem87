@@ -421,7 +421,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        const firebaseConfig = {
+       const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "garagem87-c652e.firebaseapp.com",
     databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
@@ -498,16 +498,16 @@ function abrirHistoricoOrcamentos(clienteNome) {
                         ${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}
                     </span>
                     <div class="orcamento-info">
-                        <p>Nome do Cliente: ${orcamento.nomeCliente}</p>
+                        <p>${orcamento.nomeCliente}</p>
                         <p>Data: ${new Date(orcamento.timestamp.toDate()).toLocaleDateString()}</p>
-                        <p>Nome do Veículo: ${orcamento.nomeVeiculo || ''}</p>
+                        <p>${orcamento.nomeVeiculo || ''}</p>
                         <p>Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}</p>
                     </div>
                 `;
                 div.style.cursor = 'pointer';  // Adiciona o cursor de mãozinha ao passar o mouse
                 historicoLista.appendChild(div);
             });
-            document.getElementById('total-orcamentos').innerText = `Total dos Orçamentos: R$ ${totalOrcamentos.toFixed(2)}`;
+            document.getElementById('total-orcamentos').innerText = `Total dos Serviços: R$ ${totalOrcamentos.toFixed(2)}`;
         }
     });
     abrirModal('modalHistoricoOrcamentos');
@@ -750,6 +750,7 @@ window.onclick = function(event) {
 }
 
 window.onload = atualizarListaClientes;
+ 
 
     </script>
 </body>
