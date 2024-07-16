@@ -239,6 +239,7 @@
             border-radius: 5px;
             border: 1px solid #b2dfdb;
             transition: box-shadow 0.3s, transform 0.3s;
+            cursor: pointer;
         }
         .orcamento-item:hover {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -415,15 +416,15 @@
         </div>
     </div>
 
-    <!-- Modal Histórico de Orçamentos -->
+    <!-- Modal Histórico de Serviços -->
     <div id="modalHistoricoOrcamentos" class="modal fade">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Histórico de Orçamentos</h2>
+                <h2>Histórico de Serviços</h2>
                 <span class="close" onclick="fecharModalHistorico()">&times;</span>
             </div>
             <div class="modal-body">
-                <div id="historico-orcamentos-lista">
+                <div id="historico-orcamentos-lista" style="max-height: 400px; overflow-y: auto;">
                     <!-- Lista de orçamentos será inserida aqui -->
                 </div>
                 <div class="total-orcamentos" id="total-orcamentos"></div>
@@ -507,6 +508,7 @@ function abrirHistoricoOrcamentos(clienteNome) {
                 const div = document.createElement('div');
                 div.className = 'orcamento-item';
                 div.innerHTML = `
+                    <span>${clienteNome}</span>
                     <span onclick="verDetalhesOrcamento('${doc.id}')">
                         ${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}
                     </span>
@@ -516,13 +518,12 @@ function abrirHistoricoOrcamentos(clienteNome) {
                         <p>Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}</p>
                     </div>
                 `;
-                div.style.cursor = 'pointer';  // Adiciona o cursor de mãozinha ao passar o mouse
                 historicoLista.appendChild(div);
             });
         }
-        document.getElementById('total-orcamentos').innerText = `Total dos Orçamentos: R$ ${totalOrcamentos.toFixed(2)}`;
+        document.getElementById('total-orcamentos').innerText = `Total dos Serviços: R$ ${totalOrcamentos.toFixed(2)}`;
         if (totalOrcamentos === 0) {
-            document.getElementById('total-orcamentos').innerText = 'Total dos Orçamentos: R$ 0.00';
+            document.getElementById('total-orcamentos').innerText = 'Total dos Serviços: R$ 0.00';
         }
     });
     abrirModal('modalHistoricoOrcamentos');
