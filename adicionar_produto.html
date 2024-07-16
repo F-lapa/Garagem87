@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -318,306 +319,165 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
         const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "garagem87-c652e.firebaseapp.com",
-    databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
-    projectId: "garagem87-c652e",
-    storageBucket: "garagem87-c652e.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
-};
+            apiKey: "YOUR_API_KEY",
+            authDomain: "garagem87-c652e.firebaseapp.com",
+            databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+            projectId: "garagem87-c652e",
+            storageBucket: "garagem87-c652e.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-function adicionarCliente() {
-    const nome = document.getElementById('nome').value;
-    const carro = document.getElementById('carro').value;
-    const cor = document.getElementById('cor').value;
-    const placa = document.getElementById('placa').value;
-    const ano = document.getElementById('ano').value;
-
-    if (nome && carro && cor && placa && ano) {
-        const cliente = { nome, carro, cor, placa, ano };
-        db.collection("clientes").add(cliente).then(() => {
-            atualizarListaClientes();
-            document.getElementById('form-cliente').reset();
-            fecharModalAdicionar();
-        }).catch((error) => {
-            console.error("Error adding document: ", error);
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarListaProdutos();
         });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
 
-function atualizarListaClientes() {
-    const listaClientes = document.getElementById('lista-clientes');
-    listaClientes.innerHTML = '';
-    db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            const cliente = doc.data();
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>Nome: ${cliente.nome}</span>
-                <span>Carro: ${cliente.carro}</span>
-                <span>Cor: ${cliente.cor}</span>
-                <span>Placa: ${cliente.placa}</span>
-                <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
-                <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
-            `;
-            listaClientes.appendChild(li);
-        });
-    });
-}
+        function adicionarProduto() {
+            const produto = document.getElementById('produto').value;
+            const quantidade = parseInt(document.getElementById('quantidade').value);
+            const valor = parseFloat(document.getElementById('valor').value);
 
-function abrirHistoricoOrcamentos(clienteNome) {
-    const historicoLista = document.getElementById('historico-orcamentos-lista');
-    historicoLista.innerHTML = '';
-    db.collection("orcamentos").where("nomeCliente", "==", clienteNome).get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            const orcamento = doc.data();
-            const div = document.createElement('div');
-            div.className = 'orcamento-item';
-            div.innerHTML = `
-                <span onclick="verDetalhesOrcamento('${doc.id}')">${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}</span>
-            `;
-            historicoLista.appendChild(div);
-        });
-    });
-    abrirModal('modalHistoricoOrcamentos');
-}
-
-async function verDetalhesOrcamento(id) {
-    const orcamentoDoc = await db.collection("orcamentos").doc(id).get();
-    if (orcamentoDoc.exists) {
-        const orcamento = orcamentoDoc.data();
-        const cliente = await obterCliente(orcamento.nomeCliente);
-        const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
-            const produto = await obterProduto(item.produto);
-            return {
-                ...item,
-                preco: produto ? parseFloat(produto.valor) : 0
-            };
-        }));
-
-        let dataConfirmacao = "";
-        if (orcamento.confirmado && orcamento.timestamp) {
-            const timestamp = orcamento.timestamp.toDate();
-            dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
-            document.getElementById('data-confirmacao').innerText = `Confirmado em: ${dataConfirmacao}`;
+            if (produto && !isNaN(quantidade) && !isNaN(valor)) {
+                const item = { produto, quantidade, valor: valor.toFixed(2) };
+                db.collection("produtos").add(item).then(() => {
+                    atualizarListaProdutos();
+                    document.getElementById('form-produto').reset();
+                    fecharModal('modalAdicionarProduto');
+                }).catch((error) => {
+                    console.error("Erro ao adicionar documento: ", error);
+                });
+            } else {
+                alert("Por favor, preencha todos os campos com valores válidos.");
+            }
         }
 
-        const detalhesModalBody = document.getElementById('detalhes-modal-body');
-        detalhesModalBody.innerHTML = `
-            <div id="orcamento-detalhes">
-                <div class="details-header">
-                    <h2>Detalhes do Orçamento</h2>
-                </div>
-                <div class="details-section">
-                    <h2>Cliente</h2>
-                    <p><span>Nome:</span> ${orcamento.nomeCliente || ''}</p>
-                    <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
-                    <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
-                    <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
-                    <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Produtos</h2>
-                    <table class="details-table">
-                        <thead>
-                            <tr>
-                                <th>Quantidade</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Valor Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${produtosDetalhados.map(produto => `
-                            <tr>
-                                <td>${produto.quantidade}</td>
-                                <td>${produto.produto}</td>
-                                <td>R$ ${produto.preco.toFixed(2)}</td>
-                                <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="details-section">
-                    <h2>Mão de obra</h2>
-                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
-                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Totais</h2>
-                    <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
-                </div>
-            </div>
-        `;
-        abrirModal('modalDetalhesOrcamento');
-    } else {
-        console.log("Orçamento não encontrado.");
-    }
-}
+        function atualizarListaProdutos() {
+            const listaProdutos = document.getElementById('lista-produtos');
+            listaProdutos.innerHTML = '';
+            db.collection("produtos").orderBy("produto").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span style="flex: 1;">${item.produto}</span>
+                        <span style="flex: 0.5;">${item.quantidade}</span>
+                        <span style="flex: 0.5;">R$ ${parseFloat(item.valor).toFixed(2)}</span>
+                        <i class="fas fa-trash icon-remove" onclick="abrirModalRemover('${doc.id}', event)" style="flex: 0.2;"></i>
+                    `;
+                    li.onclick = (e) => {
+                        if (e.target.classList.contains('icon-remove')) {
+                            abrirModalRemover(doc.id, e);
+                        } else {
+                            abrirModalEditar(doc.id);
+                        }
+                    };
+                    listaProdutos.appendChild(li);
+                });
+            });
+        }
 
-async function obterCliente(nomeCliente) {
-    const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
-    if (!clienteSnapshot.empty) {
-        return clienteSnapshot.docs[0].data();
-    }
-    return null;
-}
-
-async function obterProduto(produtoNome) {
-    const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
-    if (!produtoSnapshot.empty) {
-        return produtoSnapshot.docs[0].data();
-    }
-    return null;
-}
-
-function abrirModal(modalId) {
-    document.getElementById(modalId).style.display = 'block';
-    setTimeout(() => {
-        document.getElementById(modalId).classList.add('modal-show');
-    }, 10);
-}
-
-function fecharModal(modalId) {
-    document.getElementById(modalId).classList.remove('modal-show');
-    setTimeout(() => {
-        document.getElementById(modalId).style.display = 'none';
-    }, 500);
-}
-
-function abrirModalAdicionar() {
-    document.getElementById('modalAdicionarCliente').style.display = 'block';
-    setTimeout(() => {
-        document.getElementById('modalAdicionarCliente').classList.add('modal-show');
-    }, 10);
-}
-
-function fecharModalAdicionar() {
-    document.getElementById('modalAdicionarCliente').classList.remove('modal-show');
-    setTimeout(() => {
-        document.getElementById('modalAdicionarCliente').style.display = 'none';
-    }, 500);
-}
-
-function abrirModalEditar(id) {
-    const docRef = db.collection("clientes").doc(id);
-    docRef.get().then((doc) => {
-        if (doc.exists) {
-            const cliente = doc.data();
-            document.getElementById('editar-index').value = id;
-            document.getElementById('editar-nome').value = cliente.nome;
-            document.getElementById('editar-carro').value = cliente.carro;
-            document.getElementById('editar-cor').value = cliente.cor;
-            document.getElementById('editar-placa').value = cliente.placa;
-            document.getElementById('editar-ano').value = cliente.ano;
-            document.getElementById('modalEditarCliente').style.display = 'block';
+        function abrirModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
             setTimeout(() => {
-                document.getElementById('modalEditarCliente').classList.add('modal-show');
+                document.getElementById(modalId).classList.add('modal-show');
             }, 10);
-        } else {
-            console.log("No such document!");
         }
-    }).catch((error) => {
-        console.log("Error getting document:", error);
-    });
-}
 
-function fecharModalEditar() {
-    document.getElementById('modalEditarCliente').classList.remove('modal-show');
-    setTimeout(() => {
-        document.getElementById('modalEditarCliente').style.display = 'none';
-    }, 500);
-}
-
-function abrirModalRemover(id, event) {
-    event.stopPropagation();
-    clienteParaRemover = id;
-    document.getElementById('modalRemoverCliente').style.display = 'block';
-    setTimeout(() => {
-        document.getElementById('modalRemoverCliente').classList.add('modal-show');
-    }, 10);
-}
-
-function fecharModalRemover() {
-    document.getElementById('modalRemoverCliente').classList.remove('modal-show');
-    setTimeout(() => {
-        document.getElementById('modalRemoverCliente').style.display = 'none';
-    }, 500);
-}
-
-function removerClienteConfirmado() {
-    db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
-        atualizarListaClientes();
-        fecharModalRemover();
-    }).catch((error) => {
-        console.error("Error removing document: ", error);
-    });
-}
-
-function salvarCliente() {
-    const id = document.getElementById('editar-index').value;
-    const carro = document.getElementById('editar-carro').value;
-    const cor = document.getElementById('editar-cor').value;
-    const placa = document.getElementById('editar-placa').value;
-    const ano = document.getElementById('editar-ano').value;
-
-    if (carro && cor && placa && ano) {
-        db.collection("clientes").doc(id).update({
-            carro,
-            cor,
-            placa,
-            ano
-        }).then(() => {
-            atualizarListaClientes();
-            fecharModalEditar();
-        }).catch((error) => {
-            console.error("Error updating document: ", error);
-        });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
-
-function filtrarClientes() {
-    const input = document.getElementById('buscar-cliente');
-    const filter = input.value.toUpperCase();
-    const ul = document.getElementById('lista-clientes');
-    const li = ul.getElementsByTagName('li');
-
-    for (let i = 0; i < li.length; i++) {
-        const txtValue = li[i].textContent || li[i].innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            li[i].style.display = "";
-        } else {
-            li[i].style.display = "none";
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.remove('modal-show');
+            setTimeout(() => {
+                document.getElementById(modalId).style.display = 'none';
+            }, 500);
         }
-    }
-}
 
-window.onclick = function(event) {
-    const modalAdicionar = document.getElementById('modalAdicionarCliente');
-    const modalEditar = document.getElementById('modalEditarCliente');
-    const modalRemover = document.getElementById('modalRemoverCliente');
-    if (event.target == modalAdicionar) {
-        fecharModalAdicionar();
-    }
-    if (event.target == modalEditar) {
-        fecharModalEditar();
-    }
-    if (event.target == modalRemover) {
-        fecharModalRemover();
-    }
-}
+        function abrirModalEditar(id) {
+            const docRef = db.collection("produtos").doc(id);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const produto = doc.data();
+                    document.getElementById('editar-index').value = id;
+                    document.getElementById('editar-produto').value = produto.produto;
+                    document.getElementById('editar-quantidade').value = produto.quantidade;
+                    document.getElementById('editar-valor').value = produto.valor;
+                    abrirModal('modalEditarProduto');
+                } else {
+                    console.log("Documento não encontrado!");
+                }
+            }).catch((error) => {
+                console.log("Erro ao obter documento:", error);
+            });
+        }
 
-window.onload = atualizarListaClientes;
+        function abrirModalRemover(id, event) {
+            event.stopPropagation();
+            document.getElementById('editar-index').value = id;
+            abrirModal('modalRemoverProduto');
+        }
 
+        function removerProdutoConfirmado() {
+            const id = document.getElementById('editar-index').value;
+            db.collection("produtos").doc(id).delete().then(() => {
+                atualizarListaProdutos();
+                fecharModal('modalRemoverProduto');
+            }).catch((error) => {
+                console.error("Erro ao remover documento: ", error);
+            });
+        }
+
+        function salvarProduto() {
+            const id = document.getElementById('editar-index').value;
+            const quantidade = parseInt(document.getElementById('editar-quantidade').value);
+            const valor = parseFloat(document.getElementById('editar-valor').value);
+
+            if (!isNaN(quantidade) && !isNaN(valor)) {
+                db.collection("produtos").doc(id).update({
+                    quantidade,
+                    valor: valor.toFixed(2)
+                }).then(() => {
+                    atualizarListaProdutos();
+                    fecharModal('modalEditarProduto');
+                }).catch((error) => {
+                    console.error("Erro ao atualizar documento: ", error);
+                });
+            } else {
+                alert("Por favor, preencha todos os campos com valores válidos.");
+            }
+        }
+
+        function filtrarProdutos() {
+            const input = document.getElementById('buscar-produto');
+            const filter = input.value.toUpperCase();
+            const ul = document.getElementById('lista-produtos');
+            const li = ul.getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const txtValue = li[i].textContent || li[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
+        window.onclick = function(event) {
+            const modalAdicionar = document.getElementById('modalAdicionarProduto');
+            const modalEditar = document.getElementById('modalEditarProduto');
+            const modalRemover = document.getElementById('modalRemoverProduto');
+            if (event.target == modalAdicionar) {
+                fecharModal('modalAdicionarProduto');
+            }
+            if (event.target == modalEditar) {
+                fecharModal('modalEditarProduto');
+            }
+            if (event.target == modalRemover) {
+                fecharModal('modalRemoverProduto');
+            }
+        }
     </script>
 </body>
 </html>
