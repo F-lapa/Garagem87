@@ -138,6 +138,9 @@
         .modal-show {
             z-index: 1001; /* Garantir que a modal aberta esteja na frente */
         }
+        #modalDetalhesOrcamento.modal-show {
+            z-index: 1002; /* Modal de detalhes deve estar sempre na frente */
+        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -521,7 +524,7 @@
                 modal.classList.add('modal-show');
             }, 10);
             if (modalId === 'modalDetalhesOrcamento') {
-                modal.style.zIndex = 1001;  // Garante que a modal de detalhes fique na frente
+                modal.style.zIndex = 1002;  // Garante que a modal de detalhes fique na frente
             }
         }
 
