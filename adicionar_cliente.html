@@ -315,24 +315,33 @@
         </div>
     </div>
 
-    <!-- Modal para Histórico de Orçamentos -->
-    <div id="modalHistoricoOrcamentos" class="modal">
+    <!-- Modal Detalhes Orçamento -->
+    <div id="modalDetalhesOrcamento" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Histórico de Orçamentos</h2>
-                <span class="close" onclick="fecharModalHistorico()">&times;</span>
-            </div>
-            <div class="modal-body" id="historico-orcamentos-lista">
-                <!-- Lista de Orçamentos -->
+            <span class="close" onclick="fecharModal('modalDetalhesOrcamento')">&times;</span>
+            <div class="modal-body" id="detalhes-modal-body">
+                <!-- Conteúdo dos detalhes do orçamento será inserido aqui -->
             </div>
         </div>
     </div>
 
-    <!-- Firebase Configuration -->
+    <!-- Modal Histórico de Orçamentos -->
+    <div id="modalHistoricoOrcamentos" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModalHistorico()">&times;</span>
+            <div class="modal-body">
+                <h2>Histórico de Orçamentos</h2>
+                <div id="historico-orcamentos-lista">
+                    <!-- Lista de orçamentos será inserida aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-const firebaseConfig = {
+       const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "garagem87-c652e.firebaseapp.com",
     databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
@@ -424,6 +433,11 @@ async function verDetalhesOrcamento(id) {
         }
 
         const detalhesModalBody = document.getElementById('detalhes-modal-body');
+        if (!detalhesModalBody) {
+            console.error("Elemento com o ID 'detalhes-modal-body' não encontrado.");
+            return;
+        }
+
         detalhesModalBody.innerHTML = `
             <div id="orcamento-detalhes">
                 <div class="details-header">
