@@ -402,24 +402,11 @@
         </div>
     </div>
 
-    <!-- Modal Detalhes Orçamento -->
-    <div id="modalDetalhesOrcamento" class="modal fade">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Detalhes do Orçamento</h2>
-                <span class="close" onclick="fecharModal('modalDetalhesOrcamento')">&times;</span>
-            </div>
-            <div class="modal-body" id="detalhes-modal-body">
-                <!-- Conteúdo dos detalhes do orçamento será inserido aqui -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Histórico de Orçamentos -->
+    <!-- Modal Histórico de Serviços -->
     <div id="modalHistoricoOrcamentos" class="modal fade">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Histórico de Orçamentos</h2>
+                <h2>Histórico de Serviços</h2>
                 <span class="close" onclick="fecharModalHistorico()">&times;</span>
             </div>
             <div class="modal-body">
@@ -511,8 +498,9 @@ function abrirHistoricoOrcamentos(clienteNome) {
                         ${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}
                     </span>
                     <div class="orcamento-info">
+                        <p>Nome do Cliente: ${orcamento.nomeCliente}</p>
                         <p>Data: ${new Date(orcamento.timestamp.toDate()).toLocaleDateString()}</p>
-                        <p>Serviço: ${orcamento.descricaoServico}</p>
+                        <p>Nome do Veículo: ${orcamento.nomeVeiculo || ''}</p>
                         <p>Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}</p>
                     </div>
                 `;
