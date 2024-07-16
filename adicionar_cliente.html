@@ -434,7 +434,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        const firebaseConfig = {
+       const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "garagem87-c652e.firebaseapp.com",
     databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
@@ -519,7 +519,10 @@ function abrirHistoricoOrcamentos(clienteNome) {
                 div.style.cursor = 'pointer';  // Adiciona o cursor de mãozinha ao passar o mouse
                 historicoLista.appendChild(div);
             });
-            document.getElementById('total-orcamentos').innerText = `Total dos Orçamentos: R$ ${totalOrcamentos.toFixed(2)}`;
+        }
+        document.getElementById('total-orcamentos').innerText = `Total dos Orçamentos: R$ ${totalOrcamentos.toFixed(2)}`;
+        if (totalOrcamentos === 0) {
+            document.getElementById('total-orcamentos').innerText = 'Total dos Orçamentos: R$ 0.00';
         }
     });
     abrirModal('modalHistoricoOrcamentos');
