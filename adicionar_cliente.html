@@ -402,11 +402,24 @@
         </div>
     </div>
 
-    <!-- Modal Histórico de Serviços -->
+    <!-- Modal Detalhes Orçamento -->
+    <div id="modalDetalhesOrcamento" class="modal fade">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes do Orçamento</h2>
+                <span class="close" onclick="fecharModal('modalDetalhesOrcamento')">&times;</span>
+            </div>
+            <div class="modal-body" id="detalhes-modal-body">
+                <!-- Conteúdo dos detalhes do orçamento será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Histórico de Orçamentos -->
     <div id="modalHistoricoOrcamentos" class="modal fade">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Histórico de Serviços</h2>
+                <h2>Histórico de Orçamentos</h2>
                 <span class="close" onclick="fecharModalHistorico()">&times;</span>
             </div>
             <div class="modal-body">
@@ -463,7 +476,7 @@ function atualizarListaClientes() {
         querySnapshot.forEach((doc) => {
             const cliente = doc.data();
             const li = document.createElement('li');
-            li.innerHTML = `
+            li.innerHTML = 
                 <span>
                     Nome: ${cliente.nome}<br>
                     Carro: ${cliente.carro}<br>
@@ -474,7 +487,7 @@ function atualizarListaClientes() {
                     <i class="fas fa-history icon-history" onclick="abrirHistoricoOrcamentos('${cliente.nome}')"></i>
                     <i class="fas fa-trash" onclick="abrirModalRemover('${doc.id}', event)"></i>
                 </div>
-            `;
+            ;
             listaClientes.appendChild(li);
         });
     });
@@ -493,21 +506,20 @@ function abrirHistoricoOrcamentos(clienteNome) {
                 totalOrcamentos += orcamento.valorTotal;
                 const div = document.createElement('div');
                 div.className = 'orcamento-item';
-                div.innerHTML = `
+                div.innerHTML = 
                     <span onclick="verDetalhesOrcamento('${doc.id}')">
                         ${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}
                     </span>
                     <div class="orcamento-info">
-                        <p>Nome do Cliente: ${orcamento.nomeCliente}</p>
                         <p>Data: ${new Date(orcamento.timestamp.toDate()).toLocaleDateString()}</p>
-                        <p>Nome do Veículo: ${orcamento.nomeVeiculo || ''}</p>
+                        <p>Serviço: ${orcamento.descricaoServico}</p>
                         <p>Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}</p>
                     </div>
-                `;
+                ;
                 div.style.cursor = 'pointer';  // Adiciona o cursor de mãozinha ao passar o mouse
                 historicoLista.appendChild(div);
             });
-            document.getElementById('total-orcamentos').innerText = `Total dos Orçamentos: R$ ${totalOrcamentos.toFixed(2)}`;
+            document.getElementById('total-orcamentos').innerText = Total dos Orçamentos: R$ ${totalOrcamentos.toFixed(2)};
         }
     });
     abrirModal('modalHistoricoOrcamentos');
@@ -529,7 +541,7 @@ async function verDetalhesOrcamento(id) {
         let dataConfirmacao = "";
         if (orcamento.confirmado && orcamento.timestamp) {
             const timestamp = orcamento.timestamp.toDate();
-            dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+            dataConfirmacao = ${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()};
         }
 
         const detalhesModalBody = document.getElementById('detalhes-modal-body');
@@ -538,11 +550,11 @@ async function verDetalhesOrcamento(id) {
             return;
         }
 
-        detalhesModalBody.innerHTML = `
+        detalhesModalBody.innerHTML = 
             <div id="orcamento-detalhes">
                 <div class="details-header">
                     <h2>Detalhes do Orçamento</h2>
-                    <p id="data-confirmacao">${dataConfirmacao ? `Confirmado em: ${dataConfirmacao}` : ''}</p>
+                    <p id="data-confirmacao">${dataConfirmacao ? Confirmado em: ${dataConfirmacao} : ''}</p>
                 </div>
                 <div class="details-section">
                     <h2>Cliente</h2>
@@ -564,13 +576,13 @@ async function verDetalhesOrcamento(id) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${produtosDetalhados.map(produto => `
+                            ${produtosDetalhados.map(produto => 
                             <tr>
                                 <td>${produto.quantidade}</td>
                                 <td>${produto.produto}</td>
                                 <td>R$ ${produto.preco.toFixed(2)}</td>
                                 <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
-                            `).join('')}
+                            ).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -584,7 +596,7 @@ async function verDetalhesOrcamento(id) {
                     <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
                 </div>
             </div>
-        `;
+        ;
         abrirModal('modalDetalhesOrcamento');
     } else {
         console.log("Orçamento não encontrado.");
