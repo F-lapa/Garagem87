@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -14,24 +15,24 @@
             height: 100vh;
             background-color: #f2f2f2;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             box-sizing: border-box;
         }
         .container {
             background: #ffffff;
-            padding: 20px 30px;
+            padding: 15px 20px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .container img {
             width: 100%;
-            max-width: 300px; /* Increased the size of the logo */
+            max-width: 200px;
             display: block;
-            margin: 0 auto 20px;
+            margin: 0 auto 10px;
             animation: shine 1.5s infinite;
         }
         @keyframes shine {
@@ -47,22 +48,22 @@
         }
         .btn {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: none;
             border-radius: 5px;
             background-color: #d32f2f;
             color: white;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 15px;
             transition: background-color 0.3s;
         }
         .btn:hover {
             background-color: #9a0007;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: left;
         }
         .form-group label {
@@ -75,25 +76,25 @@
         .form-group select,
         .form-group textarea {
             width: calc(100% - 40px);
-            padding: 8px;
+            padding: 6px;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 12px;
             box-sizing: border-box;
             display: inline-block;
         }
         .form-group textarea {
-            height: 80px;
+            height: 60px;
             resize: vertical;
         }
         .form-group .add-product,
         .form-group .remove-product {
-            width: 25px;
-            padding: 8px;
+            width: 20px;
+            padding: 6px;
             margin-left: 10px;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 12px;
             text-align: center;
             cursor: pointer;
             background-color: #d32f2f;
@@ -106,39 +107,39 @@
         .product-list .product-item {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .product-list .product-item select {
-            width: calc(100% - 85px);
+            width: calc(100% - 65px);
         }
         .product-list .product-item input {
-            width: 50px;
-            margin-left: 10px;
+            width: 40px;
+            margin-left: 8px;
         }
         .search-bar {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: left;
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
         }
         .search-bar input {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 12px;
             box-sizing: border-box;
         }
         .orcamento-list {
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
         }
         .orcamento-item {
             background: #ffffff;
-            padding: 15px;
+            padding: 10px;
             border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -147,39 +148,39 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             color: #d32f2f;
-            margin-left: 10px;
+            margin-left: 8px;
         }
         .orcamento-item button:hover {
             color: #9a0007;
         }
         .orcamento-details {
             display: none;
-            margin-top: 10px;
+            margin-top: 8px;
             text-align: left;
-            padding: 15px;
+            padding: 10px;
             background: #ffffff;
             border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
             position: relative;
         }
         .orcamento-details.active {
             display: block;
         }
         .details-section {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .details-section h2 {
-            font-size: 18px;
+            font-size: 16px;
             color: #d32f2f;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 1px solid #b2dfdb;
-            padding-bottom: 5px;
+            padding-bottom: 4px;
         }
         .details-section p {
-            margin: 5px 0;
-            font-size: 14px;
+            margin: 4px 0;
+            font-size: 12px;
         }
         .details-section p span {
             font-weight: bold;
@@ -192,11 +193,11 @@
             top: 50%;
             transform: translate(-50%, -50%);
             width: 100%;
-            max-width: 500px;
+            max-width: 400px;
             height: auto;
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
             animation: fadeIn 0.5s;
         }
@@ -207,10 +208,10 @@
         .modal-content {
             background-color: #fefefe;
             margin: auto;
-            padding: 20px;
+            padding: 15px;
             border: 1px solid #888;
             width: 100%;
-            max-width: 400px;
+            max-width: 350px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             box-sizing: border-box;
@@ -224,29 +225,29 @@
         }
         .modal-header {
             border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
         }
         .modal-footer {
             border-top: 1px solid #e0e0e0;
-            padding-top: 10px;
-            margin-top: 20px;
+            padding-top: 8px;
+            margin-top: 15px;
         }
         .modal-header h2 {
             margin: 0;
             color: #d32f2f;
             flex: 1 0 100%;
-            font-size: 18px;
+            font-size: 16px;
         }
         .modal-header img {
             width: 100%;
-            max-width: 100px;
+            max-width: 80px;
             display: block;
-            margin: 0 auto 10px;
+            margin: 0 auto 8px;
         }
         .close {
             color: #aaa;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -258,16 +259,16 @@
             background-color: #d32f2f;
             color: white;
             cursor: pointer;
-            padding: 10px 20px;
+            padding: 8px 15px;
             border: none;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             transition: background-color 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
         .btn-modal:hover {
             background-color: #9a0007;
@@ -275,14 +276,14 @@
         .details-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 8px;
             background: #f9f9f9;
             border: 1px solid #b2dfdb;
         }
         .details-table th,
         .details-table td {
             border: 1px solid #b2dfdb;
-            padding: 8px;
+            padding: 6px;
             text-align: left;
         }
         .details-table th {
@@ -304,22 +305,22 @@
             align-items: center;
         }
         .details-header .close {
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
         }
         .btn-enviar {
             background-color: #d32f2f;
             color: white;
             cursor: pointer;
-            padding: 10px 20px;
+            padding: 8px 15px;
             border: none;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 15px;
             transition: background-color 0.3s;
             display: block;
             width: 100%;
@@ -332,13 +333,13 @@
         }
         .orcamento-confirmado {
             color: green;
-            font-size: 14px;
-            margin-left: 10px;
+            font-size: 12px;
+            margin-left: 8px;
         }
         @media (max-width: 600px) {
             .modal-content {
                 width: 90%;
-                padding: 10px;
+                padding: 8px;
             }
             .modal-header h2, .modal-header img {
                 text-align: center;
@@ -347,17 +348,17 @@
                 padding: 4px;
             }
             .details-section p {
-                font-size: 12px;
+                font-size: 10px;
             }
             .details-section h2 {
-                font-size: 16px;
+                font-size: 14px;
             }
         }
         .print-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 24px;
+            top: 8px;
+            right: 8px;
+            font-size: 20px;
             cursor: pointer;
             color: #d32f2f;
         }
@@ -365,8 +366,8 @@
             color: #9a0007;
         }
         .modal-header .close {
-            top: 40px; /* Adjusted position below print icon */
-            right: 10px;
+            top: 30px; /* Adjusted position below print icon */
+            right: 8px;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -446,75 +447,6 @@
         </div>
     </div>
 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
-<script>
-        }
-
-    async function verDetalhes(id) {
-        const orcamento = orcamentos.find(orc => orc.id === id);
-        const cliente = await obterCliente(orcamento.nomeCliente);
-        const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
-            const produto = await obterProduto(item.produto);
-            return {
-                ...item,
-                preco: produto ? parseFloat(produto.valor) : 0
-            };
-        }));
-
-        let dataConfirmacao = "";
-        if (orcamento.confirmado && orcamento.timestamp) {
-            const timestamp = orcamento.timestamp.toDate();
-            dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
-            document.getElementById('data-confirmacao').innerText = `Confirmado em: ${dataConfirmacao}`;
-        }
-
-        const detalhesModalBody = document.getElementById('detalhes-modal-body');
-        detalhesModalBody.innerHTML = `
-            <div id="orcamento-detalhes">
-                <div class="details-header">
-                    <h2>Detalhes do Orçamento</h2>
-                </div>
-                <div class="details-section">
-                    <h2>Cliente</h2>
-                    <p><span>Nome:</span> ${orcamento.nomeCliente || ''}</p>
-                    <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
-                    <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
-                    <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
-                    <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Produtos</h2>
-                    <table class="details-table">
-                        <thead>
-                            <tr>
-                                <th>Quantidade</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Valor Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${produtosDetalhados.map(produto => `
-                            <tr>
-                                <td>${produto.quantidade}</td>
-                                <td>${produto.produto}</td>
-                                <td>R$ ${produto.preco.toFixed(2)}</td>
-                                <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="details-section">
-                    <h2>Mão de obra</h2>
-                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
-                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Totais</h2>
-                    <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
-                </div>
-            </div>
-        <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 <script>
 
