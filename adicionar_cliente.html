@@ -279,11 +279,12 @@
         .details-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 10px; /* Tamanho da fonte reduzido para compactar a tabela */
         }
         .details-table th,
         .details-table td {
             border: 1px solid #b2dfdb;
-            padding: 8px;
+            padding: 4px; /* Padding reduzido para compactar a tabela */
             text-align: left;
         }
         .details-table th {
@@ -579,10 +580,10 @@ async function verDetalhesOrcamento(id) {
                     <table class="details-table">
                         <thead>
                             <tr>
-                                <th>Quantidade</th>
+                                <th>Qtd.</th> <!-- Reduzido "Quantidade" -->
                                 <th>Descrição</th>
                                 <th>Valor</th>
-                                <th>Valor Total</th>
+                                <th>Total</th> <!-- Reduzido "Valor Total" -->
                             </tr>
                         </thead>
                         <tbody>
