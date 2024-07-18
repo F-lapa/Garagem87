@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -20,17 +19,17 @@
         }
         .container {
             background: #ffffff;
-            padding: 15px 20px;
+            padding: 10px 15px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
             text-align: center;
             margin-bottom: 10px;
         }
         .container img {
             width: 100%;
-            max-width: 200px;
+            max-width: 150px;
             display: block;
             margin: 0 auto 10px;
             animation: shine 1.5s infinite;
@@ -56,14 +55,14 @@
             cursor: pointer;
             font-size: 12px;
             font-weight: bold;
-            margin-top: 15px;
+            margin-top: 10px;
             transition: background-color 0.3s;
         }
         .btn:hover {
             background-color: #9a0007;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-align: left;
         }
         .form-group label {
@@ -75,8 +74,8 @@
         .form-group input,
         .form-group select,
         .form-group textarea {
-            width: calc(100% - 40px);
-            padding: 6px;
+            width: calc(100% - 30px);
+            padding: 5px;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
             font-size: 12px;
@@ -90,7 +89,7 @@
         .form-group .add-product,
         .form-group .remove-product {
             width: 20px;
-            padding: 6px;
+            padding: 5px;
             margin-left: 10px;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
@@ -117,10 +116,10 @@
             margin-left: 8px;
         }
         .search-bar {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-align: left;
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
         }
         .search-bar input {
             width: 100%;
@@ -132,7 +131,7 @@
         }
         .orcamento-list {
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
         }
         .orcamento-item {
             background: #ffffff;
@@ -172,7 +171,7 @@
             margin-bottom: 10px;
         }
         .details-section h2 {
-            font-size: 16px;
+            font-size: 14px;
             color: #d32f2f;
             margin-bottom: 8px;
             border-bottom: 1px solid #b2dfdb;
@@ -281,11 +280,12 @@
             margin-top: 8px;
             background: #f9f9f9;
             border: 1px solid #b2dfdb;
+            font-size: 10px; /* Tamanho da fonte reduzido para compactar a tabela */
         }
         .details-table th,
         .details-table td {
             border: 1px solid #b2dfdb;
-            padding: 6px;
+            padding: 4px; /* Padding reduzido para compactar a tabela */
             text-align: left;
         }
         .details-table th {
@@ -373,6 +373,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container" id="pdf-content">
@@ -437,7 +438,7 @@
 
     <div id="modalDetalhes" class="modal">
         <div class="modal-content">
-            <span class="print-btn" onclick="printOrcamento()"><i class="fas fa-print"></i></span>
+            <span class="print-btn" onclick="gerarPDF()"><i class="fas fa-print"></i></span>
             <div class="modal-header">
                 <img src="LogoGaragem87.png" alt="Logo da Garagem87">
                 <h2>Detalhes do Orçamento</h2>
@@ -645,10 +646,10 @@ async function verDetalhes(id) {
                 <table class="details-table">
                     <thead>
                         <tr>
-                            <th>Quantidade</th>
+                            <th>Qtd.</th> <!-- Reduzido "Quantidade" -->
                             <th>Descrição</th>
                             <th>Valor</th>
-                            <th>Valor Total</th>
+                            <th>Total</th> <!-- Reduzido "Valor Total" -->
                         </tr>
                     </thead>
                     <tbody>
@@ -765,14 +766,37 @@ function buscarOrcamentos(event) {
     exibirOrcamentos(filtro);
 }
 
-function printOrcamento() {
-    const modalContent = document.querySelector('#modalDetalhes .modal-content');
-    html2canvas(modalContent, { scale: 2, scrollY: -window.scrollY }).then(canvas => {
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        const link = document.createElement('a');
-        link.href = imgData;
-        link.download = 'detalhes_orcamento.jpg';
-        link.click();
+function gerarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+
+    const modalBody = document.getElementById('detalhes-modal-body');
+    const modalContent = modalBody.innerHTML;
+    const imgData = document.querySelector('#modalDetalhes .modal-header img').src;
+    const logoWidth = 50;
+    const logoHeight = 25;
+
+    doc.addImage(imgData, 'PNG', 10, 10, logoWidth, logoHeight);
+
+    html2canvas(modalBody, { scale: 1.5 }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdfWidth = doc.internal.pageSize.getWidth() - 20; // Considerar margens
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        let heightLeft = pdfHeight;
+        let position = 40;
+
+        doc.addImage(imgData, 'PNG', 10, position, pdfWidth, pdfHeight);
+        heightLeft -= doc.internal.pageSize.getHeight() - 40;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - pdfHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 10, position, pdfWidth, pdfHeight);
+            heightLeft -= doc.internal.pageSize.getHeight();
+        }
+
+        doc.save('detalhes_orcamento.pdf');
     });
 }
 
