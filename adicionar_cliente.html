@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -134,7 +135,7 @@
             top: 50%;
             transform: translate(-50%, -50%);
             width: 100%;
-            max-width: 500px; /* Ajuste a largura máxima para 500px */
+            max-width: 600px; /* Ajuste a largura máxima para 600px */
             height: auto;
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.4);
@@ -165,7 +166,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 500px; /* Ajuste a largura máxima para 500px */
+            max-width: 600px; /* Ajuste a largura máxima para 600px */
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -299,6 +300,11 @@
             font-weight: bold;
             text-align: right;
             color: #d32f2f;
+        }
+        /* Adicionando barra de rolagem para conteúdo extenso no modal */
+        .modal-body {
+            max-height: 500px;
+            overflow-y: auto;
         }
     </style>
 </head>
