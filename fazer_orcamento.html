@@ -627,6 +627,8 @@ async function verDetalhes(id) {
         };
     }));
 
+    const totalProdutos = produtosDetalhados.reduce((total, produto) => total + (produto.preco * produto.quantidade), 0);
+
     const detalhesModalBody = document.getElementById('detalhes-modal-body');
     detalhesModalBody.innerHTML = `
         <div id="orcamento-detalhes">
@@ -660,6 +662,10 @@ async function verDetalhes(id) {
                             <td>R$ ${produto.preco.toFixed(2)}</td>
                             <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
                         `).join('')}
+                        <tr>
+                            <td colspan="3"><strong>Total dos Produtos:</strong></td>
+                            <td><strong>R$ ${totalProdutos.toFixed(2)}</strong></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
