@@ -101,6 +101,7 @@
             border-radius: 5px;
             border: 1px solid #b2dfdb;
             transition: box-shadow 0.3s, transform 0.3s;
+            cursor: pointer;
         }
         #lista-clientes li:hover {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -487,7 +488,7 @@
                     const cliente = doc.data();
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span>
+                        <span onclick="abrirModalEditar('${doc.id}')">
                             Nome: ${cliente.nome}<br>
                             Carro: ${cliente.carro}<br>
                             Cor: ${cliente.cor}<br>
