@@ -252,10 +252,11 @@
             margin: 0 auto 8px;
         }
         .close {
-            color: #aaa;
+            color: #d32f2f;
             font-size: 20px;
             font-weight: bold;
             cursor: pointer;
+            margin-top: 10px;
         }
         .close:hover,
         .close:focus {
@@ -372,10 +373,6 @@
         .print-btn:hover {
             color: #9a0007;
         }
-        .modal-header .close {
-            top: 20px;
-            right: 6px;
-        }
         .btn-alterar {
             background: none;
             border: none;
@@ -455,10 +452,10 @@
     <div id="modalDetalhes" class="modal">
         <div class="modal-content">
             <span class="print-btn" onclick="gerarPDF()"><i class="fas fa-print"></i></span>
+            <span class="close" onclick="fecharModal('modalDetalhes')">&times;</span>
             <div class="modal-header">
                 <img src="LogoGaragem87.png" alt="Logo da Garagem87">
                 <h2>Detalhes do Orçamento</h2>
-                <span class="close" onclick="fecharModal('modalDetalhes')">&times;</span>
             </div>
             <div class="modal-body" id="detalhes-modal-body">
             </div>
@@ -508,14 +505,14 @@
 <script>
 
     const firebaseConfig = {
-    apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
-  authDomain: "garagem87-c652e.firebaseapp.com",
-  databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
-  projectId: "garagem87-c652e",
-  storageBucket: "garagem87-c652e.appspot.com",
-  messagingSenderId: "325224720529",
-  appId: "1:325224720529:web:bfed4699261241f7ddf730",
-  measurementId: "G-83FY7T6X2D"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "garagem87-c652e.firebaseapp.com",
+    databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+    projectId: "garagem87-c652e",
+    storageBucket: "garagem87-c652e.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
