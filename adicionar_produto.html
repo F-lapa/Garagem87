@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,7 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f2f2f2; /* Cor de fundo suave */
+            background-color: #f2f2f2;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -25,10 +24,12 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 600px;
+            max-height: 90vh;
+            overflow: auto;
         }
         .container img {
             width: 100%;
-            max-width: 250px; /* Reduzi o tamanho máximo da imagem */
+            max-width: 250px;
             display: block;
             margin: 0 auto 10px;
             animation: shine 1.5s infinite;
@@ -46,33 +47,33 @@
         }
         .container h2 {
             text-align: center;
-            color: #d32f2f; /* Cor combinando com o logotipo */
+            color: #d32f2f;
             margin-bottom: 20px;
-            font-size: 20px; /* Diminuir o tamanho do texto */
+            font-size: 20px;
         }
         .btn {
             width: 100%;
-            padding: 10px; /* Diminuir o padding */
+            padding: 10px;
             border: none;
             border-radius: 5px;
-            background-color: #d32f2f; /* Cor combinando com o logotipo */
+            background-color: #d32f2f;
             color: white;
             cursor: pointer;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
             font-weight: bold;
             margin-bottom: 20px;
             transition: background-color 0.3s;
             text-align: center;
         }
         .btn:hover {
-            background-color: #9a0007; /* Cor mais escura para o hover */
+            background-color: #9a0007;
         }
         .search-container {
             margin-bottom: 20px;
         }
         #buscar-produto {
             width: 100%;
-            padding: 10px; /* Diminuir o padding */
+            padding: 10px;
             box-sizing: border-box;
             border: 1px solid #b2dfdb;
             border-radius: 5px;
@@ -81,13 +82,13 @@
         .lista-cabecalho {
             display: flex;
             justify-content: space-between;
-            padding: 8px; /* Diminuir o padding */
-            background: #d32f2f; /* Cor combinando com o logotipo */
+            padding: 8px;
+            background: #d32f2f;
             color: white;
             border-radius: 5px;
             margin-bottom: 10px;
             font-weight: bold;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
         }
         .lista-cabecalho span {
             flex: 1;
@@ -97,12 +98,16 @@
             list-style-type: none;
             padding: 0;
             margin: 0;
+            max-height: 300px; /* Limitar a altura máxima da lista */
+            overflow-y: auto; /* Adicionar barra de rolagem se a lista crescer */
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
         }
         #lista-produtos li {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px; /* Diminuir o padding */
+            padding: 8px;
             margin: 5px 0;
             background: #ffffff;
             border-radius: 5px;
@@ -116,19 +121,18 @@
             flex: 1;
             text-align: center;
             font-weight: bold;
-            color: #d32f2f; /* Cor combinando com o logotipo */
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            color: #d32f2f;
+            font-size: 14px;
         }
         .icon-remove {
             color: #e57373;
-            font-size: 18px; /* Diminuir o tamanho do ícone */
+            font-size: 18px;
             cursor: pointer;
             transition: color 0.3s;
         }
         .icon-remove:hover {
-            color: #d32f2f; /* Cor combinando com o logotipo */
+            color: #d32f2f;
         }
-        /* Estilo do modal */
         .modal {
             display: none;
             position: fixed;
@@ -137,12 +141,12 @@
             top: 50%;
             transform: translate(-50%, -50%);
             width: 100%;
-            max-width: 350px; /* Diminuir o tamanho máximo */
+            max-width: 350px;
             height: auto;
             overflow: auto;
             background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
-            animation: fadeIn 0.5s; /* Adicionado efeito de fade in */
+            animation: fadeIn 0.5s;
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -154,7 +158,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 300px; /* Diminuir o tamanho máximo */
+            max-width: 300px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -175,12 +179,12 @@
         }
         .modal-header h2 {
             margin: 0;
-            color: #d32f2f; /* Cor combinando com o logotipo */
-            font-size: 18px; /* Diminuir o tamanho da fonte */
+            color: #d32f2f;
+            font-size: 18px;
         }
         .close {
             color: #aaa;
-            font-size: 24px; /* Diminuir o tamanho do ícone */
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -195,9 +199,9 @@
         }
         .form-group label {
             margin-bottom: 5px;
-            color: #d32f2f; /* Cor combinando com o logotipo */
+            color: #d32f2f;
             font-weight: bold;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
         }
         .form-group input {
             padding: 10px;
@@ -208,18 +212,18 @@
             margin-bottom: 10px;
         }
         .btn-modal {
-            background-color: #d32f2f; /* Cor combinando com o logotipo */
+            background-color: #d32f2f;
             color: white;
             cursor: pointer;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 14px; /* Diminuir o tamanho da fonte */
+            font-size: 14px;
             font-weight: bold;
             transition: background-color 0.3s;
         }
         .btn-modal:hover {
-            background-color: #9a0007; /* Cor mais escura para o hover */
+            background-color: #9a0007;
         }
     </style>
 </head>
