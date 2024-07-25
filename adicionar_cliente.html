@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -25,6 +24,8 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 600px;
+            max-height: 90vh;
+            overflow: auto;
         }
         .container img {
             width: 100%;
@@ -85,6 +86,10 @@
             list-style-type: none;
             padding: 0;
             margin: 0;
+            max-height: 300px; /* Limitar a altura máxima da lista */
+            overflow-y: auto; /* Adicionar barra de rolagem se a lista crescer */
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
         }
         #lista-clientes li {
             display: flex;
@@ -130,12 +135,12 @@
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000; /* Padrão para todas as modais */
+            z-index: 1000;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
             width: 100%;
-            max-width: 600px; /* Ajuste a largura máxima para 600px */
+            max-width: 600px;
             height: auto;
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.4);
@@ -144,10 +149,10 @@
             animation: fadeIn 0.5s;
         }
         .modal-show {
-            z-index: 1001; /* Garantir que a modal aberta esteja na frente */
+            z-index: 1001;
         }
         #modalDetalhesOrcamento.modal-show {
-            z-index: 1002; /* Modal de detalhes deve estar sempre na frente */
+            z-index: 1002;
         }
         .modal.fade {
             opacity: 0;
@@ -166,7 +171,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 600px; /* Ajuste a largura máxima para 600px */
+            max-width: 600px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -257,7 +262,6 @@
             font-size: 12px;
             color: #757575;
         }
-        /* Estilo para os detalhes do orçamento */
         .details-header {
             background-color: #f5f5f5;
             padding: 10px;
@@ -279,12 +283,12 @@
         .details-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px; /* Tamanho da fonte reduzido para compactar a tabela */
+            font-size: 10px;
         }
         .details-table th,
         .details-table td {
             border: 1px solid #b2dfdb;
-            padding: 4px; /* Padding reduzido para compactar a tabela */
+            padding: 4px;
             text-align: left;
         }
         .details-table th {
@@ -294,7 +298,6 @@
         .details-table td {
             background-color: #f5f5f5;
         }
-        /* Destacar valor total dos orçamentos */
         .total-orcamentos {
             margin-top: 10px;
             font-size: 16px;
@@ -302,7 +305,6 @@
             text-align: right;
             color: #d32f2f;
         }
-        /* Adicionando barra de rolagem para conteúdo extenso no modal */
         .modal-body {
             max-height: 500px;
             overflow-y: auto;
@@ -442,344 +444,343 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-       const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "garagem87-c652e.firebaseapp.com",
-    databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
-    projectId: "garagem87-c652e",
-    storageBucket: "garagem87-c652e.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
-};
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "garagem87-c652e.firebaseapp.com",
+            databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
+            projectId: "garagem87-c652e",
+            storageBucket: "garagem87-c652e.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-function adicionarCliente() {
-    const nome = document.getElementById('nome').value;
-    const carro = document.getElementById('carro').value;
-    const cor = document.getElementById('cor').value;
-    const placa = document.getElementById('placa').value;
-    const ano = document.getElementById('ano').value;
+        function adicionarCliente() {
+            const nome = document.getElementById('nome').value;
+            const carro = document.getElementById('carro').value;
+            const cor = document.getElementById('cor').value;
+            const placa = document.getElementById('placa').value;
+            const ano = document.getElementById('ano').value;
 
-    if (nome && carro && cor && placa && ano) {
-        const cliente = { nome, carro, cor, placa, ano };
-        db.collection("clientes").add(cliente).then(() => {
-            atualizarListaClientes();
-            document.getElementById('form-cliente').reset();
-            fecharModalAdicionar();
-        }).catch((error) => {
-            console.error("Error adding document: ", error);
-        });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
+            if (nome && carro && cor && placa && ano) {
+                const cliente = { nome, carro, cor, placa, ano };
+                db.collection("clientes").add(cliente).then(() => {
+                    atualizarListaClientes();
+                    document.getElementById('form-cliente').reset();
+                    fecharModalAdicionar();
+                }).catch((error) => {
+                    console.error("Error adding document: ", error);
+                });
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
 
-function atualizarListaClientes() {
-    const listaClientes = document.getElementById('lista-clientes');
-    listaClientes.innerHTML = '';
-    db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            const cliente = doc.data();
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>
-                    Nome: ${cliente.nome}<br>
-                    Carro: ${cliente.carro}<br>
-                    Cor: ${cliente.cor}<br>
-                    Placa: ${cliente.placa}
-                </span>
-                <div class="icon-actions">
-                    <i class="fas fa-history icon-history" onclick="abrirHistoricoOrcamentos('${cliente.nome}')"></i>
-                    <i class="fas fa-trash" onclick="abrirModalRemover('${doc.id}', event)"></i>
-                </div>
-            `;
-            listaClientes.appendChild(li);
-        });
-    });
-}
-
-function abrirHistoricoOrcamentos(clienteNome) {
-    const historicoLista = document.getElementById('historico-orcamentos-lista');
-    historicoLista.innerHTML = '';
-    let totalOrcamentos = 0;
-    db.collection("orcamentos").where("nomeCliente", "==", clienteNome).get().then((querySnapshot) => {
-        if (querySnapshot.empty) {
-            historicoLista.innerHTML = '<p>Até o momento o cliente não tem orçamentos a serem exibidos.</p>';
-        } else {
-            querySnapshot.forEach((doc) => {
-                const orcamento = doc.data();
-                totalOrcamentos += orcamento.valorTotal;
-                const div = document.createElement('div');
-                div.className = 'orcamento-item';
-                div.innerHTML = `
-                    <span>${clienteNome}</span>
-                    <span onclick="verDetalhesOrcamento('${doc.id}')">
-                        ${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}
-                    </span>
-                    <div class="orcamento-info">
-                        <p>Data: ${new Date(orcamento.timestamp.toDate()).toLocaleDateString()}</p>
-                        <p>Serviço: ${orcamento.descricaoServico}</p>
-                        <p>Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}</p>
-                    </div>
-                `;
-                historicoLista.appendChild(div);
+        function atualizarListaClientes() {
+            const listaClientes = document.getElementById('lista-clientes');
+            listaClientes.innerHTML = '';
+            db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const cliente = doc.data();
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>
+                            Nome: ${cliente.nome}<br>
+                            Carro: ${cliente.carro}<br>
+                            Cor: ${cliente.cor}<br>
+                            Placa: ${cliente.placa}
+                        </span>
+                        <div class="icon-actions">
+                            <i class="fas fa-history icon-history" onclick="abrirHistoricoOrcamentos('${cliente.nome}')"></i>
+                            <i class="fas fa-trash" onclick="abrirModalRemover('${doc.id}', event)"></i>
+                        </div>
+                    `;
+                    listaClientes.appendChild(li);
+                });
             });
         }
-        document.getElementById('total-orcamentos').innerText = `Total dos Serviços: R$ ${totalOrcamentos.toFixed(2)}`;
-        if (totalOrcamentos === 0) {
-            document.getElementById('total-orcamentos').innerText = 'Total dos Serviços: R$ 0.00';
+
+        function abrirHistoricoOrcamentos(clienteNome) {
+            const historicoLista = document.getElementById('historico-orcamentos-lista');
+            historicoLista.innerHTML = '';
+            let totalOrcamentos = 0;
+            db.collection("orcamentos").where("nomeCliente", "==", clienteNome).get().then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    historicoLista.innerHTML = '<p>Até o momento o cliente não tem orçamentos a serem exibidos.</p>';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const orcamento = doc.data();
+                        totalOrcamentos += orcamento.valorTotal;
+                        const div = document.createElement('div');
+                        div.className = 'orcamento-item';
+                        div.innerHTML = `
+                            <span>${clienteNome}</span>
+                            <span onclick="verDetalhesOrcamento('${doc.id}')">
+                                ${orcamento.descricaoServico} - R$ ${orcamento.valorTotal.toFixed(2)}
+                            </span>
+                            <div class="orcamento-info">
+                                <p>Data: ${new Date(orcamento.timestamp.toDate()).toLocaleDateString()}</p>
+                                <p>Serviço: ${orcamento.descricaoServico}</p>
+                                <p>Valor Total: R$ ${orcamento.valorTotal.toFixed(2)}</p>
+                            </div>
+                        `;
+                        historicoLista.appendChild(div);
+                    });
+                }
+                document.getElementById('total-orcamentos').innerText = `Total dos Serviços: R$ ${totalOrcamentos.toFixed(2)}`;
+                if (totalOrcamentos === 0) {
+                    document.getElementById('total-orcamentos').innerText = 'Total dos Serviços: R$ 0.00';
+                }
+            });
+            abrirModal('modalHistoricoOrcamentos');
         }
-    });
-    abrirModal('modalHistoricoOrcamentos');
-}
 
-async function verDetalhesOrcamento(id) {
-    const orcamentoDoc = await db.collection("orcamentos").doc(id).get();
-    if (orcamentoDoc.exists) {
-        const orcamento = orcamentoDoc.data();
-        const cliente = await obterCliente(orcamento.nomeCliente);
-        const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
-            const produto = await obterProduto(item.produto);
-            return {
-                ...item,
-                preco: produto ? parseFloat(produto.valor) : 0
-            };
-        }));
+        async function verDetalhesOrcamento(id) {
+            const orcamentoDoc = await db.collection("orcamentos").doc(id).get();
+            if (orcamentoDoc.exists) {
+                const orcamento = orcamentoDoc.data();
+                const cliente = await obterCliente(orcamento.nomeCliente);
+                const produtosDetalhados = await Promise.all(orcamento.produtos.map(async item => {
+                    const produto = await obterProduto(item.produto);
+                    return {
+                        ...item,
+                        preco: produto ? parseFloat(produto.valor) : 0
+                    };
+                }));
 
-        let dataConfirmacao = "";
-        if (orcamento.confirmado && orcamento.timestamp) {
-            const timestamp = orcamento.timestamp.toDate();
-            dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+                let dataConfirmacao = "";
+                if (orcamento.confirmado && orcamento.timestamp) {
+                    const timestamp = orcamento.timestamp.toDate();
+                    dataConfirmacao = `${timestamp.getDate().toString().padStart(2, '0')}/${(timestamp.getMonth() + 1).toString().padStart(2, '0')}/${timestamp.getFullYear()}`;
+                }
+
+                const detalhesModalBody = document.getElementById('detalhes-modal-body');
+                if (!detalhesModalBody) {
+                    console.error("Elemento com o ID 'detalhes-modal-body' não encontrado.");
+                    return;
+                }
+
+                const totalProdutos = produtosDetalhados.reduce((total, produto) => total + (produto.preco * produto.quantidade), 0);
+
+                detalhesModalBody.innerHTML = `
+                    <div id="orcamento-detalhes">
+                        <div class="details-header">
+                            <h2>Detalhes do Orçamento</h2>
+                            <p id="data-confirmacao">${dataConfirmacao ? `Confirmado em: ${dataConfirmacao}` : ''}</p>
+                        </div>
+                        <div class="details-section">
+                            <h2>Cliente</h2>
+                            <p><span>Nome:</span> ${orcamento.nomeCliente || ''}</p>
+                            <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
+                            <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
+                            <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
+                            <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
+                        </div>
+                        <div class="details-section">
+                            <h2>Produtos</h2>
+                            <table class="details-table">
+                                <thead>
+                                    <tr>
+                                        <th>Qtd.</th>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${produtosDetalhados.map(produto => `
+                                    <tr>
+                                        <td>${produto.quantidade}</td>
+                                        <td>${produto.produto}</td>
+                                        <td>R$ ${produto.preco.toFixed(2)}</td>
+                                        <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
+                                    `).join('')}
+                                    <tr>
+                                        <td colspan="3"><strong>Total dos Produtos:</strong></td>
+                                        <td><strong>R$ ${totalProdutos.toFixed(2)}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="details-section">
+                            <h2>Mão de obra</h2>
+                            <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
+                            <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+                        </div>
+                        <div class="details-section">
+                            <h2>Totais</h2>
+                            <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
+                        </div>
+                    </div>
+                `;
+                abrirModal('modalDetalhesOrcamento');
+            } else {
+                console.log("Orçamento não encontrado.");
+            }
         }
 
-        const detalhesModalBody = document.getElementById('detalhes-modal-body');
-        if (!detalhesModalBody) {
-            console.error("Elemento com o ID 'detalhes-modal-body' não encontrado.");
-            return;
+        async function obterCliente(nomeCliente) {
+            const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
+            if (!clienteSnapshot.empty) {
+                return clienteSnapshot.docs[0].data();
+            }
+            return null;
         }
 
-        const totalProdutos = produtosDetalhados.reduce((total, produto) => total + (produto.preco * produto.quantidade), 0);
-
-        detalhesModalBody.innerHTML = `
-            <div id="orcamento-detalhes">
-                <div class="details-header">
-                    <h2>Detalhes do Orçamento</h2>
-                    <p id="data-confirmacao">${dataConfirmacao ? `Confirmado em: ${dataConfirmacao}` : ''}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Cliente</h2>
-                    <p><span>Nome:</span> ${orcamento.nomeCliente || ''}</p>
-                    <p><span>Carro:</span> ${cliente ? cliente.carro : ''}</p>
-                    <p><span>Placa:</span> ${cliente ? cliente.placa : ''}</p>
-                    <p><span>Ano do Veículo:</span> ${cliente ? cliente.ano : ''}</p>
-                    <p><span>Hodômetro:</span> ${orcamento.hodometro || ''}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Produtos</h2>
-                    <table class="details-table">
-                        <thead>
-                            <tr>
-                                <th>Qtd.</th> <!-- Reduzido "Quantidade" -->
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Total</th> <!-- Reduzido "Valor Total" -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${produtosDetalhados.map(produto => `
-                            <tr>
-                                <td>${produto.quantidade}</td>
-                                <td>${produto.produto}</td>
-                                <td>R$ ${produto.preco.toFixed(2)}</td>
-                                <td>R$ ${(produto.preco * produto.quantidade).toFixed(2)}</td>
-                            `).join('')}
-                            <tr>
-                                <td colspan="3"><strong>Total dos Produtos:</strong></td>
-                                <td><strong>R$ ${totalProdutos.toFixed(2)}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="details-section">
-                    <h2>Mão de obra</h2>
-                    <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
-                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
-                </div>
-                <div class="details-section">
-                    <h2>Totais</h2>
-                    <p><span>Valor Total:</span> <span style="font-size: 18px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
-                </div>
-            </div>
-        `;
-        abrirModal('modalDetalhesOrcamento');
-    } else {
-        console.log("Orçamento não encontrado.");
-    }
-}
-
-async function obterCliente(nomeCliente) {
-    const clienteSnapshot = await db.collection("clientes").where("nome", "==", nomeCliente).get();
-    if (!clienteSnapshot.empty) {
-        return clienteSnapshot.docs[0].data();
-    }
-    return null;
-}
-
-async function obterProduto(produtoNome) {
-    const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
-    if (!produtoSnapshot.empty) {
-        return produtoSnapshot.docs[0].data();
-    }
-    return null;
-}
-
-function abrirModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.add('fade');
-    modal.style.display = 'block';
-    setTimeout(() => {
-        modal.classList.add('in');
-    }, 10);
-    if (modalId === 'modalDetalhesOrcamento') {
-        modal.style.zIndex = 1002;  // Garante que a modal de detalhes fique na frente
-    }
-}
-
-function fecharModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.remove('in');
-    setTimeout(() => {
-        modal.style.display = 'none';
-        modal.classList.remove('fade');
-    }, 500);
-    if (modalId === 'modalDetalhesOrcamento') {
-        modal.style.zIndex = 1000;  // Reseta o z-index após fechar a modal de detalhes
-    }
-}
-
-function fecharModalHistorico() {
-    fecharModal('modalHistoricoOrcamentos');
-}
-
-function abrirModalAdicionar() {
-    abrirModal('modalAdicionarCliente');
-}
-
-function fecharModalAdicionar() {
-    fecharModal('modalAdicionarCliente');
-}
-
-function abrirModalEditar(id) {
-    const docRef = db.collection("clientes").doc(id);
-    docRef.get().then((doc) => {
-        if (doc.exists) {
-            const cliente = doc.data();
-            document.getElementById('editar-index').value = id;
-            document.getElementById('editar-nome').value = cliente.nome;
-            document.getElementById('editar-carro').value = cliente.carro;
-            document.getElementById('editar-cor').value = cliente.cor;
-            document.getElementById('editar-placa').value = cliente.placa;
-            document.getElementById('editar-ano').value = cliente.ano;
-            abrirModal('modalEditarCliente');
-        } else {
-            console.log("No such document!");
+        async function obterProduto(produtoNome) {
+            const produtoSnapshot = await db.collection("produtos").where("produto", "==", produtoNome).get();
+            if (!produtoSnapshot.empty) {
+                return produtoSnapshot.docs[0].data();
+            }
+            return null;
         }
-    }).catch((error) => {
-        console.log("Error getting document:", error);
-    });
-}
 
-function fecharModalEditar() {
-    fecharModal('modalEditarCliente');
-}
-
-function abrirModalRemover(id, event) {
-    event.stopPropagation();
-    clienteParaRemover = id;
-    abrirModal('modalRemoverCliente');
-}
-
-function fecharModalRemover() {
-    fecharModal('modalRemoverCliente');
-}
-
-function removerClienteConfirmado() {
-    db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
-        atualizarListaClientes();
-        fecharModalRemover();
-    }).catch((error) => {
-        console.error("Error removing document: ", error);
-    });
-}
-
-function salvarCliente() {
-    const id = document.getElementById('editar-index').value;
-    const carro = document.getElementById('editar-carro').value;
-    const cor = document.getElementById('editar-cor').value;
-    const placa = document.getElementById('editar-placa').value;
-    const ano = document.getElementById('editar-ano').value;
-
-    if (carro && cor && placa && ano) {
-        db.collection("clientes").doc(id).update({
-            carro,
-            cor,
-            placa,
-            ano
-        }).then(() => {
-            atualizarListaClientes();
-            fecharModalEditar();
-        }).catch((error) => {
-            console.error("Error updating document: ", error);
-        });
-    } else {
-        alert("Por favor, preencha todos os campos.");
-    }
-}
-
-function filtrarClientes() {
-    const input = document.getElementById('buscar-cliente');
-    const filter = input.value.toUpperCase();
-    const ul = document.getElementById('lista-clientes');
-    const li = ul.getElementsByTagName('li');
-
-    for (let i = 0; i < li.length; i++) {
-        const txtValue = li[i].textContent || li[i].innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            li[i].style.display = "";
-        } else {
-            li[i].style.display = "none";
+        function abrirModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('fade');
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('in');
+            }, 10);
+            if (modalId === 'modalDetalhesOrcamento') {
+                modal.style.zIndex = 1002;
+            }
         }
-    }
-}
 
-window.onclick = function(event) {
-    const modalAdicionar = document.getElementById('modalAdicionarCliente');
-    const modalEditar = document.getElementById('modalEditarCliente');
-    const modalRemover = document.getElementById('modalRemoverCliente');
-    const modalDetalhesOrcamento = document.getElementById('modalDetalhesOrcamento');
-    const modalHistoricoOrcamentos = document.getElementById('modalHistoricoOrcamentos');
-    if (event.target == modalAdicionar) {
-        fecharModalAdicionar();
-    }
-    if (event.target == modalEditar) {
-        fecharModalEditar();
-    }
-    if (event.target == modalRemover) {
-        fecharModalRemover();
-    }
-    if (event.target == modalDetalhesOrcamento) {
-        fecharModal('modalDetalhesOrcamento');
-    }
-    if (event.target == modalHistoricoOrcamentos) {
-        fecharModalHistorico();
-    }
-}
+        function fecharModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('in');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.classList.remove('fade');
+            }, 500);
+            if (modalId === 'modalDetalhesOrcamento') {
+                modal.style.zIndex = 1000;
+            }
+        }
 
-window.onload = atualizarListaClientes;
+        function fecharModalHistorico() {
+            fecharModal('modalHistoricoOrcamentos');
+        }
 
+        function abrirModalAdicionar() {
+            abrirModal('modalAdicionarCliente');
+        }
+
+        function fecharModalAdicionar() {
+            fecharModal('modalAdicionarCliente');
+        }
+
+        function abrirModalEditar(id) {
+            const docRef = db.collection("clientes").doc(id);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const cliente = doc.data();
+                    document.getElementById('editar-index').value = id;
+                    document.getElementById('editar-nome').value = cliente.nome;
+                    document.getElementById('editar-carro').value = cliente.carro;
+                    document.getElementById('editar-cor').value = cliente.cor;
+                    document.getElementById('editar-placa').value = cliente.placa;
+                    document.getElementById('editar-ano').value = cliente.ano;
+                    abrirModal('modalEditarCliente');
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting document:", error);
+            });
+        }
+
+        function fecharModalEditar() {
+            fecharModal('modalEditarCliente');
+        }
+
+        function abrirModalRemover(id, event) {
+            event.stopPropagation();
+            clienteParaRemover = id;
+            abrirModal('modalRemoverCliente');
+        }
+
+        function fecharModalRemover() {
+            fecharModal('modalRemoverCliente');
+        }
+
+        function removerClienteConfirmado() {
+            db.collection("clientes").doc(clienteParaRemover).delete().then(() => {
+                atualizarListaClientes();
+                fecharModalRemover();
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+            });
+        }
+
+        function salvarCliente() {
+            const id = document.getElementById('editar-index').value;
+            const carro = document.getElementById('editar-carro').value;
+            const cor = document.getElementById('editar-cor').value;
+            const placa = document.getElementById('editar-placa').value;
+            const ano = document.getElementById('editar-ano').value;
+
+            if (carro && cor && placa && ano) {
+                db.collection("clientes").doc(id).update({
+                    carro,
+                    cor,
+                    placa,
+                    ano
+                }).then(() => {
+                    atualizarListaClientes();
+                    fecharModalEditar();
+                }).catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        function filtrarClientes() {
+            const input = document.getElementById('buscar-cliente');
+            const filter = input.value.toUpperCase();
+            const ul = document.getElementById('lista-clientes');
+            const li = ul.getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const txtValue = li[i].textContent || li[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
+        window.onclick = function(event) {
+            const modalAdicionar = document.getElementById('modalAdicionarCliente');
+            const modalEditar = document.getElementById('modalEditarCliente');
+            const modalRemover = document.getElementById('modalRemoverCliente');
+            const modalDetalhesOrcamento = document.getElementById('modalDetalhesOrcamento');
+            const modalHistoricoOrcamentos = document.getElementById('modalHistoricoOrcamentos');
+            if (event.target == modalAdicionar) {
+                fecharModalAdicionar();
+            }
+            if (event.target == modalEditar) {
+                fecharModalEditar();
+            }
+            if (event.target == modalRemover) {
+                fecharModalRemover();
+            }
+            if (event.target == modalDetalhesOrcamento) {
+                fecharModal('modalDetalhesOrcamento');
+            }
+            if (event.target == modalHistoricoOrcamentos) {
+                fecharModalHistorico();
+            }
+        }
+
+        window.onload = atualizarListaClientes;
     </script>
 </body>
 </html>
