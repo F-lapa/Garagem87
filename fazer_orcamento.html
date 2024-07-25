@@ -604,20 +604,33 @@ function adicionarProduto(maintainPrevious = false) {
     });
 }
 
-function adicionarProdutoEdicao() {
+function adicionarProdutoEdicao(maintainPrevious = false) {
     const productList = document.getElementById('editar-product-list');
+    const lastProductItem = productList.lastElementChild;
+    let selectedProduct = '';
+    let selectedQuantity = '';
+
+    if (maintainPrevious && lastProductItem) {
+        selectedProduct = lastProductItem.querySelector('select[name="produtos"]').value;
+        selectedQuantity = lastProductItem.querySelector('input[name="quantidade"]').value;
+    }
+
     const productItem = document.createElement('div');
     productItem.className = 'product-item';
     productItem.innerHTML = `
         <select name="produtos">
             <option value="">Nenhum Produto</option>
         </select>
-        <input type="number" name="quantidade" min="1">
-        <div class="add-product" onclick="adicionarProdutoEdicao()">+</div>
+        <input type="number" name="quantidade" min="1" value="${selectedQuantity}">
+        <div class="add-product" onclick="adicionarProdutoEdicao(true)">+</div>
         <div class="remove-product" onclick="removerProduto(this)">-</div>
     `;
     productList.appendChild(productItem);
-    carregarProdutos();
+    carregarProdutos(() => {
+        if (maintainPrevious && selectedProduct) {
+            productItem.querySelector('select[name="produtos"]').value = selectedProduct;
+        }
+    });
 }
 
 function removerProduto(element) {
@@ -782,19 +795,24 @@ function abrirModalEditar(id) {
         
         const productList = document.getElementById('editar-product-list');
         productList.innerHTML = '';
-        orcamentoAtual.produtos.forEach(produto => {
-            const productItem = document.createElement('div');
-            productItem.className = 'product-item';
-            productItem.innerHTML = `
-                <select name="produtos">
-                    <option value="">Nenhum Produto</option>
-                </select>
-                <input type="number" name="quantidade" value="${produto.quantidade}" min="1">
-                <div class="add-product" onclick="adicionarProdutoEdicao()">+</div>
-                <div class="remove-product" onclick="removerProduto(this)">-</div>
-            `;
-            productList.appendChild(productItem);
-        });
+        if (orcamentoAtual.produtos.length > 0) {
+            orcamentoAtual.produtos.forEach(produto => {
+                const productItem = document.createElement('div');
+                productItem.className = 'product-item';
+                productItem.innerHTML = `
+                    <select name="produtos">
+                        <option value="">Nenhum Produto</option>
+                    </select>
+                    <input type="number" name="quantidade" value="${produto.quantidade}" min="1">
+                    <div class="add-product" onclick="adicionarProdutoEdicao()">+</div>
+                    <div class="remove-product" onclick="removerProduto(this)">-</div>
+                `;
+                productList.appendChild(productItem);
+            });
+        } else {
+            adicionarProdutoEdicao(); // Adicionar um campo para adicionar produtos se não houver produtos no orçamento
+        }
+
         carregarProdutos(() => {
             orcamentoAtual.produtos.forEach((produto, index) => {
                 const select = productList.querySelectorAll('select[name="produtos"]')[index];
@@ -1007,8 +1025,6 @@ function atualizarListaClientes() {
         });
     });
 }
-             
-
 </script>
 </body>
 </html>
