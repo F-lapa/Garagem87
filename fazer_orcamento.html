@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -519,7 +520,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 <script>
 
-    const firebaseConfig = {
+     const firebaseConfig = {
         apiKey: "AIzaSyAUQ8VkjzIBQrkc-aBWbhk4FsPVm_DE52o",
         authDomain: "garagem87-c652e.firebaseapp.com",
         databaseURL: "https://garagem87-c652e-default-rtdb.firebaseio.com",
@@ -536,7 +537,7 @@
     let produtos = [];
     let clientes = [];
     let orcamentos = [];
-    let orcamentoAtual = null; // Variável para armazenar o orçamento atual para edição
+    let orcamentoAtual = null;
 
     function carregarProdutos(callback) {
         db.collection("produtos").get().then((querySnapshot) => {
@@ -550,6 +551,10 @@
                     estoque: data.estoque
                 };
             });
+
+            // Ordenar produtos em ordem alfabética
+            produtos.sort((a, b) => a.produto.localeCompare(b.produto, 'pt', { sensitivity: 'base' }));
+
             const productSelects = document.querySelectorAll('select[name="produtos"]');
             productSelects.forEach(select => {
                 const selectedValue = select.value;
@@ -563,7 +568,7 @@
                 });
                 select.value = selectedValue;
             });
-            if (callback) callback(); // Chame o callback após carregar os produtos
+            if (callback) callback();
         }).catch(error => {
             console.error("Erro ao carregar produtos:", error);
         });
@@ -581,7 +586,7 @@
                 clienteSelect.appendChild(option);
             });
             const editarClienteSelect = document.getElementById('editar-nome-cliente');
-            editarClienteSelect.innerHTML = clienteSelect.innerHTML; // Preenche o select do modal de edição com os mesmos clientes
+            editarClienteSelect.innerHTML = clienteSelect.innerHTML;
         }).catch(error => {
             console.error("Erro ao carregar clientes:", error);
         });
@@ -655,7 +660,7 @@
         const nomeCliente = form['nome-cliente'].value || '';
         const servico = parseFloat(form.servico.value);
         const descricaoServico = form['descricao-servico'].value || '';
-        const observacoes = form['observacoes'].value || ''; // Capturando as observações
+        const observacoes = form['observacoes'].value || '';
         const hodometro = form['hodometro'].value || ''; 
         const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
             .map((select, index) => {
@@ -687,7 +692,7 @@
             nomeCliente,
             servico,
             descricaoServico,
-            observacoes, // Incluindo as observações no objeto do orçamento
+            observacoes,
             valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
             valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
             produtos: produtosSelecionados,
@@ -743,6 +748,8 @@
         }));
 
         const totalProdutos = produtosDetalhados.reduce((total, produto) => total + (produto.preco * produto.quantidade), 0);
+        const valorMaoDeObra = parseFloat(orcamento.servico) || 0;
+        const valorTotalOrcamento = totalProdutos + valorMaoDeObra;
 
         const detalhesModalBody = document.getElementById('detalhes-modal-body');
         detalhesModalBody.innerHTML = `
@@ -787,15 +794,15 @@
                 <div class="details-section">
                     <h2>Mão de obra</h2>
                     <p><span>Descrição:</span> ${orcamento.descricaoServico}</p>
-                    <p><span>Valor:</span> R$ ${orcamento.servico.toFixed(2)}</p>
+                    <p><span>Valor:</span> R$ ${valorMaoDeObra.toFixed(2)}</p>
                 </div>
                 <div class="details-section">
                     <h2>Observações</h2>
-                    <p>${orcamento.observacoes || 'Nenhuma observação'}</p> <!-- Exibindo as observações -->
+                    <p>${orcamento.observacoes || 'Nenhuma observação'}</p>
                 </div>
                 <div class="details-section">
                     <h2>Totais</h2>
-                    <p><span>Valor Total:</span> <span style="font-size: 12px; font-weight: bold;">R$ ${orcamento.valorTotal.toFixed(2)}</span></p>
+                    <p><span>Valor Total:</span> <span style="font-size: 12px; font-weight: bold;">R$ ${valorTotalOrcamento.toFixed(2)}</span></p>
                 </div>
             </div>
         `;
@@ -809,7 +816,7 @@
             form['nome-cliente'].value = orcamentoAtual.nomeCliente;
             form['hodometro'].value = orcamentoAtual.hodometro || '';
             form['descricao-servico'].value = orcamentoAtual.descricaoServico;
-            form['observacoes'].value = orcamentoAtual.observacoes || ''; // Carregar observações para edição
+            form['observacoes'].value = orcamentoAtual.observacoes || '';
             form['servico'].value = orcamentoAtual.servico;
             
             const productList = document.getElementById('editar-product-list');
@@ -829,7 +836,7 @@
                     productList.appendChild(productItem);
                 });
             } else {
-                adicionarProdutoEdicao(); // Adicionar um campo para adicionar produtos se não houver produtos no orçamento
+                adicionarProdutoEdicao();
             }
 
             carregarProdutos(() => {
@@ -850,7 +857,7 @@
         const nomeCliente = form['nome-cliente'].value || '';
         const servico = parseFloat(form.servico.value);
         const descricaoServico = form['descricao-servico'].value || '';
-        const observacoes = form['observacoes'].value || ''; // Capturando as observações na edição
+        const observacoes = form['observacoes'].value || '';
         const hodometro = form['hodometro'].value || ''; 
         const produtosSelecionados = Array.from(form.querySelectorAll('select[name="produtos"]'))
             .map((select, index) => {
@@ -882,7 +889,7 @@
             nomeCliente,
             servico,
             descricaoServico,
-            observacoes, // Incluindo as observações no objeto do orçamento atualizado
+            observacoes,
             valorTotalProdutos: isNaN(valorTotalProdutos) ? 0 : valorTotalProdutos,
             valorTotal: isNaN(valorTotal) ? 0 : valorTotal,
             produtos: produtosSelecionados,
@@ -996,29 +1003,38 @@
     function gerarPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
-
         const modalBody = document.getElementById('orcamento-detalhes');
         const logoSrc = document.querySelector('#modalDetalhes .modal-header img').src;
         const logoWidth = 50;
         const logoHeight = 25;
 
-        // Add the logo at the top of the PDF
+        // Adicionar o logotipo no topo do PDF
         const img = new Image();
         img.src = logoSrc;
         img.onload = function () {
             doc.addImage(img, 'PNG', (doc.internal.pageSize.getWidth() - logoWidth) / 2, 10, logoWidth, logoHeight);
 
+            // Capturar o conteúdo HTML com uma escala maior para alta resolução
             html2canvas(modalBody, { scale: 2 }).then((canvas) => {
                 const imgData = canvas.toDataURL('image/png');
-                const pdfWidth = doc.internal.pageSize.getWidth() - 20;
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-                if (pdfHeight > doc.internal.pageSize.getHeight() - 30) {
-                    doc.addImage(imgData, 'PNG', 10, 40, pdfWidth, pdfHeight * 0.8);
+                // Dimensões do PDF
+                const pdfWidth = doc.internal.pageSize.getWidth() - 20; // Largura do PDF menos margens
+                const pdfHeight = doc.internal.pageSize.getHeight() - 40; // Altura do PDF menos margens e espaço para logo
+
+                // Calcular proporção de redimensionamento para caber em uma página
+                const aspectRatio = canvas.width / canvas.height;
+                const imageHeight = pdfWidth / aspectRatio;
+
+                // Redimensionar imagem para que caiba completamente na página
+                if (imageHeight > pdfHeight) {
+                    const scaleFactor = pdfHeight / imageHeight;
+                    doc.addImage(imgData, 'PNG', 10, 40, pdfWidth * scaleFactor, pdfHeight);
                 } else {
-                    doc.addImage(imgData, 'PNG', 10, 40, pdfWidth, pdfHeight);
+                    doc.addImage(imgData, 'PNG', 10, 40, pdfWidth, imageHeight);
                 }
 
+                doc.setFontSize(10); // Definir tamanho da fonte menor para melhor legibilidade
                 doc.save('detalhes_orcamento.pdf');
             });
         };
@@ -1030,26 +1046,6 @@
         carregarOrcamentos();
     });
 
-    function atualizarListaClientes() {
-        const listaClientes = document.getElementById('lista-clientes');
-        listaClientes.innerHTML = '';
-        db.collection("clientes").orderBy("nome").get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const cliente = doc.data();
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>Nome: ${cliente.nome}</span>
-                    <span>Carro: ${cliente.carro}</span>
-                    <span>Cor: ${cliente.cor}</span>
-                    <span>Placa: ${cliente.placa}</span>
-                    <button onclick="abrirHistoricoOrcamentos('${cliente.nome}')">Histórico de Orçamentos</button>
-                    <span class="icon-remove" onclick="abrirModalRemover('${doc.id}', event)"><i class="fas fa-trash"></i></span>
-                `;
-                li.onclick = () => abrirModalEditar(doc.id);
-                listaClientes.appendChild(li);
-            });
-        });
-    }
 </script>
 </body>
 </html>
